@@ -1,25 +1,25 @@
-import type { ChangeEvent } from 'react';
+import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
-import { isSupportedLanguage, LANGUAGE_STORAGE_KEY, supportedLanguages } from './i18n/resources';
-import { useCounterStore } from './store/counterStore';
-import { Button, Separator } from './ui';
+import {
+  isSupportedLanguage,
+  LANGUAGE_STORAGE_KEY,
+  supportedLanguages,
+  type AppLanguage,
+} from './i18n/resources';
+import { Button } from './ui';
 
 import styles from './App.module.css';
 
+const featureKeys = ['history', 'schedule', 'reminders'] as const;
+
 const App = () => {
   const { i18n, t } = useTranslation();
-  const count = useCounterStore((state) => state.count);
-  const increment = useCounterStore((state) => state.increment);
-  const decrement = useCounterStore((state) => state.decrement);
-  const reset = useCounterStore((state) => state.reset);
   const resolvedLanguage = i18n.resolvedLanguage;
-  const selectedLanguage =
+  const selectedLanguage: AppLanguage =
     resolvedLanguage && isSupportedLanguage(resolvedLanguage) ? resolvedLanguage : 'ru';
 
-  const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextLanguage = event.target.value;
-
-    if (!isSupportedLanguage(nextLanguage)) {
+  const handleLanguageChange = (nextLanguage: AppLanguage) => {
+    if (nextLanguage === selectedLanguage) {
       return;
     }
 
@@ -27,40 +27,48 @@ const App = () => {
     void i18n.changeLanguage(nextLanguage);
   };
 
+  const handleLoginClick = () => {
+    // TODO: connect login flow.
+  };
+
   return (
     <main className={styles.app}>
-      <section className={styles.app__card}>
-        <header className={styles.app__header}>
-          <h1 className={styles.app__title}>{t('app.title')}</h1>
-          <label className={styles.app__language} htmlFor="language-select">
-            <span className={styles.app__languageLabel}>{t('language.label')}</span>
-            <select
-              className={styles.app__languageSelect}
-              id="language-select"
-              onChange={handleLanguageChange}
-              value={selectedLanguage}
-            >
+      <section className={styles.hero}>
+        <header className={styles.hero__topBar}>
+          <p className={styles.hero__badge}>{t('hero.badge')}</p>
+          <div className={styles.hero__actions}>
+            <div className={styles.hero__language} role="group" aria-label={t('language.label')}>
               {supportedLanguages.map((language) => (
-                <option key={language} value={language}>
+                <button
+                  key={language}
+                  aria-pressed={selectedLanguage === language}
+                  className={classNames(
+                    styles.hero__languageButton,
+                    selectedLanguage === language && styles['hero__languageButton--active'],
+                  )}
+                  onClick={() => handleLanguageChange(language)}
+                  type="button"
+                >
                   {t(`language.${language}`)}
-                </option>
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+            <Button className={styles.hero__loginButton} onClick={handleLoginClick} type="button">
+              {t('actions.login')}
+            </Button>
+          </div>
         </header>
-        <p className={styles.app__description}>{t('app.description')}</p>
-        <p className={styles.app__counter}>{t('app.currentValue', { count })}</p>
-        <Separator className={styles.app__separator} decorative />
-        <div className={styles.app__controls}>
-          <Button onClick={increment} variant="primary">
-            {t('actions.increment')}
-          </Button>
-          <Button onClick={decrement} variant="secondary">
-            {t('actions.decrement')}
-          </Button>
-          <Button onClick={reset} variant="danger">
-            {t('actions.reset')}
-          </Button>
+        <h1 className={styles.hero__title}>{t('hero.title')}</h1>
+        <p className={styles.hero__description}>{t('hero.description')}</p>
+        <div className={styles.hero__features}>
+          {featureKeys.map((featureKey) => (
+            <article className={styles.hero__featureCard} key={featureKey}>
+              <h2 className={styles.hero__featureTitle}>{t(`hero.features.${featureKey}Title`)}</h2>
+              <p className={styles.hero__featureDescription}>
+                {t(`hero.features.${featureKey}Description`)}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
     </main>

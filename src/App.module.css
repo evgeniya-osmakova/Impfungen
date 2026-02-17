@@ -3,96 +3,198 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px 24px;
 }
 
-.app__card {
-  width: min(560px, 100%);
+.hero {
+  position: relative;
+  width: min(980px, 100%);
   display: grid;
-  gap: 20px;
-  padding: 32px;
-  border-radius: 20px;
-  border: 1px solid var(--surface-200);
-  background: color-mix(in oklab, var(--surface-0) 90%, transparent);
-  backdrop-filter: blur(6px);
+  gap: 28px;
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px solid color-mix(in oklab, var(--brand-200) 45%, var(--surface-0));
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 0 0, color-mix(in oklab, var(--brand-100) 70%, transparent) 0, transparent 45%),
+    radial-gradient(circle at 95% 12%, color-mix(in oklab, var(--accent-200) 75%, transparent) 0, transparent 42%),
+    linear-gradient(150deg, color-mix(in oklab, var(--surface-0) 90%, var(--brand-50)) 0, var(--surface-0) 100%);
   box-shadow: var(--shadow-strong);
+  overflow: hidden;
 }
 
-.app__header {
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, color-mix(in oklab, var(--surface-200) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--surface-200) 45%, transparent) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__topBar {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
 
-.app__title {
+.hero__badge {
   margin: 0;
-  font-size: clamp(1.4rem, 2.8vw, 2rem);
-  line-height: 1.2;
-}
-
-.app__language {
-  display: grid;
-  gap: 6px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.app__languageLabel {
-  line-height: 1.2;
-}
-
-.app__languageSelect {
-  min-width: 120px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--surface-200);
-  background: var(--surface-50);
-  color: var(--text-primary);
-  font: inherit;
-}
-
-.app__languageSelect:focus-visible {
-  outline: 2px solid var(--accent-500);
-  outline-offset: 1px;
-}
-
-.app__description {
-  margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.app__counter {
-  margin: 0;
-  font-size: 1.35rem;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--brand-300) 55%, var(--surface-0));
+  background: color-mix(in oklab, var(--brand-50) 80%, var(--surface-0));
+  color: var(--brand-800);
+  font-size: 0.84rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.app__separator {
-  margin: 2px 0;
-}
-
-.app__controls {
+.hero__actions {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-@media (max-width: 640px) {
-  .app__card {
-    padding: 24px;
-  }
+.hero__language {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 65%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-100) 80%, var(--surface-0));
+}
 
-  .app__header {
+.hero__languageButton {
+  min-width: 84px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.hero__languageButton:hover {
+  transform: translateY(-1px);
+}
+
+.hero__languageButton:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.hero__languageButton--active {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  box-shadow: 0 5px 14px rgb(15 23 42 / 0.1);
+}
+
+.hero__loginButton {
+  min-width: 126px;
+}
+
+.hero__title {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.hero__description {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.hero__features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hero__featureCard {
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 92%, var(--accent-50));
+}
+
+.hero__featureTitle {
+  margin: 0 0 8px;
+  font-size: 1.04rem;
+  line-height: 1.35;
+}
+
+.hero__featureDescription {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+  .hero__features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .hero__topBar {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .app__languageSelect {
+  .hero__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    padding: 18px;
+  }
+
+  .hero {
+    gap: 22px;
+    border-radius: 20px;
+  }
+
+  .hero__language {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .hero__languageButton {
+    min-width: 0;
+  }
+
+  .hero__loginButton {
     width: 100%;
   }
 
-  .app__controls {
-    display: grid;
+  .hero__features {
+    grid-template-columns: 1fr;
   }
 }
