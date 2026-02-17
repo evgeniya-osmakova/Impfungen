@@ -8,6 +8,22 @@ export const ru = {
     },
     actions: {
       login: 'Войти',
+      logout: 'Выйти',
+    },
+    auth: {
+      loading: 'Проверяем сессию OAuth...',
+      connected: 'Вы успешно вошли через OAuth.',
+      configHint:
+        'Для входа через OAuth задайте VITE_OAUTH_AUTHORIZE_URL, VITE_OAUTH_TOKEN_URL и VITE_OAUTH_CLIENT_ID.',
+      errors: {
+        configMissing: 'OAuth не настроен в переменных окружения.',
+        exchangeFailed: 'Не удалось завершить вход через OAuth.',
+        missingAccessToken: 'OAuth-провайдер не вернул access token.',
+        missingVerifier: 'Отсутствует code_verifier для завершения OAuth.',
+        providerError: 'OAuth-провайдер вернул ошибку.',
+        stateMismatch: 'Проверка state не прошла. Повторите вход.',
+        unexpected: 'Непредвиденная ошибка OAuth.',
+      },
     },
     hero: {
       badge: 'Календарь прививок',

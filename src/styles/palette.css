@@ -30,6 +30,11 @@
 
   --danger-500: #dc2626;
   --danger-600: #b91c1c;
+  --danger-700: #991b1b;
+
+  --success-50: #ecfdf5;
+  --success-500: #16a34a;
+  --success-700: #15803d;
 
   --shadow-strong: 0 12px 34px rgb(15 23 42 / 0.15);
 }

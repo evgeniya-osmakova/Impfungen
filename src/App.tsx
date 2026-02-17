@@ -1,12 +1,15 @@
+import { useEffect } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
+import { AUTH_ERROR_TRANSLATION_KEY_BY_CODE } from './constants/auth';
+import type { AppLanguage } from './interfaces/language';
 import {
-  isSupportedLanguage,
   LANGUAGE_STORAGE_KEY,
+  resolveAppLanguage,
   supportedLanguages,
-  type AppLanguage,
 } from './i18n/resources';
-import { Button } from './ui';
+import { useAuthStore } from './store/authStore';
+import { Button, Error } from './ui';
 
 import styles from './App.module.css';
 
@@ -14,9 +17,13 @@ const featureKeys = ['history', 'schedule', 'reminders'] as const;
 
 const App = () => {
   const { i18n, t } = useTranslation();
-  const resolvedLanguage = i18n.resolvedLanguage;
-  const selectedLanguage: AppLanguage =
-    resolvedLanguage && isSupportedLanguage(resolvedLanguage) ? resolvedLanguage : 'ru';
+  const { authError, handleAuthClick, initialize, isAuthenticated, isInitialized, isInitializing, oauthConfigured } =
+    useAuthStore();
+  const selectedLanguage = resolveAppLanguage(i18n.resolvedLanguage);
+
+  useEffect(() => {
+    void initialize();
+  }, [initialize]);
 
   const handleLanguageChange = (nextLanguage: AppLanguage) => {
     if (nextLanguage === selectedLanguage) {
@@ -27,9 +34,11 @@ const App = () => {
     void i18n.changeLanguage(nextLanguage);
   };
 
-  const handleLoginClick = () => {
-    // TODO: connect login flow.
-  };
+  const authErrorMessage = authError
+    ? [t(AUTH_ERROR_TRANSLATION_KEY_BY_CODE[authError.code]), authError.details]
+        .filter(Boolean)
+        .join(' ')
+    : null;
 
   return (
     <main className={styles.app}>
@@ -53,13 +62,24 @@ const App = () => {
                 </button>
               ))}
             </div>
-            <Button className={styles.hero__loginButton} onClick={handleLoginClick} type="button">
-              {t('actions.login')}
+            <Button
+              className={styles.hero__loginButton}
+              disabled={isInitializing}
+              onClick={handleAuthClick}
+              type="button"
+            >
+              {isAuthenticated ? t('actions.logout') : t('actions.login')}
             </Button>
           </div>
         </header>
         <h1 className={styles.hero__title}>{t('hero.title')}</h1>
         <p className={styles.hero__description}>{t('hero.description')}</p>
+        {!isInitialized && <p className={styles.hero__authHint}>{t('auth.loading')}</p>}
+        {isAuthenticated && <p className={styles.hero__authSuccess}>{t('auth.connected')}</p>}
+        <Error className={styles.hero__authError} message={authErrorMessage} />
+        {!oauthConfigured && !isAuthenticated && (
+          <p className={styles.hero__authHint}>{t('auth.configHint')}</p>
+        )}
         <div className={styles.hero__features}>
           {featureKeys.map((featureKey) => (
             <article className={styles.hero__featureCard} key={featureKey}>

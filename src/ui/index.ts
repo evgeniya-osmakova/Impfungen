@@ -1,2 +1,2 @@
 export { Button } from './button/Button';
-export { Separator } from './separator/Separator';
+export { Error } from './error/Error';

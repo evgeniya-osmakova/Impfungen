@@ -8,6 +8,22 @@ export const de = {
     },
     actions: {
       login: 'Anmelden',
+      logout: 'Abmelden',
+    },
+    auth: {
+      loading: 'OAuth-Sitzung wird geprueft...',
+      connected: 'Du bist ueber OAuth angemeldet.',
+      configHint:
+        'Setze VITE_OAUTH_AUTHORIZE_URL, VITE_OAUTH_TOKEN_URL und VITE_OAUTH_CLIENT_ID, um OAuth-Login zu aktivieren.',
+      errors: {
+        configMissing: 'OAuth ist in den Umgebungsvariablen nicht konfiguriert.',
+        exchangeFailed: 'OAuth-Anmeldung konnte nicht abgeschlossen werden.',
+        missingAccessToken: 'Der OAuth-Provider hat kein Access Token geliefert.',
+        missingVerifier: 'code_verifier fuer den OAuth-Callback fehlt.',
+        providerError: 'Der OAuth-Provider hat einen Fehler zurueckgegeben.',
+        stateMismatch: 'OAuth-State-Pruefung fehlgeschlagen. Bitte erneut anmelden.',
+        unexpected: 'Unerwarteter OAuth-Fehler.',
+      },
     },
     hero: {
       badge: 'Impfkalender',
