@@ -1,0 +1,28 @@
+.placeholder {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px dashed color-mix(in oklab, var(--brand-300) 70%, var(--surface-0));
+  background:
+    radial-gradient(circle at 10% 0, color-mix(in oklab, var(--brand-100) 74%, transparent) 0, transparent 44%),
+    radial-gradient(circle at 94% 100%, color-mix(in oklab, var(--accent-100) 82%, transparent) 0, transparent 45%),
+    color-mix(in oklab, var(--surface-0) 95%, var(--surface-50));
+  text-align: center;
+}
+
+.placeholder__title {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  line-height: 1.18;
+}
+
+.placeholder__description {
+  margin: 0;
+  max-width: 54ch;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}

@@ -126,29 +126,6 @@
   line-height: 1.65;
 }
 
-.hero__authSuccess {
-  margin: 0;
-  width: fit-content;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in oklab, var(--success-500) 30%, var(--surface-0));
-  background: color-mix(in oklab, var(--success-50) 85%, var(--surface-0));
-  color: color-mix(in oklab, var(--success-700) 80%, var(--text-primary));
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.hero__authError {
-  margin: 0;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in oklab, var(--danger-500) 28%, var(--surface-0));
-  background: color-mix(in oklab, var(--danger-50) 88%, var(--surface-0));
-  color: color-mix(in oklab, var(--danger-700) 82%, var(--text-primary));
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
 .hero__authHint {
   margin: 0;
   color: var(--text-secondary);

@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import tseslint from 'typescript-eslint';
 
-const controlFlowStatements = ['if', 'for', 'for-in', 'for-of', 'while', 'do', 'switch', 'try'];
+const controlFlowStatements = ['if', 'for', 'while', 'do', 'switch', 'try'];
 
 export default tseslint.config(
   { ignores: ['dist', 'coverage'] },

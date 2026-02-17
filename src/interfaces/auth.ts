@@ -15,6 +15,12 @@ export interface OAuthSession {
   tokenType: string | null;
 }
 
+export interface AuthUser {
+  email: string;
+  login: string;
+  name: string;
+}
+
 export interface OAuthCallbackIdleResult {
   status: 'idle';
 }

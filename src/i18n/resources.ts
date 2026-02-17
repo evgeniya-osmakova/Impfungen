@@ -1,4 +1,5 @@
 import type { AppLanguage } from '../interfaces/language';
+
 import { de } from './locales/de';
 import { en } from './locales/en';
 import { ru } from './locales/ru';

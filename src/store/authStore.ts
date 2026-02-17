@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import {
   beginOAuthLogin,
   clearOAuthSession,
@@ -6,7 +7,24 @@ import {
   getOAuthSession,
   isOAuthConfigured,
 } from '../auth/oauth';
-import type { AuthError } from '../interfaces/auth';
+import type { AuthError, AuthUser } from '../interfaces/auth';
+
+const STUB_USER: AuthUser = {
+  email: 'demo.user@example.com',
+  login: 'demo.user',
+  name: 'Demo User',
+};
+
+const createStubUser = (): AuthUser => ({ ...STUB_USER });
+
+const getInitialAuthFlags = () => {
+  const hasSession = Boolean(getOAuthSession());
+
+  return {
+    isAuthenticated: hasSession,
+    user: hasSession ? createStubUser() : null,
+  };
+};
 
 interface AuthStore {
   authError: AuthError | null;
@@ -16,12 +34,14 @@ interface AuthStore {
   isAuthenticated: boolean;
   isInitialized: boolean;
   isInitializing: boolean;
+  loginStub: () => void;
   oauthConfigured: boolean;
+  user: AuthUser | null;
 }
 
 const getInitialAuthState = () => ({
   authError: null,
-  isAuthenticated: Boolean(getOAuthSession()),
+  ...getInitialAuthFlags(),
   isInitialized: false,
   isInitializing: false,
   oauthConfigured: isOAuthConfigured(),
@@ -37,7 +57,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
 
     if (result.status === 'success') {
-      set({ authError: null, isAuthenticated: true });
+      set({ authError: null, isAuthenticated: true, user: createStubUser() });
 
       return;
     }
@@ -45,12 +65,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({
       authError: { code: result.code, details: result.details },
       isAuthenticated: Boolean(getOAuthSession()),
+      user: getOAuthSession() ? createStubUser() : null,
     });
   },
   handleAuthClick: async () => {
     if (get().isAuthenticated) {
       clearOAuthSession();
-      set({ authError: null, isAuthenticated: false });
+      set({ authError: null, isAuthenticated: false, user: null });
 
       return;
     }
@@ -85,5 +106,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isInitializing: true });
     await state.completeLoginFromCallback();
     set({ isInitialized: true, isInitializing: false });
+  },
+  loginStub: () => {
+    set({
+      authError: null,
+      isAuthenticated: true,
+      user: createStubUser(),
+    });
   },
 }));

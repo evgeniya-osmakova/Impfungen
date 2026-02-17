@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
   clearOAuthSession,
   completeOAuthLogin,
@@ -49,7 +50,7 @@ describe('oauth', () => {
     window.sessionStorage.setItem('impfungen.oauth.state', 'expected-state');
     window.sessionStorage.setItem('impfungen.oauth.verifier', 'expected-verifier');
     window.history.replaceState(null, document.title, '/?code=auth-code&state=expected-state');
-    globalThis.fetch = vi.fn().mockResolvedValue(
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(
         JSON.stringify({
           access_token: 'access-token-value',
@@ -60,6 +61,7 @@ describe('oauth', () => {
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       ),
     );
+    globalThis.fetch = fetchMock;
 
     const result = await completeOAuthLogin();
     const session = getOAuthSession();
@@ -68,26 +70,30 @@ describe('oauth', () => {
     expect(session?.accessToken).toBe('access-token-value');
     expect(session?.refreshToken).toBe('refresh-token-value');
     expect(new URL(window.location.href).search).toBe('');
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://id.example.com/oauth2/token',
-      expect.objectContaining({
-        method: 'POST',
-        body: expect.stringContaining('code_verifier=expected-verifier'),
-      }),
-    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const [requestUrl, requestOptions] = fetchMock.mock.calls[0];
+    expect(requestUrl).toBe('https://id.example.com/oauth2/token');
+    expect(requestOptions?.method).toBe('POST');
+
+    if (typeof requestOptions?.body !== 'string') {
+      throw new Error('Expected fetch request body to be a string.');
+    }
+
+    expect(requestOptions.body).toContain('code_verifier=expected-verifier');
   });
 
   it('returns state mismatch when callback state is invalid', async () => {
     window.sessionStorage.setItem('impfungen.oauth.state', 'expected-state');
     window.sessionStorage.setItem('impfungen.oauth.verifier', 'expected-verifier');
     window.history.replaceState(null, document.title, '/?code=auth-code&state=wrong-state');
-    globalThis.fetch = vi.fn();
+    const fetchMock = vi.fn<typeof fetch>();
+    globalThis.fetch = fetchMock;
 
     const result = await completeOAuthLogin();
 
     expect(result).toEqual({ status: 'error', code: 'state_mismatch' });
-    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(new URL(window.location.href).search).toBe('');
   });
 

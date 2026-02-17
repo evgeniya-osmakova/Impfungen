@@ -42,5 +42,10 @@ export const en = {
           'Get clear reminders about the next shot without manually checking deadlines.',
       },
     },
+    internal: {
+      placeholderTitle: 'Section in progress',
+      placeholderDescription:
+        'This area will be filled with application features next. Header and footer are now ready as a shared layout.',
+    },
   },
 } as const;

@@ -42,5 +42,10 @@ export const de = {
           'Erhalte rechtzeitig Hinweise auf die naechste Impfung, ohne selbst Fristen zu verfolgen.',
       },
     },
+    internal: {
+      placeholderTitle: 'Bereich in Arbeit',
+      placeholderDescription:
+        'Dieser Bereich wird als naechstes mit Funktionen gefuellt. Header und Footer stehen bereits als gemeinsames Layout.',
+    },
   },
 } as const;
