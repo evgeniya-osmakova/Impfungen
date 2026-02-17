@@ -1,0 +1,57 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.app__card {
+  width: min(560px, 100%);
+  display: grid;
+  gap: 20px;
+  padding: 32px;
+  border-radius: 20px;
+  border: 1px solid var(--surface-200);
+  background: color-mix(in oklab, var(--surface-0) 90%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-strong);
+}
+
+.app__title {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  line-height: 1.2;
+}
+
+.app__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.app__counter {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.app__separator {
+  margin: 2px 0;
+}
+
+.app__controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .app__card {
+    padding: 24px;
+  }
+
+  .app__controls {
+    display: grid;
+  }
+}
