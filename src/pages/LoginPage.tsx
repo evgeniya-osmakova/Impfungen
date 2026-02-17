@@ -32,19 +32,19 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
   };
 
   return (
-    <main className={styles.app}>
-      <section className={styles.hero}>
-        <header className={styles.hero__topBar}>
-          <p className={styles.hero__badge}>{t('hero.badge')}</p>
-          <div className={styles.hero__actions}>
-            <div className={styles.hero__language} role="group" aria-label={t('language.label')}>
+    <main className={styles.loginPage}>
+      <section className={styles.loginPage__hero}>
+        <header className={styles.loginPage__topBar}>
+          <p className={styles.loginPage__badge}>{t('hero.badge')}</p>
+          <div className={styles.loginPage__actions}>
+            <div className={styles.loginPage__language} role="group" aria-label={t('language.label')}>
               {supportedLanguages.map((language) => (
                 <button
                   key={language}
                   aria-pressed={selectedLanguage === language}
                   className={classNames(
-                    styles.hero__languageButton,
-                    selectedLanguage === language && styles['hero__languageButton--active'],
+                    styles.loginPage__languageButton,
+                    selectedLanguage === language && styles.loginPage__languageButtonActive,
                   )}
                   onClick={() => handleLanguageChange(language)}
                   type="button"
@@ -54,7 +54,7 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
               ))}
             </div>
             <Button
-              className={styles.hero__loginButton}
+              className={styles.loginPage__loginButton}
               disabled={isInitializing}
               onClick={onLoginClick}
               type="button"
@@ -63,14 +63,14 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
             </Button>
           </div>
         </header>
-        <h1 className={styles.hero__title}>{t('hero.title')}</h1>
-        <p className={styles.hero__description}>{t('hero.description')}</p>
-        {isInitializing && <p className={styles.hero__authHint}>{t('auth.loading')}</p>}
-        <div className={styles.hero__features}>
+        <h1 className={styles.loginPage__title}>{t('hero.title')}</h1>
+        <p className={styles.loginPage__description}>{t('hero.description')}</p>
+        {isInitializing && <p className={styles.loginPage__authHint}>{t('auth.loading')}</p>}
+        <div className={styles.loginPage__features}>
           {featureKeys.map((featureKey) => (
-            <article className={styles.hero__featureCard} key={featureKey}>
-              <h2 className={styles.hero__featureTitle}>{t(`hero.features.${featureKey}Title`)}</h2>
-              <p className={styles.hero__featureDescription}>
+            <article className={styles.loginPage__featureCard} key={featureKey}>
+              <h2 className={styles.loginPage__featureTitle}>{t(`hero.features.${featureKey}Title`)}</h2>
+              <p className={styles.loginPage__featureDescription}>
                 {t(`hero.features.${featureKey}Description`)}
               </p>
             </article>

@@ -18,27 +18,27 @@ export const InternalLayout = ({ children, user }: PropsWithChildren<InternalLay
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.header__inner}>
-          <p className={styles.brand}>Impfungen</p>
-          <div className={styles.userBlock}>
-            <span aria-hidden className={styles.avatar}>
+    <div className={styles.layout}>
+      <header className={styles.layout__header}>
+        <div className={styles.layout__headerInner}>
+          <p className={styles.layout__brand}>Impfungen</p>
+          <div className={styles.layout__userBlock}>
+            <span aria-hidden className={styles.layout__avatar}>
               {getUserInitial(user)}
             </span>
-            <div className={styles.userData}>
-              <p className={styles.userName}>{user.name}</p>
-              <p className={styles.userMeta}>{user.login}</p>
-              <p className={styles.userMeta}>{user.email}</p>
+            <div className={styles.layout__userData}>
+              <p className={styles.layout__userName}>{user.name}</p>
+              <p className={styles.layout__userMeta}>{user.login}</p>
+              <p className={styles.layout__userMeta}>{user.email}</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className={styles.main}>{children}</main>
+      <main className={styles.layout__main}>{children}</main>
 
-      <footer className={styles.footer}>
-        <div className={styles.footer__inner}>{currentYear}</div>
+      <footer className={styles.layout__footer}>
+        <div className={styles.layout__footerInner}>{currentYear}</div>
       </footer>
     </div>
   );

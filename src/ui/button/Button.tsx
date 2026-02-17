@@ -13,9 +13,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClassName: Record<ButtonVariant, string> = {
-  primary: styles['button--primary'],
-  secondary: styles['button--secondary'],
-  danger: styles['button--danger'],
+  primary: styles.buttonPrimary,
+  secondary: styles.buttonSecondary,
+  danger: styles.buttonDanger,
 };
 
 export const Button = ({
@@ -32,7 +32,7 @@ export const Button = ({
       className={classNames(
         styles.button,
         variantClassName[variant],
-        fullWidth && styles['button--full-width'],
+        fullWidth && styles.buttonFullWidth,
         className,
       )}
       {...props}
