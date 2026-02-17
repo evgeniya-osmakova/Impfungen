@@ -18,10 +18,43 @@
   box-shadow: var(--shadow-strong);
 }
 
+.app__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .app__title {
   margin: 0;
   font-size: clamp(1.4rem, 2.8vw, 2rem);
   line-height: 1.2;
+}
+
+.app__language {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.app__languageLabel {
+  line-height: 1.2;
+}
+
+.app__languageSelect {
+  min-width: 120px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-200);
+  background: var(--surface-50);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.app__languageSelect:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 1px;
 }
 
 .app__description {
@@ -49,6 +82,14 @@
 @media (max-width: 640px) {
   .app__card {
     padding: 24px;
+  }
+
+  .app__header {
+    flex-direction: column;
+  }
+
+  .app__languageSelect {
+    width: 100%;
   }
 
   .app__controls {
