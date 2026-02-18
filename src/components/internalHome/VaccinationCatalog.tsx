@@ -21,6 +21,7 @@ interface VaccinationCatalogProps {
   categoryFilter: VaccinationCategoryFilter;
   country: VaccinationCountryCode;
   diseases: readonly VaccinationDisease[];
+  onSelectDiseaseFromCatalog: (diseaseId: string) => void;
   onChangeCategoryFilter: (categoryFilter: VaccinationCategoryFilter) => void;
   onChangeSearchQuery: (searchQuery: string) => void;
   resolveDiseaseLabel: (disease: VaccinationDisease) => string;
@@ -67,6 +68,7 @@ export const VaccinationCatalog = ({
   categoryFilter,
   country,
   diseases,
+  onSelectDiseaseFromCatalog,
   onChangeCategoryFilter,
   onChangeSearchQuery,
   resolveDiseaseLabel,
@@ -132,12 +134,17 @@ export const VaccinationCatalog = ({
             }
 
             return (
-              <article className={styles.vaccinationCatalog__card} key={disease.id}>
+              <button
+                className={styles.vaccinationCatalog__card}
+                key={disease.id}
+                onClick={() => onSelectDiseaseFromCatalog(disease.id)}
+                type={HTML_BUTTON_TYPE.button}
+              >
                 <p className={styles.vaccinationCatalog__cardTitle}>{resolveDiseaseLabel(disease)}</p>
                 <p className={styles.vaccinationCatalog__cardBadge}>
                   {t(resolveBadgeTextKey(category))}
                 </p>
-              </article>
+              </button>
             );
           })}
         </div>

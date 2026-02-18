@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE } from '../../constants/internalHomeText';
@@ -35,6 +35,9 @@ export const InternalHomeContent = () => {
   const { i18n, t } = useTranslation();
   const language = resolveAppLanguage(i18n.resolvedLanguage);
   const [formErrorKey, setFormErrorKey] = useState<string | null>(null);
+  const [prefilledDiseaseId, setPrefilledDiseaseId] = useState<string | null>(null);
+  const diseaseFieldRef = useRef<HTMLSelectElement | null>(null);
+  const formSectionRef = useRef<HTMLElement | null>(null);
   const {
     categoryFilter,
     cancelEdit,
@@ -105,6 +108,7 @@ export const InternalHomeContent = () => {
   const handleChangeCountry = (nextCountry: VaccinationCountryCode) => {
     setCountry(nextCountry);
     setFormErrorKey(null);
+    setPrefilledDiseaseId(null);
   };
 
   const handleEditRecord = (diseaseId: string) => {
@@ -115,6 +119,25 @@ export const InternalHomeContent = () => {
   const handleCancelEdit = () => {
     cancelEdit();
     setFormErrorKey(null);
+  };
+
+  const scrollToDiseaseField = () => {
+    const formSection = formSectionRef.current;
+
+    if (!formSection) {
+      return;
+    }
+
+    formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    diseaseFieldRef.current?.focus({ preventScroll: true });
+  };
+
+  const handleSelectDiseaseFromCatalog = (diseaseId: string) => {
+    cancelEdit();
+    setPrefilledDiseaseId(diseaseId);
+    setFormErrorKey(null);
+    scrollToDiseaseField();
   };
 
   return (
@@ -128,9 +151,12 @@ export const InternalHomeContent = () => {
       <div className={styles.internalHomeContent__grid}>
         <VaccinationForm
           diseases={diseasesForFormSorted}
+          diseaseFieldRef={diseaseFieldRef}
           errorKey={formErrorKey}
+          formSectionRef={formSectionRef}
           onCancelEdit={handleCancelEdit}
           onSubmitRecord={handleSubmitRecord}
+          prefilledDiseaseId={prefilledDiseaseId}
           recordForEdit={recordForEdit}
           resolveDiseaseLabel={resolveDiseaseLabel}
         />
@@ -147,6 +173,7 @@ export const InternalHomeContent = () => {
         categoryFilter={categoryFilter}
         country={country}
         diseases={catalogDiseases}
+        onSelectDiseaseFromCatalog={handleSelectDiseaseFromCatalog}
         onChangeCategoryFilter={setCategoryFilter}
         onChangeSearchQuery={setSearchQuery}
         resolveDiseaseLabel={resolveDiseaseLabel}

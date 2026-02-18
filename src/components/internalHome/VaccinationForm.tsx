@@ -1,4 +1,4 @@
-import { type SyntheticEvent, useEffect, useState } from 'react';
+import { type RefObject, type SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -18,9 +18,12 @@ import styles from './VaccinationForm.module.css';
 
 interface VaccinationFormProps {
   diseases: readonly VaccinationDisease[];
+  diseaseFieldRef: RefObject<HTMLSelectElement | null>;
   errorKey: string | null;
+  formSectionRef: RefObject<HTMLElement | null>;
   onCancelEdit: () => void;
   onSubmitRecord: (record: VaccinationRecordInput) => void;
+  prefilledDiseaseId: string | null;
   recordForEdit: VaccinationRecord | null;
   resolveDiseaseLabel: (disease: VaccinationDisease) => string;
 }
@@ -35,9 +38,12 @@ const resolveInitialDiseaseId = (recordForEdit: VaccinationRecord | null): strin
 
 export const VaccinationForm = ({
   diseases,
+  diseaseFieldRef,
   errorKey,
+  formSectionRef,
   onCancelEdit,
   onSubmitRecord,
+  prefilledDiseaseId,
   recordForEdit,
   resolveDiseaseLabel,
 }: VaccinationFormProps) => {
@@ -59,6 +65,20 @@ export const VaccinationForm = ({
     setNextDueAt(recordForEdit?.nextDueAt ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
   }, [recordForEdit]);
 
+  useEffect(() => {
+    if (isEditMode || !prefilledDiseaseId) {
+      return;
+    }
+
+    const hasDisease = diseases.some((disease) => disease.id === prefilledDiseaseId);
+
+    if (!hasDisease) {
+      return;
+    }
+
+    setSelectedDiseaseId(prefilledDiseaseId);
+  }, [diseases, isEditMode, prefilledDiseaseId]);
+
   const formTitle = isEditMode ? 'internal.form.titleEdit' : 'internal.form.titleAdd';
   const submitLabel = isEditMode ? 'internal.form.actions.saveEdit' : 'internal.form.actions.saveAdd';
   const showUnavailableHint = !isEditMode && !hasDiseasesForAdd;
@@ -74,7 +94,7 @@ export const VaccinationForm = ({
   };
 
   return (
-    <section className={styles.vaccinationForm}>
+    <section className={styles.vaccinationForm} ref={formSectionRef}>
       <header className={styles.vaccinationForm__header}>
         <h2 className={styles.vaccinationForm__title}>{t(formTitle)}</h2>
         <p className={styles.vaccinationForm__subtitle}>{t('internal.form.subtitle')}</p>
@@ -92,6 +112,7 @@ export const VaccinationForm = ({
           disabled={isEditMode || !hasDiseasesForAdd}
           id={INTERNAL_HOME_FORM_FIELD_ID.disease}
           onChange={(event) => setSelectedDiseaseId(event.target.value)}
+          ref={diseaseFieldRef}
           value={selectedDiseaseId}
         >
           {!isEditMode && (

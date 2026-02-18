@@ -102,10 +102,28 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
   padding: 12px;
   border-radius: 12px;
   border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
   background: var(--surface-0);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.vaccinationCatalog__card:hover {
+  border-color: color-mix(in oklab, var(--brand-300) 60%, var(--surface-0));
+  background: color-mix(in oklab, var(--brand-50) 35%, var(--surface-0));
+}
+
+.vaccinationCatalog__card:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
 }
 
 .vaccinationCatalog__cardTitle {

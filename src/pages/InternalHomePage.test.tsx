@@ -86,4 +86,21 @@ describe('InternalHomePage', () => {
 
     expect(within(diseaseSelect).getByRole('option', { name: 'Measles' })).toBeInTheDocument();
   });
+
+  it('prefills disease field when catalog card is clicked', async () => {
+    const user = userEvent.setup();
+
+    const { getByLabelText, getByRole, getByText } = render(<InternalHomePage user={USER_FIXTURE} />);
+
+    await user.click(getByText('Россия'));
+    await user.click(getByRole('button', { name: 'Подтвердить страну' }));
+
+    const diseaseSelect = getByLabelText('Заболевание') as HTMLSelectElement;
+
+    expect(diseaseSelect.value).toBe('');
+
+    await user.click(getByRole('button', { name: /столбняк/i }));
+
+    expect(diseaseSelect.value).toBe('tetanus');
+  });
 });
