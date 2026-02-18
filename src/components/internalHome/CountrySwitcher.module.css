@@ -1,0 +1,30 @@
+.countrySwitcher {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 70%, var(--surface-0));
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--surface-0) 92%, var(--brand-50));
+}
+
+.countrySwitcher__label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.countrySwitcher__controls {
+  display: inline-grid;
+  width: fit-content;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.countrySwitcher__description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}

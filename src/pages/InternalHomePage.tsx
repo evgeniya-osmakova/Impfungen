@@ -1,7 +1,14 @@
 import { useTranslation } from 'react-i18next';
 
+import {
+  CountryOnboarding,
+  InternalHomeContent,
+} from '../components/internalHome';
+import { INTERNAL_HOME_TEXT } from '../constants/internalHomeText';
 import type { AuthUser } from '../interfaces/auth';
+import type { VaccinationCountryCode } from '../interfaces/vaccination';
 import { InternalLayout } from '../layouts/InternalLayout';
+import { useVaccinationStore } from '../store/vaccinationStore';
 
 import styles from './InternalHomePage.module.css';
 
@@ -12,11 +19,34 @@ interface InternalHomePageProps {
 export const InternalHomePage = ({ user }: InternalHomePageProps) => {
   const { t } = useTranslation();
 
+  const {
+    confirmCountry,
+    country,
+    isCountryConfirmed,
+    setCountry,
+  } = useVaccinationStore();
+
+  const handleChangeCountry = (nextCountry: VaccinationCountryCode) => setCountry(nextCountry);
+
+  const handleConfirmCountry = (nextCountry: VaccinationCountryCode) => confirmCountry(nextCountry);
+
   return (
     <InternalLayout user={user}>
-      <section className={styles.placeholder}>
-        <h1 className={styles.placeholder__title}>{t('internal.placeholderTitle')}</h1>
-        <p className={styles.placeholder__description}>{t('internal.placeholderDescription')}</p>
+      <section className={styles.internalHomePage}>
+        <header className={styles.internalHomePage__header}>
+          <h1 className={styles.internalHomePage__title}>{t(INTERNAL_HOME_TEXT.page.title)}</h1>
+          <p className={styles.internalHomePage__description}>{t(INTERNAL_HOME_TEXT.page.description)}</p>
+        </header>
+
+        {!isCountryConfirmed || !country ? (
+          <CountryOnboarding
+            onConfirmCountry={handleConfirmCountry}
+            onSelectCountry={handleChangeCountry}
+            selectedCountry={country}
+          />
+        ) : (
+          <InternalHomeContent />
+        )}
       </section>
     </InternalLayout>
   );

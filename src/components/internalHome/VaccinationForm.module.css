@@ -1,0 +1,86 @@
+.vaccinationForm {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  background: var(--surface-0);
+}
+
+.vaccinationForm__header {
+  display: grid;
+  gap: 6px;
+}
+
+.vaccinationForm__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.vaccinationForm__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.vaccinationForm__body {
+  display: grid;
+  gap: 10px;
+}
+
+.vaccinationForm__fieldLabel {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.vaccinationForm__fieldControl {
+  width: 100%;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--surface-0) 95%, var(--surface-50));
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.vaccinationForm__fieldControl:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.vaccinationForm__fieldControl:disabled {
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+select.vaccinationForm__fieldControl {
+  appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 6.5L8 11L12.5 6.5' stroke='%23334155' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+}
+
+.vaccinationForm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.vaccinationForm__error {
+  margin: 0;
+  color: var(--danger-600);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.vaccinationForm__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}

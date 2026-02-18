@@ -1,0 +1,64 @@
+.vaccinationSummary {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--surface-0) 90%, var(--brand-50)),
+    color-mix(in oklab, var(--surface-0) 92%, var(--accent-50))
+  );
+}
+
+.vaccinationSummary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.vaccinationSummary__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.vaccinationSummary__country {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.vaccinationSummary__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vaccinationSummary__metricCard {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  border-radius: 12px;
+  background: var(--surface-0);
+}
+
+.vaccinationSummary__metricValue {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.vaccinationSummary__metricLabel {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 760px) {
+  .vaccinationSummary__metrics {
+    grid-template-columns: 1fr;
+  }
+}

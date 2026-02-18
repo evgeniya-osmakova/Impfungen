@@ -1,28 +1,29 @@
-.placeholder {
-  min-height: 420px;
+.internalHomePage {
   display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 10px;
-  padding: 32px;
-  border-radius: 24px;
-  border: 1px dashed color-mix(in oklab, var(--brand-300) 70%, var(--surface-0));
+  gap: 18px;
+}
+
+.internalHomePage__header {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--brand-300) 42%, var(--surface-0));
   background:
-    radial-gradient(circle at 10% 0, color-mix(in oklab, var(--brand-100) 74%, transparent) 0, transparent 44%),
-    radial-gradient(circle at 94% 100%, color-mix(in oklab, var(--accent-100) 82%, transparent) 0, transparent 45%),
-    color-mix(in oklab, var(--surface-0) 95%, var(--surface-50));
-  text-align: center;
+    radial-gradient(circle at 0 0, color-mix(in oklab, var(--brand-100) 75%, transparent) 0, transparent 44%),
+    radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--accent-100) 75%, transparent) 0, transparent 42%),
+    var(--surface-0);
 }
 
-.placeholder__title {
+.internalHomePage__title {
   margin: 0;
-  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
-  line-height: 1.18;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  letter-spacing: -0.01em;
 }
 
-.placeholder__description {
+.internalHomePage__description {
   margin: 0;
-  max-width: 54ch;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
+  max-width: 78ch;
 }

@@ -1,0 +1,17 @@
+.internalHomeContent {
+  display: grid;
+  gap: 16px;
+}
+
+.internalHomeContent__grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.35fr);
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .internalHomeContent__grid {
+    grid-template-columns: 1fr;
+  }
+}

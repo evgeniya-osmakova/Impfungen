@@ -1,0 +1,142 @@
+.vaccinationCatalog {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 95%, var(--accent-50));
+}
+
+.vaccinationCatalog__header {
+  display: grid;
+  gap: 6px;
+}
+
+.vaccinationCatalog__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.vaccinationCatalog__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.vaccinationCatalog__searchLabel {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.vaccinationCatalog__searchInput {
+  width: 100%;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.vaccinationCatalog__searchInput:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.vaccinationCatalog__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vaccinationCatalog__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  border-radius: 999px;
+  background: var(--surface-0);
+  color: var(--text-secondary);
+  padding: 7px 11px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vaccinationCatalog__filter:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.vaccinationCatalog__filterActive {
+  border-color: var(--brand-400);
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--brand-50) 82%, var(--surface-0));
+}
+
+.vaccinationCatalog__filterCount {
+  display: inline-flex;
+  min-width: 20px;
+  justify-content: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface-100) 80%, var(--surface-0));
+}
+
+.vaccinationCatalog__countLabel {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.vaccinationCatalog__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.vaccinationCatalog__card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background: var(--surface-0);
+}
+
+.vaccinationCatalog__cardTitle {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.vaccinationCatalog__cardBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 34px;
+  margin: auto 0 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--brand-300) 50%, var(--surface-0));
+  color: var(--text-secondary);
+  background: color-mix(in oklab, var(--brand-50) 80%, var(--surface-0));
+  font-size: 0.77rem;
+  line-height: 1;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vaccinationCatalog__empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+  color: var(--text-secondary);
+  text-align: center;
+}

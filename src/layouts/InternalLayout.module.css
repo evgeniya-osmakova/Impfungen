@@ -9,7 +9,7 @@
   background: color-mix(in oklab, var(--surface-0) 95%, var(--accent-50));
 }
 
-.layout__header-inner {
+.layout__headerInner {
   width: min(1120px, 100%);
   margin: 0 auto;
   padding: 14px 24px;
@@ -26,7 +26,7 @@
   letter-spacing: 0.02em;
 }
 
-.layout__user-block {
+.layout__userBlock {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -51,19 +51,19 @@
   box-shadow: 0 7px 16px rgb(15 23 42 / 0.16);
 }
 
-.layout__user-data {
+.layout__userData {
   display: grid;
   gap: 2px;
 }
 
-.layout__user-name {
+.layout__userName {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.3;
 }
 
-.layout__user-meta {
+.layout__userMeta {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.82rem;
@@ -81,7 +81,7 @@
   background: color-mix(in oklab, var(--surface-0) 96%, var(--brand-50));
 }
 
-.layout__footer-inner {
+.layout__footerInner {
   width: min(1120px, 100%);
   margin: 0 auto;
   padding: 14px 24px;
@@ -90,7 +90,7 @@
 }
 
 @media (max-width: 640px) {
-  .layout__header-inner {
+  .layout__headerInner {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -99,7 +99,7 @@
     padding: 18px;
   }
 
-  .layout__footer-inner {
+  .layout__footerInner {
     padding: 12px 18px;
   }
 }

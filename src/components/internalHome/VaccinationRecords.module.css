@@ -1,0 +1,83 @@
+.vaccinationRecords {
+  display: grid;
+  gap: 12px;
+}
+
+.vaccinationRecords__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vaccinationRecords__title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.vaccinationRecords__list {
+  display: grid;
+  gap: 12px;
+}
+
+.vaccinationRecords__card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 95%, var(--brand-50));
+}
+
+.vaccinationRecords__cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.vaccinationRecords__cardTitle {
+  margin: 0;
+  font-size: 1.03rem;
+  line-height: 1.4;
+}
+
+.vaccinationRecords__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.vaccinationRecords__completedAt {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.vaccinationRecords__completedAt strong {
+  color: var(--text-primary);
+}
+
+.vaccinationRecords__empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in oklab, var(--surface-200) 70%, var(--surface-0));
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .vaccinationRecords__cardHead {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vaccinationRecords__actions {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,68 @@
+.radioPillGroup {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.radioPillGroup__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.radioPillGroup__controls {
+  display: grid;
+  gap: 8px;
+}
+
+.radioPillGroup__control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  border-radius: 14px;
+  background: var(--surface-0);
+  color: var(--text-secondary);
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.radioPillGroup__controlDefault {
+  padding: 14px;
+}
+
+.radioPillGroup__controlCompact {
+  padding: 8px 12px;
+}
+
+.radioPillGroup__control:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgb(15 23 42 / 0.14);
+}
+
+.radioPillGroup__control:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.radioPillGroup__controlActive {
+  color: var(--text-primary);
+  border-color: var(--brand-400);
+  background: color-mix(in oklab, var(--brand-50) 86%, var(--surface-0));
+}
+
+.radioPillGroup__controlText {
+  font-weight: 700;
+}
