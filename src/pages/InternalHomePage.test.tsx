@@ -24,7 +24,7 @@ describe('InternalHomePage', () => {
   it('supports onboarding, add/edit/delete flow, and hides timeline without next date', async () => {
     const user = userEvent.setup();
 
-    const { findByRole, findByText, getByLabelText, getByRole, getByText, queryByText } = render(
+    const { findByLabelText, findByRole, findByText, getByLabelText, getByRole, getByText, queryByText } = render(
       <InternalHomePage user={USER_FIXTURE} />,
     );
 
@@ -38,20 +38,24 @@ describe('InternalHomePage', () => {
     await user.click(getByRole('button', { name: 'Подтвердить страну' }));
 
     expect(await findByRole('heading', { name: 'Сводка по карте прививок' })).toBeInTheDocument();
+    expect(await findByRole('heading', { name: 'Прививки на ближайший год' })).toBeInTheDocument();
 
-    const diseaseSelect = getByLabelText('Заболевание');
+    await user.click(getByRole('button', { name: 'Добавить сделанную прививку' }));
+
+    const diseaseSelect = await findByLabelText('Заболевание');
     await user.selectOptions(diseaseSelect, 'measles');
     await user.type(getByLabelText('Дата сделанной прививки'), '2024-03-01');
     await user.click(getByRole('button', { name: 'Сохранить запись' }));
 
     expect(await findByRole('heading', { name: 'Корь' })).toBeInTheDocument();
-    expect(queryByText('Линеечка до следующей прививки')).not.toBeInTheDocument();
+    expect(queryByText('Следующая')).not.toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Редактировать' }));
-    await user.type(getByLabelText('Дата следующей прививки'), '2025-03-01');
+    await user.selectOptions(getByLabelText('Планирование следующих доз'), 'manual');
+    await user.type(getByLabelText('Будущая дата 1'), '2027-03-01');
     await user.click(getByRole('button', { name: 'Сохранить изменения' }));
 
-    expect(await findByText('Линеечка до следующей прививки')).toBeInTheDocument();
+    expect(await findByText('Следующая')).toBeInTheDocument();
 
     await user.clear(getByLabelText('Поиск по заболеванию'));
     await user.type(getByLabelText('Поиск по заболеванию'), 'столбняк');
@@ -67,9 +71,7 @@ describe('InternalHomePage', () => {
 
     await user.click(getByRole('button', { name: 'Удалить' }));
 
-    expect(
-      await findByText('Записей пока нет. Добавьте первую прививку через форму слева.'),
-    ).toBeInTheDocument();
+    expect(await findByText('Записей пока нет.')).toBeInTheDocument();
   });
 
   it('shows disease names in selected language', async () => {
@@ -81,6 +83,7 @@ describe('InternalHomePage', () => {
 
     await user.click(getByText('Russia'));
     await user.click(getByRole('button', { name: 'Confirm country' }));
+    await user.click(getByRole('button', { name: 'Add completed vaccination' }));
 
     const diseaseSelect = getByLabelText('Disease');
 
@@ -90,16 +93,14 @@ describe('InternalHomePage', () => {
   it('prefills disease field when catalog card is clicked', async () => {
     const user = userEvent.setup();
 
-    const { getByLabelText, getByRole, getByText } = render(<InternalHomePage user={USER_FIXTURE} />);
+    const { findByLabelText, getByRole, getByText } = render(<InternalHomePage user={USER_FIXTURE} />);
 
     await user.click(getByText('Россия'));
     await user.click(getByRole('button', { name: 'Подтвердить страну' }));
 
-    const diseaseSelect = getByLabelText('Заболевание') as HTMLSelectElement;
-
-    expect(diseaseSelect.value).toBe('');
-
     await user.click(getByRole('button', { name: /столбняк/i }));
+
+    const diseaseSelect = (await findByLabelText('Заболевание')) as HTMLSelectElement;
 
     expect(diseaseSelect.value).toBe('tetanus');
   });

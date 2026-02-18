@@ -3,28 +3,15 @@ import { useTranslation } from 'react-i18next';
 
 import { VACCINATION_TIMELINE_STATUS } from '../../constants/vaccination';
 import type { AppLanguage } from '../../interfaces/language';
-import type { VaccinationTimelineStatus } from '../../interfaces/timeline';
 import { formatDateByLanguage } from '../../utils/date';
 import { resolveVaccinationTimeline } from '../../utils/timeline';
 
 import styles from './VaccinationTimeline.module.css';
 
-const railStatusClassNameByType: Record<VaccinationTimelineStatus, string> = {
+const railStatusClassNameByType = {
   [VACCINATION_TIMELINE_STATUS.overdue]: styles.vaccinationTimeline__railOverdue,
   [VACCINATION_TIMELINE_STATUS.today]: styles.vaccinationTimeline__railToday,
   [VACCINATION_TIMELINE_STATUS.upcoming]: styles.vaccinationTimeline__railUpcoming,
-};
-
-const resolveTimelineStatusTextKey = (status: VaccinationTimelineStatus): string => {
-  if (status === VACCINATION_TIMELINE_STATUS.overdue) {
-    return 'internal.timeline.status.overdue';
-  }
-
-  if (status === VACCINATION_TIMELINE_STATUS.today) {
-    return 'internal.timeline.status.today';
-  }
-
-  return 'internal.timeline.status.upcoming';
 };
 
 interface VaccinationTimelineProps {
@@ -47,7 +34,6 @@ export const VaccinationTimeline = ({
 
   return (
     <section className={styles.vaccinationTimeline}>
-      <p className={styles.vaccinationTimeline__title}>{t('internal.timeline.title')}</p>
       <div
         className={classNames(
           styles.vaccinationTimeline__rail,
@@ -67,9 +53,6 @@ export const VaccinationTimeline = ({
           <span>{formatDateByLanguage(nextDueAt, language)}</span>
         </p>
       </div>
-      <p className={styles.vaccinationTimeline__status}>
-        {t(resolveTimelineStatusTextKey(timelineMeta.status))}
-      </p>
     </section>
   );
 };

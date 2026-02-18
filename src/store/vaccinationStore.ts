@@ -5,7 +5,9 @@ import {
   VACCINATION_DEFAULT_SEARCH_QUERY,
 } from '../constants/vaccination';
 import type { VaccinationCategoryFilter, VaccinationCountryCode, VaccinationRecordInput, VaccinationStoreState } from '../interfaces/vaccination';
+import { normalizeOptionalText } from '../utils/string';
 import { createVaccinationPersistedDefaults, vaccinationRepositoryLocal } from '../utils/vaccinationRepositoryLocal';
+import { normalizeFutureDueDates } from '../utils/vaccinationSchedule';
 import { type VaccinationValidationErrorCode, validateVaccinationRecordInput } from '../utils/vaccinationValidation';
 
 interface VaccinationStore extends VaccinationStoreState {
@@ -54,9 +56,12 @@ const resolveNextRecords = (
 ) => {
   const nextUpdatedAt = new Date().toISOString();
   const nextRecord = {
+    batchNumber: normalizeOptionalText(input.batchNumber),
     completedAt: input.completedAt,
     diseaseId: input.diseaseId,
-    nextDueAt: input.nextDueAt,
+    futureDueDates: normalizeFutureDueDates(input.futureDueDates),
+    repeatEvery: input.repeatEvery ? { ...input.repeatEvery } : null,
+    tradeName: normalizeOptionalText(input.tradeName),
     updatedAt: nextUpdatedAt,
   };
   const hasExistingRecord = records.some((record) => record.diseaseId === input.diseaseId);

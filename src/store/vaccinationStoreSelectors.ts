@@ -4,10 +4,12 @@ import type {
   VaccinationCountryCode,
   VaccinationDisease,
   VaccinationRecord,
+  VaccinationRecordView,
 } from '../interfaces/vaccination';
 import {
   getAvailableDiseases,
   getCategoryCounts,
+  getRecordsDueInNextYear,
   getRecordsWithNextDateCount,
   sortRecordsByNextDueDate,
 } from '../utils/vaccinationSelectors';
@@ -23,7 +25,8 @@ interface VaccinationStoreViewData {
   categoryCounts: Record<VaccinationCategory, number>;
   diseasesForForm: VaccinationDisease[];
   recordForEdit: VaccinationRecord | null;
-  recordsForView: VaccinationRecord[];
+  recordsDueInNextYear: VaccinationRecordView[];
+  recordsForView: VaccinationRecordView[];
   recordsWithNextDate: number;
 }
 
@@ -50,6 +53,7 @@ export const selectVaccinationViewData = ({
   records,
 }: VaccinationStoreViewSource): VaccinationStoreViewData => {
   const recordForEdit = resolveRecordForEdit(records, editingDiseaseId);
+  const recordsForView = sortRecordsByNextDueDate(records);
   const availableDiseases = country
     ? getAvailableDiseases(VACCINATION_DISEASE_CATALOG, records, country)
     : [];
@@ -60,7 +64,8 @@ export const selectVaccinationViewData = ({
     categoryCounts: country ? getCategoryCounts(availableDiseases, country) : EMPTY_CATEGORY_COUNTS,
     diseasesForForm: diseaseForEdit ? [diseaseForEdit, ...availableDiseases] : availableDiseases,
     recordForEdit,
-    recordsForView: sortRecordsByNextDueDate(records),
+    recordsDueInNextYear: getRecordsDueInNextYear(recordsForView),
+    recordsForView,
     recordsWithNextDate: getRecordsWithNextDateCount(records),
   };
 };

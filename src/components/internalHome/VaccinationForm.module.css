@@ -7,6 +7,13 @@
   background: var(--surface-0);
 }
 
+.vaccinationFormInModal {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
 .vaccinationForm__header {
   display: grid;
   gap: 6px;
@@ -65,10 +72,53 @@ select.vaccinationForm__fieldControl {
 }
 
 .vaccinationForm__actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 4px;
+}
+
+.vaccinationForm__actionsSingle {
+  grid-template-columns: 1fr;
+}
+
+.vaccinationForm__actionButton {
+  min-height: 52px;
+}
+
+.vaccinationForm__futureDates {
+  display: grid;
+  gap: 8px;
+}
+
+.vaccinationForm__futureDateRow {
+  display: grid;
+  gap: 6px;
+}
+
+.vaccinationForm__futureDateControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.vaccinationForm__futureDateControl .vaccinationForm__fieldControl {
+  min-width: 0;
+}
+
+.vaccinationForm__futureDateButton {
+  min-height: 46px;
+  white-space: nowrap;
+}
+
+.vaccinationForm__addDateButton {
+  min-height: 52px;
+}
+
+.vaccinationForm__repeat {
+  display: grid;
+  gap: 8px;
 }
 
 .vaccinationForm__error {
@@ -83,4 +133,14 @@ select.vaccinationForm__fieldControl {
   color: var(--text-secondary);
   font-size: 0.86rem;
   line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .vaccinationForm__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .vaccinationForm__futureDateControl {
+    grid-template-columns: 1fr;
+  }
 }

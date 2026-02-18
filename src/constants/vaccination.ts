@@ -29,6 +29,16 @@ export const VACCINATION_CATEGORY_FILTER_OPTIONS: readonly VaccinationCategoryFi
   VACCINATION_CATEGORY_FILTER.optional,
 ];
 
+export const VACCINATION_REPEAT_UNIT = {
+  months: 'months',
+  years: 'years',
+} as const;
+
+export const VACCINATION_REPEAT_UNIT_OPTIONS = [
+  VACCINATION_REPEAT_UNIT.years,
+  VACCINATION_REPEAT_UNIT.months,
+] as const;
+
 export const VACCINATION_STORAGE_KEY = 'impfungen.vaccination.state';
 export const VACCINATION_STORAGE_VERSION = 1;
 export const VACCINATION_DEFAULT_CATEGORY_FILTER: VaccinationCategoryFilter =

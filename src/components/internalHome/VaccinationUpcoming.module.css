@@ -1,0 +1,88 @@
+.vaccinationUpcoming {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--brand-50) 76%, var(--surface-0)),
+      color-mix(in oklab, var(--accent-50) 62%, var(--surface-0))
+    );
+}
+
+.vaccinationUpcoming__header {
+  display: grid;
+  gap: 6px;
+}
+
+.vaccinationUpcoming__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.vaccinationUpcoming__description {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.vaccinationUpcoming__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.vaccinationUpcoming__item {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+  background: var(--surface-0);
+}
+
+.vaccinationUpcoming__itemTitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.vaccinationUpcoming__itemMeta {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.vaccinationUpcoming__itemMeta strong {
+  color: var(--text-primary);
+  font-weight: 700;
+  text-align: right;
+}
+
+.vaccinationUpcoming__empty {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+  background: var(--surface-0);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 760px) {
+  .vaccinationUpcoming {
+    padding: 16px;
+  }
+
+  .vaccinationUpcoming__list {
+    grid-template-columns: 1fr;
+  }
+}

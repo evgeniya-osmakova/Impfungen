@@ -3,15 +3,48 @@
   gap: 16px;
 }
 
-.internalHomeContent__grid {
+.internalHomeContent__topRow {
   display: grid;
-  grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.35fr);
+  grid-template-columns: minmax(290px, 420px) minmax(0, 1fr);
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
 }
 
-@media (max-width: 960px) {
-  .internalHomeContent__grid {
+.internalHomeContent__workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.internalHomeContent__workspaceToolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.internalHomeContent__openFormButton {
+  min-height: 44px;
+  padding-inline: 18px;
+}
+
+.internalHomeContent__recordsPane {
+  min-width: 0;
+}
+
+.internalHomeContent__catalogPane {
+  min-width: 0;
+}
+
+@media (max-width: 1140px) {
+  .internalHomeContent__topRow {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .internalHomeContent__workspaceToolbar {
+    justify-content: stretch;
+  }
+
+  .internalHomeContent__openFormButton {
+    width: 100%;
   }
 }

@@ -1,6 +1,7 @@
 import {
   VACCINATION_COUNTRY,
   VACCINATION_EMPTY_RECORDS,
+  VACCINATION_REPEAT_UNIT,
   VACCINATION_STORAGE_KEY,
   VACCINATION_STORAGE_VERSION,
 } from '../constants/vaccination';
@@ -8,10 +9,12 @@ import type {
   VaccinationCountryCode,
   VaccinationPersistedState,
   VaccinationRecord,
+  VaccinationRepeatRule,
   VaccinationRepository,
 } from '../interfaces/vaccination';
 
 import { isIsoDateValue } from './date';
+import { normalizeFutureDueDates } from './vaccinationSchedule';
 
 interface VaccinationPersistedPayload extends VaccinationPersistedState {
   version: number;
@@ -29,24 +32,87 @@ const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
 const isCountryCode = (value: unknown): value is VaccinationCountryCode =>
   value === VACCINATION_COUNTRY.RU || value === VACCINATION_COUNTRY.DE;
 
-const isVaccinationRecord = (value: unknown): value is VaccinationRecord => {
+const sanitizeOptionalText = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+
+  return normalized ? normalized : null;
+};
+
+const sanitizeRepeatEvery = (value: unknown): VaccinationRepeatRule | null => {
   if (!isObjectRecord(value)) {
-    return false;
+    return null;
+  }
+
+  const intervalValue = typeof value.interval === 'number' ? value.interval : Number.NaN;
+
+  if (!Number.isInteger(intervalValue) || intervalValue <= 0) {
+    return null;
+  }
+
+  let unitValue: VaccinationRepeatRule['unit'] | null = null;
+
+  if (value.unit === VACCINATION_REPEAT_UNIT.months) {
+    unitValue = VACCINATION_REPEAT_UNIT.months;
+  }
+
+  if (value.unit === VACCINATION_REPEAT_UNIT.years) {
+    unitValue = VACCINATION_REPEAT_UNIT.years;
+  }
+
+  if (!unitValue) {
+    return null;
+  }
+
+  return {
+    interval: intervalValue,
+    unit: unitValue,
+  };
+};
+
+const sanitizeFutureDueDates = (value: unknown, legacyNextDueAt: unknown): string[] => {
+  if (Array.isArray(value)) {
+    const dates = value.filter((entry): entry is string => typeof entry === 'string');
+
+    return normalizeFutureDueDates(dates);
+  }
+
+  if (typeof legacyNextDueAt === 'string' && isIsoDateValue(legacyNextDueAt)) {
+    return [legacyNextDueAt];
+  }
+
+  return [];
+};
+
+const sanitizeRecord = (value: unknown): VaccinationRecord | null => {
+  if (!isObjectRecord(value)) {
+    return null;
   }
 
   if (typeof value.diseaseId !== 'string' || !value.diseaseId.trim()) {
-    return false;
+    return null;
   }
 
   if (typeof value.completedAt !== 'string' || !isIsoDateValue(value.completedAt)) {
-    return false;
+    return null;
   }
 
-  if (value.nextDueAt !== null && (typeof value.nextDueAt !== 'string' || !isIsoDateValue(value.nextDueAt))) {
-    return false;
+  if (typeof value.updatedAt !== 'string' || !value.updatedAt.trim()) {
+    return null;
   }
 
-  return typeof value.updatedAt === 'string' && Boolean(value.updatedAt.trim());
+  return {
+    batchNumber: sanitizeOptionalText(value.batchNumber),
+    completedAt: value.completedAt,
+    diseaseId: value.diseaseId.trim(),
+    futureDueDates: sanitizeFutureDueDates(value.futureDueDates, value.nextDueAt),
+    repeatEvery: sanitizeRepeatEvery(value.repeatEvery),
+    tradeName: sanitizeOptionalText(value.tradeName),
+    updatedAt: value.updatedAt,
+  };
 };
 
 const sanitizeRecords = (value: unknown): VaccinationRecord[] => {
@@ -57,14 +123,16 @@ const sanitizeRecords = (value: unknown): VaccinationRecord[] => {
   const deduplicated = new Map<string, VaccinationRecord>();
 
   for (const entry of value) {
-    if (!isVaccinationRecord(entry)) {
+    const record = sanitizeRecord(entry);
+
+    if (!record) {
       continue;
     }
 
-    const prev = deduplicated.get(entry.diseaseId);
+    const prev = deduplicated.get(record.diseaseId);
 
-    if (!prev || entry.updatedAt > prev.updatedAt) {
-      deduplicated.set(entry.diseaseId, entry);
+    if (!prev || record.updatedAt > prev.updatedAt) {
+      deduplicated.set(record.diseaseId, record);
     }
   }
 

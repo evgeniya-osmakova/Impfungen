@@ -5,7 +5,11 @@ import type {
   VaccinationCountryCode,
   VaccinationDisease,
   VaccinationRecord,
+  VaccinationRecordView,
 } from '../interfaces/vaccination';
+
+import { getTodayIsoDate, parseIsoDateToUtc } from './date';
+import { resolveVaccinationRecordNextDueAt } from './vaccinationSchedule';
 
 interface FilterDiseasesOptions {
   categoryFilter: VaccinationCategoryFilter;
@@ -89,26 +93,64 @@ export const getCategoryCounts = (
     { optional: 0, recommended: 0 },
   );
 
-export const sortRecordsByNextDueDate = (records: readonly VaccinationRecord[]): VaccinationRecord[] =>
-  [...records].sort((leftRecord, rightRecord) => {
-    if (leftRecord.nextDueAt && rightRecord.nextDueAt) {
-      if (leftRecord.nextDueAt !== rightRecord.nextDueAt) {
+export const sortRecordsByNextDueDate = (
+  records: readonly VaccinationRecord[],
+): VaccinationRecordView[] =>
+  records
+    .map((record) => ({
+      ...record,
+      nextDueAt: resolveVaccinationRecordNextDueAt(record),
+    }))
+    .sort((leftRecord, rightRecord) => {
+      if (leftRecord.nextDueAt && rightRecord.nextDueAt) {
         return leftRecord.nextDueAt.localeCompare(rightRecord.nextDueAt);
       }
 
-      return rightRecord.updatedAt.localeCompare(leftRecord.updatedAt);
-    }
+      if (leftRecord.nextDueAt && !rightRecord.nextDueAt) {
+        return -1;
+      }
 
-    if (leftRecord.nextDueAt && !rightRecord.nextDueAt) {
-      return -1;
-    }
+      if (!leftRecord.nextDueAt && rightRecord.nextDueAt) {
+        return 1;
+      }
 
-    if (!leftRecord.nextDueAt && rightRecord.nextDueAt) {
-      return 1;
-    }
-
-    return rightRecord.updatedAt.localeCompare(leftRecord.updatedAt);
-  });
+      return 0;
+    });
 
 export const getRecordsWithNextDateCount = (records: readonly VaccinationRecord[]): number =>
-  records.reduce((accumulator, record) => accumulator + Number(Boolean(record.nextDueAt)), 0);
+  records.reduce(
+    (accumulator, record) => accumulator + Number(Boolean(resolveVaccinationRecordNextDueAt(record))),
+    0,
+  );
+
+export const getRecordsDueInNextYear = (
+  records: readonly VaccinationRecordView[],
+): VaccinationRecordView[] => {
+  const todayDate = parseIsoDateToUtc(getTodayIsoDate());
+
+  if (!todayDate) {
+    return [];
+  }
+
+  const nextYearDate = new Date(
+    Date.UTC(
+      todayDate.getUTCFullYear() + 1,
+      todayDate.getUTCMonth(),
+      todayDate.getUTCDate(),
+    ),
+  );
+
+  return records.filter((record) => {
+    if (!record.nextDueAt) {
+      return false;
+    }
+
+    const dueDate = parseIsoDateToUtc(record.nextDueAt);
+
+    if (!dueDate) {
+      return false;
+    }
+
+    return dueDate >= todayDate && dueDate <= nextYearDate;
+  });
+};

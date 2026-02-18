@@ -6,3 +6,4 @@ export { VaccinationForm } from './VaccinationForm';
 export { VaccinationRecords } from './VaccinationRecords';
 export { VaccinationSummary } from './VaccinationSummary';
 export { VaccinationTimeline } from './VaccinationTimeline';
+export { VaccinationUpcoming } from './VaccinationUpcoming';

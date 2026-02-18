@@ -7,18 +7,30 @@ import {
   filterDiseases,
   getAvailableDiseases,
   getCategoryCounts,
+  getRecordsDueInNextYear,
   sortRecordsByNextDueDate,
 } from './vaccinationSelectors';
 
 const resolveDiseaseLabel = (labelKey: string) => labelKey;
+const toIsoPart = (value: number) => String(value).padStart(2, '0');
+const toIsoDate = (date: Date) =>
+  `${date.getUTCFullYear()}-${toIsoPart(date.getUTCMonth() + 1)}-${toIsoPart(date.getUTCDate())}`;
+const getDateShiftedFromToday = (days: number) => {
+  const now = new Date();
+
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + days));
+};
 
 describe('vaccinationSelectors', () => {
   it('excludes already recorded diseases from available list', () => {
     const records: VaccinationRecord[] = [
       {
+        batchNumber: null,
         completedAt: '2025-01-02',
         diseaseId: 'measles',
-        nextDueAt: '2027-01-02',
+        futureDueDates: ['2027-01-02'],
+        repeatEvery: null,
+        tradeName: null,
         updatedAt: '2025-01-02T10:00:00.000Z',
       },
     ];
@@ -57,21 +69,30 @@ describe('vaccinationSelectors', () => {
   it('sorts records by next due date and keeps no-date records at the end', () => {
     const records: VaccinationRecord[] = [
       {
+        batchNumber: null,
         completedAt: '2024-01-01',
         diseaseId: 'influenza',
-        nextDueAt: null,
+        futureDueDates: [],
+        repeatEvery: null,
+        tradeName: null,
         updatedAt: '2025-01-02T10:00:00.000Z',
       },
       {
+        batchNumber: null,
         completedAt: '2024-01-01',
         diseaseId: 'hepatitisB',
-        nextDueAt: '2028-01-01',
+        futureDueDates: ['2029-01-01'],
+        repeatEvery: null,
+        tradeName: null,
         updatedAt: '2025-01-02T10:00:00.000Z',
       },
       {
+        batchNumber: null,
         completedAt: '2024-01-01',
         diseaseId: 'measles',
-        nextDueAt: '2026-01-01',
+        futureDueDates: ['2027-01-01'],
+        repeatEvery: null,
+        tradeName: null,
         updatedAt: '2025-01-02T10:00:00.000Z',
       },
     ];
@@ -79,5 +100,72 @@ describe('vaccinationSelectors', () => {
     const sorted = sortRecordsByNextDueDate(records);
 
     expect(sorted.map((record) => record.diseaseId)).toEqual(['measles', 'hepatitisB', 'influenza']);
+    expect(sorted[0].nextDueAt).toBe('2027-01-01');
+  });
+
+  it('keeps stable order for records in the same due-date group', () => {
+    const records: VaccinationRecord[] = [
+      {
+        batchNumber: null,
+        completedAt: '2024-01-01',
+        diseaseId: 'influenza',
+        futureDueDates: [],
+        repeatEvery: null,
+        tradeName: null,
+        updatedAt: '2025-01-01T10:00:00.000Z',
+      },
+      {
+        batchNumber: null,
+        completedAt: '2024-01-01',
+        diseaseId: 'measles',
+        futureDueDates: [],
+        repeatEvery: null,
+        tradeName: null,
+        updatedAt: '2026-01-01T10:00:00.000Z',
+      },
+    ];
+
+    const sorted = sortRecordsByNextDueDate(records);
+
+    expect(sorted.map((record) => record.diseaseId)).toEqual(['influenza', 'measles']);
+  });
+
+  it('returns only records that are due within the next year', () => {
+    const records = [
+      {
+        batchNumber: null,
+        completedAt: '2024-01-01',
+        diseaseId: 'measles',
+        futureDueDates: [],
+        nextDueAt: toIsoDate(getDateShiftedFromToday(35)),
+        repeatEvery: null,
+        tradeName: null,
+        updatedAt: '2025-01-01T10:00:00.000Z',
+      },
+      {
+        batchNumber: null,
+        completedAt: '2024-01-01',
+        diseaseId: 'influenza',
+        futureDueDates: [],
+        nextDueAt: toIsoDate(getDateShiftedFromToday(500)),
+        repeatEvery: null,
+        tradeName: null,
+        updatedAt: '2025-01-01T10:00:00.000Z',
+      },
+      {
+        batchNumber: null,
+        completedAt: '2024-01-01',
+        diseaseId: 'tetanus',
+        futureDueDates: [],
+        nextDueAt: toIsoDate(getDateShiftedFromToday(-10)),
+        repeatEvery: null,
+        tradeName: null,
+        updatedAt: '2025-01-01T10:00:00.000Z',
+      },
+    ];
+
+    const dueInNextYear = getRecordsDueInNextYear(records);
+
+    expect(dueInNextYear.map((record) => record.diseaseId)).toEqual(['measles']);
   });
 });

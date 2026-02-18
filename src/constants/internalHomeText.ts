@@ -1,7 +1,14 @@
+import { VACCINATION_VALIDATION_ERROR_CODE } from './vaccinationValidation';
+
 export const getDiseaseLabelKey = (diseaseId: string) => `internal.diseases.${diseaseId}`;
 
 export const INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE = {
-  completed_required: 'internal.form.errors.completedRequired',
-  disease_required: 'internal.form.errors.diseaseRequired',
-  next_before_completed: 'internal.form.errors.nextBeforeCompleted',
+  [VACCINATION_VALIDATION_ERROR_CODE.completed_required]: 'internal.form.errors.completedRequired',
+  [VACCINATION_VALIDATION_ERROR_CODE.disease_required]: 'internal.form.errors.diseaseRequired',
+  [VACCINATION_VALIDATION_ERROR_CODE.future_date_before_completed]:
+    'internal.form.errors.futureDateBeforeCompleted',
+  [VACCINATION_VALIDATION_ERROR_CODE.future_dates_invalid]: 'internal.form.errors.futureDatesInvalid',
+  [VACCINATION_VALIDATION_ERROR_CODE.repeat_interval_invalid]:
+    'internal.form.errors.repeatIntervalInvalid',
+  [VACCINATION_VALIDATION_ERROR_CODE.schedule_conflict]: 'internal.form.errors.scheduleConflict',
 } as const;

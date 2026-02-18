@@ -5,7 +5,9 @@ export const HTML_BUTTON_TYPE = {
 
 export const HTML_INPUT_TYPE = {
   date: 'date',
+  number: 'number',
   search: 'search',
+  text: 'text',
 } as const;
 
 export const HTML_ROLE = {

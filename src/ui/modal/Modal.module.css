@@ -1,0 +1,65 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  outline: 0;
+  background: color-mix(in oklab, var(--surface-900) 25%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.modal__dialog {
+  width: min(720px, 100%);
+  max-height: min(92vh, 920px);
+  overflow: auto;
+  border-radius: 20px;
+  border: 1px solid color-mix(in oklab, var(--surface-300) 75%, var(--surface-0));
+  background: var(--surface-0);
+  box-shadow:
+    0 22px 48px rgb(15 23 42 / 0.2),
+    0 2px 6px rgb(15 23 42 / 0.12);
+}
+
+.modal__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 14px;
+  border-bottom: 1px solid color-mix(in oklab, var(--surface-200) 75%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 96%, var(--surface-50));
+}
+
+.modal__body {
+  padding: 10px 14px 14px;
+}
+
+.modal__closeButton {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.modal__closeIcon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 760px) {
+  .modal {
+    padding: 10px;
+  }
+
+  .modal__dialog {
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+}
