@@ -4,7 +4,6 @@ import {
   CountryOnboarding,
   InternalHomeContent,
 } from '../components/internalHome';
-import { INTERNAL_HOME_TEXT } from '../constants/internalHomeText';
 import type { AuthUser } from '../interfaces/auth';
 import type { VaccinationCountryCode } from '../interfaces/vaccination';
 import { InternalLayout } from '../layouts/InternalLayout';
@@ -34,8 +33,8 @@ export const InternalHomePage = ({ user }: InternalHomePageProps) => {
     <InternalLayout user={user}>
       <section className={styles.internalHomePage}>
         <header className={styles.internalHomePage__header}>
-          <h1 className={styles.internalHomePage__title}>{t(INTERNAL_HOME_TEXT.page.title)}</h1>
-          <p className={styles.internalHomePage__description}>{t(INTERNAL_HOME_TEXT.page.description)}</p>
+          <h1 className={styles.internalHomePage__title}>{t('internal.page.title')}</h1>
+          <p className={styles.internalHomePage__description}>{t('internal.page.description')}</p>
         </header>
 
         {!isCountryConfirmed || !country ? (

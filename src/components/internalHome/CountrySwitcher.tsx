@@ -1,0 +1,39 @@
+import { useTranslation } from 'react-i18next';
+
+import { RADIO_PILL_GROUP_SIZE } from '../../constants/ui';
+import { VACCINATION_COUNTRY, VACCINATION_COUNTRY_OPTIONS } from '../../constants/vaccination';
+import type { VaccinationCountryCode } from '../../interfaces/vaccination';
+import { RadioPillGroup } from '../../ui';
+
+import styles from './CountrySwitcher.module.css';
+
+interface CountrySwitcherProps {
+  country: VaccinationCountryCode;
+  onChangeCountry: (country: VaccinationCountryCode) => void;
+}
+
+export const CountrySwitcher = ({ country, onChangeCountry }: CountrySwitcherProps) => {
+  const { t } = useTranslation();
+  const resolveCountryLabel = (countryCode: VaccinationCountryCode) =>
+    countryCode === VACCINATION_COUNTRY.RU ? t('internal.country.ru') : t('internal.country.de');
+
+  const countryOptions = VACCINATION_COUNTRY_OPTIONS.map((countryOption) => ({
+    label: resolveCountryLabel(countryOption),
+    value: countryOption,
+  }));
+
+  return (
+    <section className={styles.countrySwitcher}>
+      <p className={styles.countrySwitcher__label}>{t('internal.country.label')}</p>
+      <RadioPillGroup
+        controlsClassName={styles.countrySwitcher__controls}
+        legend={t('internal.country.label')}
+        onChange={onChangeCountry}
+        options={countryOptions}
+        size={RADIO_PILL_GROUP_SIZE.compact}
+        value={country}
+      />
+      <p className={styles.countrySwitcher__description}>{t('internal.country.description')}</p>
+    </section>
+  );
+};

@@ -1,3 +1,5 @@
+import { ARIA_LIVE, HTML_ROLE } from '../../constants/ui';
+
 interface ErrorProps {
   className: string;
   message: string | null;
@@ -9,7 +11,7 @@ export const Error = ({ className, message }: ErrorProps) => {
   }
 
   return (
-    <p aria-live="assertive" className={className} role="alert">
+    <p aria-live={ARIA_LIVE.assertive} className={className} role={HTML_ROLE.alert}>
       {message}
     </p>
   );

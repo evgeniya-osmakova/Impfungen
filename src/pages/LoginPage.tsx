@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
+import { HTML_BUTTON_TYPE, HTML_ROLE } from '../constants/ui';
 import {
   LANGUAGE_STORAGE_KEY,
   resolveAppLanguage,
@@ -11,7 +12,7 @@ import { Button } from '../ui';
 
 import styles from './LoginPage.module.css';
 
-const featureKeys = ['history', 'schedule', 'reminders'] as const;
+const loginFeatureKeys = ['history', 'schedule', 'reminders'] as const;
 
 interface LoginPageProps {
   isInitializing: boolean;
@@ -37,7 +38,11 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
         <header className={styles.loginPage__topBar}>
           <p className={styles.loginPage__badge}>{t('hero.badge')}</p>
           <div className={styles.loginPage__actions}>
-            <div className={styles.loginPage__language} role="group" aria-label={t('language.label')}>
+            <div
+              className={styles.loginPage__language}
+              role={HTML_ROLE.group}
+              aria-label={t('language.label')}
+            >
               {supportedLanguages.map((language) => (
                 <button
                   key={language}
@@ -47,7 +52,7 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
                     selectedLanguage === language && styles.loginPage__languageButtonActive,
                   )}
                   onClick={() => handleLanguageChange(language)}
-                  type="button"
+                  type={HTML_BUTTON_TYPE.button}
                 >
                   {t(`language.${language}`)}
                 </button>
@@ -57,7 +62,7 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
               className={styles.loginPage__loginButton}
               disabled={isInitializing}
               onClick={onLoginClick}
-              type="button"
+              type={HTML_BUTTON_TYPE.button}
             >
               {t('actions.login')}
             </Button>
@@ -67,9 +72,11 @@ export const LoginPage = ({ isInitializing, onLoginClick }: LoginPageProps) => {
         <p className={styles.loginPage__description}>{t('hero.description')}</p>
         {isInitializing && <p className={styles.loginPage__authHint}>{t('auth.loading')}</p>}
         <div className={styles.loginPage__features}>
-          {featureKeys.map((featureKey) => (
+          {loginFeatureKeys.map((featureKey) => (
             <article className={styles.loginPage__featureCard} key={featureKey}>
-              <h2 className={styles.loginPage__featureTitle}>{t(`hero.features.${featureKey}Title`)}</h2>
+              <h2 className={styles.loginPage__featureTitle}>
+                {t(`hero.features.${featureKey}Title`)}
+              </h2>
               <p className={styles.loginPage__featureDescription}>
                 {t(`hero.features.${featureKey}Description`)}
               </p>

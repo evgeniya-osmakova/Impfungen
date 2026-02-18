@@ -2,9 +2,11 @@ import { Slot } from '@radix-ui/react-slot';
 import classNames from 'classnames';
 import type { ButtonHTMLAttributes } from 'react';
 
+import { BUTTON_VARIANT, HTML_TAG } from '../../constants/ui';
+
 import styles from './Button.module.css';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger';
+type ButtonVariant = (typeof BUTTON_VARIANT)[keyof typeof BUTTON_VARIANT];
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
@@ -13,19 +15,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClassName: Record<ButtonVariant, string> = {
-  primary: styles.buttonPrimary,
-  secondary: styles.buttonSecondary,
-  danger: styles.buttonDanger,
+  [BUTTON_VARIANT.primary]: styles.buttonPrimary,
+  [BUTTON_VARIANT.secondary]: styles.buttonSecondary,
+  [BUTTON_VARIANT.danger]: styles.buttonDanger,
 };
 
 export const Button = ({
   asChild = false,
   className,
   fullWidth = false,
-  variant = 'primary',
+  variant = BUTTON_VARIANT.primary,
   ...props
 }: ButtonProps) => {
-  const Component = asChild ? Slot : 'button';
+  const Component = asChild ? Slot : HTML_TAG.button;
 
   return (
     <Component
