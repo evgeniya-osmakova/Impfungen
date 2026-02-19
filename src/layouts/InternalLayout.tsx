@@ -7,7 +7,7 @@ import {
   resolveAppLanguage,
   supportedLanguages,
 } from '../i18n/resources';
-import { useLanguageStore } from '../store/languageStore';
+import { useLanguageStore } from '../state/language';
 
 import styles from './InternalLayout.module.css';
 
@@ -45,7 +45,9 @@ export const InternalLayout = ({ children }: PropsWithChildren) => {
         </div>
       </header>
 
-      <main className={styles.layout__main}>{children}</main>
+      <main className={styles.layout__main}>
+        {children}
+      </main>
 
       <footer className={styles.layout__footer}>
         <div className={styles.layout__footerInner}>{currentYear}</div>

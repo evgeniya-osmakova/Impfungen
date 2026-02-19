@@ -1,13 +1,10 @@
 import {
   VACCINATION_REPEAT_UNIT,
 } from '../constants/vaccination';
-import {
-  VACCINATION_NEXT_DUE_SOURCE,
-  type VaccinationNextDue,
-  type VaccinationPlannedDose,
-  type VaccinationRecord,
-  type VaccinationRepeatRule,
-} from '../interfaces/vaccination';
+import type { PlannedDose, RepeatRule } from '../interfaces/dose';
+import type { ImmunizationSeries } from '../interfaces/immunizationRecord';
+import type { NextDue } from '../interfaces/nextDue';
+import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
 
 import { addMonthsToIsoDate, getTodayIsoDate, isIsoDateValue } from './date';
 
@@ -21,7 +18,7 @@ const normalizeInterval = (value: number): number | null => {
 
 const addRepeatInterval = (
   value: string,
-  repeatRule: VaccinationRepeatRule,
+  repeatRule: RepeatRule,
 ): string | null => {
   const interval = normalizeInterval(repeatRule.interval);
 
@@ -42,7 +39,7 @@ const addRepeatInterval = (
 
 const resolveNextDueByRepeat = (
   completedAt: string,
-  repeatRule: VaccinationRepeatRule,
+  repeatRule: RepeatRule,
   referenceDate: string,
 ): string | null => {
   if (!isIsoDateValue(completedAt)) {
@@ -72,7 +69,7 @@ const resolveNextDueByRepeat = (
 };
 
 const resolveLatestCompletedAt = (
-  completedDoses: Pick<VaccinationRecord, 'completedDoses'>['completedDoses'],
+  completedDoses: Pick<ImmunizationSeries, 'completedDoses'>['completedDoses'],
 ): string | null => {
   const validCompletedDates = completedDoses
     .map((dose) => dose.completedAt)
@@ -86,12 +83,12 @@ const resolveLatestCompletedAt = (
 };
 
 export const normalizeFutureDueDoses = (
-  value: readonly VaccinationPlannedDose[],
-): VaccinationPlannedDose[] =>
+  value: readonly PlannedDose[],
+): PlannedDose[] =>
   value
     .filter((entry) => isIsoDateValue(entry.dueAt))
     .sort((leftDose, rightDose) => leftDose.dueAt.localeCompare(rightDose.dueAt))
-    .reduce<VaccinationPlannedDose[]>((accumulator, dose) => {
+    .reduce<PlannedDose[]>((accumulator, dose) => {
       if (accumulator.some((item) => item.id === dose.id)) {
         return accumulator;
       }
@@ -102,9 +99,9 @@ export const normalizeFutureDueDoses = (
     }, []);
 
 export const resolveVaccinationRecordNextDue = (
-  record: Pick<VaccinationRecord, 'completedDoses' | 'futureDueDoses' | 'repeatEvery'>,
+  record: Pick<ImmunizationSeries, 'completedDoses' | 'futureDueDoses' | 'repeatEvery'>,
   referenceDate: string = getTodayIsoDate(),
-): VaccinationNextDue | null => {
+): NextDue | null => {
   const normalizedReferenceDate = isIsoDateValue(referenceDate) ? referenceDate : getTodayIsoDate();
   const nextFutureDose = normalizeFutureDueDoses(record.futureDueDoses).find(
     (futureDose) => futureDose.dueAt >= normalizedReferenceDate,
@@ -115,7 +112,7 @@ export const resolveVaccinationRecordNextDue = (
       dueAt: nextFutureDose.dueAt,
       kind: nextFutureDose.kind,
       plannedDoseId: nextFutureDose.id,
-      source: VACCINATION_NEXT_DUE_SOURCE.manual,
+      source: NEXT_DUE_SOURCE.manual,
     };
   }
 
@@ -143,6 +140,6 @@ export const resolveVaccinationRecordNextDue = (
     dueAt: nextDueAtByRepeat,
     kind: record.repeatEvery.kind,
     plannedDoseId: null,
-    source: VACCINATION_NEXT_DUE_SOURCE.repeat,
+    source: NEXT_DUE_SOURCE.repeat,
   };
 };

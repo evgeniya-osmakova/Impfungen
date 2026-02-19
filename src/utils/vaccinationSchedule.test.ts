@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { VACCINATION_NEXT_DUE_SOURCE } from '../interfaces/vaccination';
+import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
 
 import { resolveVaccinationRecordNextDue } from './vaccinationSchedule';
 
@@ -29,7 +29,7 @@ describe('vaccinationSchedule', () => {
       dueAt: '2025-06-01',
       kind: 'revaccination',
       plannedDoseId: 'planned-2',
-      source: VACCINATION_NEXT_DUE_SOURCE.manual,
+      source: NEXT_DUE_SOURCE.manual,
     });
   });
 
@@ -62,7 +62,7 @@ describe('vaccinationSchedule', () => {
       dueAt: '2034-02-10',
       kind: 'revaccination',
       plannedDoseId: null,
-      source: VACCINATION_NEXT_DUE_SOURCE.repeat,
+      source: NEXT_DUE_SOURCE.repeat,
     });
   });
 

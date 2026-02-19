@@ -1,0 +1,28 @@
+.workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.workspace__toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.workspace__openFormButton {
+  min-height: 44px;
+  padding-inline: 18px;
+}
+
+.workspace__recordsPane {
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .workspace__toolbar {
+    justify-content: stretch;
+  }
+
+  .workspace__openFormButton {
+    width: 100%;
+  }
+}

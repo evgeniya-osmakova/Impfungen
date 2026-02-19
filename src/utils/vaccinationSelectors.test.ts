@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { VACCINATION_DISEASE_CATALOG } from '../constants/vaccinationCatalog';
-import {
-  VACCINATION_NEXT_DUE_SOURCE,
-  type VaccinationRecord,
-  type VaccinationRecordView,
-} from '../interfaces/vaccination';
+import type {
+  ImmunizationSeries,
+  ImmunizationSeriesView,
+} from '../interfaces/immunizationRecord';
+import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
 
 import {
   filterDiseases,
@@ -27,8 +27,8 @@ const getDateShiftedFromToday = (days: number) => {
 
 const createRecord = (
   diseaseId: string,
-  options: Partial<VaccinationRecord> = {},
-): VaccinationRecord => ({
+  options: Partial<ImmunizationSeries> = {},
+): ImmunizationSeries => ({
   completedDoses: options.completedDoses ?? [{
     batchNumber: null,
     completedAt: '2024-01-01',
@@ -44,7 +44,7 @@ const createRecord = (
 
 describe('vaccinationSelectors', () => {
   it('excludes already recorded diseases from available list', () => {
-    const records: VaccinationRecord[] = [
+    const records: ImmunizationSeries[] = [
       createRecord('measles', {
         futureDueDoses: [{ dueAt: '2027-01-02', id: 'plan-1', kind: 'nextDose' }],
       }),
@@ -98,7 +98,7 @@ describe('vaccinationSelectors', () => {
   });
 
   it('sorts records by next due date and keeps no-date records at the end', () => {
-    const records: VaccinationRecord[] = [
+    const records: ImmunizationSeries[] = [
       createRecord('influenza'),
       createRecord('hepatitisB', {
         futureDueDoses: [{ dueAt: '2029-01-01', id: 'plan-2', kind: 'nextDose' }],
@@ -115,7 +115,7 @@ describe('vaccinationSelectors', () => {
   });
 
   it('keeps stable order for records in the same due-date group', () => {
-    const records: VaccinationRecord[] = [
+    const records: ImmunizationSeries[] = [
       createRecord('influenza', { updatedAt: '2025-01-01T10:00:00.000Z' }),
       createRecord('measles', { updatedAt: '2026-01-01T10:00:00.000Z' }),
     ];
@@ -126,14 +126,14 @@ describe('vaccinationSelectors', () => {
   });
 
   it('returns only records that are due within the next year', () => {
-    const records: VaccinationRecordView[] = [
+    const records: ImmunizationSeriesView[] = [
       {
         ...createRecord('measles'),
         nextDue: {
           dueAt: toIsoDate(getDateShiftedFromToday(35)),
           kind: 'nextDose',
           plannedDoseId: 'plan-1',
-          source: VACCINATION_NEXT_DUE_SOURCE.manual,
+          source: NEXT_DUE_SOURCE.manual,
         },
       },
       {
@@ -142,7 +142,7 @@ describe('vaccinationSelectors', () => {
           dueAt: toIsoDate(getDateShiftedFromToday(500)),
           kind: 'revaccination',
           plannedDoseId: null,
-          source: VACCINATION_NEXT_DUE_SOURCE.repeat,
+          source: NEXT_DUE_SOURCE.repeat,
         },
       },
       {
@@ -151,7 +151,7 @@ describe('vaccinationSelectors', () => {
           dueAt: toIsoDate(getDateShiftedFromToday(-10)),
           kind: 'nextDose',
           plannedDoseId: 'plan-3',
-          source: VACCINATION_NEXT_DUE_SOURCE.manual,
+          source: NEXT_DUE_SOURCE.manual,
         },
       },
     ];

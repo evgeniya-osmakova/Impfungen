@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
+import { VaccinationStoreProvider } from './state/vaccination';
+import { vaccinationRepositoryLocal } from './state/vaccination/vaccinationRepositoryLocal';
 import App from './App.tsx';
 
 import './i18n';
@@ -16,8 +18,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <VaccinationStoreProvider repository={vaccinationRepositoryLocal}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </VaccinationStoreProvider>
   </StrictMode>,
 );

@@ -1,8 +1,8 @@
-import type { VaccinationDisease } from '../interfaces/vaccination';
+import type { Disease } from '../interfaces/disease';
 
 import { getDiseaseLabelKey } from './internalHomeText';
 
-export const VACCINATION_DISEASE_CATALOG: readonly VaccinationDisease[] = [
+export const VACCINATION_DISEASE_CATALOG: readonly Disease[] = [
   {
     countryCategory: {
       DE: 'optional',

@@ -7,9 +7,9 @@ import {
   type VaccinationValidationErrorCode,
 } from '../constants/vaccinationValidation';
 import type {
-  VaccinationCompleteDoseInput,
-  VaccinationRecordInput,
-} from '../interfaces/vaccination';
+  ImmunizationDoseInput,
+  ImmunizationSeriesInput,
+} from '../interfaces/immunizationRecord';
 
 import { getTodayIsoDate, isIsoDateValue } from './date';
 
@@ -22,7 +22,7 @@ export type { VaccinationValidationErrorCode } from '../constants/vaccinationVal
 
 export const validateVaccinationRecordInput = (
   input: Pick<
-    VaccinationRecordInput,
+    ImmunizationSeriesInput,
     'completedAt' | 'completedDoseKind' | 'diseaseId' | 'futureDueDoses' | 'repeatEvery'
   >,
 ): VaccinationValidationResult => {
@@ -140,7 +140,7 @@ export const validateVaccinationRecordInput = (
 };
 
 export const validateVaccinationCompleteDoseInput = (
-  input: Pick<VaccinationCompleteDoseInput, 'completedAt' | 'diseaseId' | 'kind'>,
+  input: Pick<ImmunizationDoseInput, 'completedAt' | 'diseaseId' | 'kind'>,
 ): VaccinationValidationResult => {
   const todayIsoDate = getTodayIsoDate();
 
