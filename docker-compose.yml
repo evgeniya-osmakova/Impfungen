@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: impfungen
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d impfungen']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      CORS_ORIGIN: http://localhost:5173
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/impfungen
+      HOST: 0.0.0.0
+      PORT: 3000
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "node -e \"fetch('http://localhost:3000/health').then((response)=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    command: sh -c "yarn install --frozen-lockfile && yarn start --host 0.0.0.0 --port 5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      CHOKIDAR_USEPOLLING: 'true'
+      VITE_API_BASE_URL: http://localhost:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:
+  postgres_data:
