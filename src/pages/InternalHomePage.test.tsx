@@ -3,15 +3,17 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import i18n from '../i18n';
-import type { AuthUser } from '../interfaces/auth';
 import { createVaccinationStoreDefaults, useVaccinationStore } from '../store/vaccinationStore';
+import { formatDateByLanguage } from '../utils/date';
 
 import { InternalHomePage } from './InternalHomePage';
 
-const USER_FIXTURE: AuthUser = {
-  email: 'demo.user@example.com',
-  login: 'demo.user',
-  name: 'Demo User',
+const toIsoPart = (value: number) => String(value).padStart(2, '0');
+const toIsoDateShiftedFromToday = (days: number) => {
+  const now = new Date();
+  const shifted = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + days));
+
+  return `${shifted.getUTCFullYear()}-${toIsoPart(shifted.getUTCMonth() + 1)}-${toIsoPart(shifted.getUTCDate())}`;
 };
 
 describe('InternalHomePage', () => {
@@ -21,12 +23,23 @@ describe('InternalHomePage', () => {
     await i18n.changeLanguage('ru');
   });
 
-  it('supports onboarding, add/edit/delete flow, and hides timeline without next date', async () => {
+  it('supports onboarding and full flow with planned-to-completed and additional dose', async () => {
     const user = userEvent.setup();
+    const plannedDueDate = toIsoDateShiftedFromToday(10);
+    const completedFromPlannedDate = toIsoDateShiftedFromToday(0);
+    const additionalCompletedDate = toIsoDateShiftedFromToday(-1);
 
-    const { findByLabelText, findByRole, findByText, getByLabelText, getByRole, getByText, queryByText } = render(
-      <InternalHomePage user={USER_FIXTURE} />,
-    );
+    const {
+      findAllByRole,
+      findByLabelText,
+      findByRole,
+      findByText,
+      getByLabelText,
+      getByRole,
+      getByText,
+      queryAllByRole,
+      queryByText,
+    } = render(<InternalHomePage />);
 
     expect(
       getByRole('heading', {
@@ -37,14 +50,14 @@ describe('InternalHomePage', () => {
     await user.click(getByText('Россия'));
     await user.click(getByRole('button', { name: 'Подтвердить страну' }));
 
-    expect(await findByRole('heading', { name: 'Сводка по карте прививок' })).toBeInTheDocument();
-    expect(await findByRole('heading', { name: 'Прививки на ближайший год' })).toBeInTheDocument();
+    expect(await findByRole('heading', { name: 'Вакцинации на ближайший год' })).toBeInTheDocument();
 
-    await user.click(getByRole('button', { name: 'Добавить сделанную прививку' }));
+    await user.click(getByRole('button', { name: 'Добавить выполненную вакцинацию' }));
 
     const diseaseSelect = await findByLabelText('Заболевание');
     await user.selectOptions(diseaseSelect, 'measles');
-    await user.type(getByLabelText('Дата сделанной прививки'), '2024-03-01');
+    await user.type(getByLabelText('Дата выполненной вакцинации'), '2024-03-01');
+    await user.selectOptions(getByLabelText('Тип выполненной вакцинации'), 'nextDose');
     await user.click(getByRole('button', { name: 'Сохранить запись' }));
 
     expect(await findByRole('heading', { name: 'Корь' })).toBeInTheDocument();
@@ -52,10 +65,49 @@ describe('InternalHomePage', () => {
 
     await user.click(getByRole('button', { name: 'Редактировать' }));
     await user.selectOptions(getByLabelText('Планирование следующих доз'), 'manual');
-    await user.type(getByLabelText('Будущая дата 1'), '2027-03-01');
+    await user.type(getByLabelText('Будущая дата 1'), plannedDueDate);
+    await user.selectOptions(getByLabelText('Тип запланированной вакцинации'), 'nextDose');
     await user.click(getByRole('button', { name: 'Сохранить изменения' }));
+    expect(queryByText(/Далее по графику:/)).not.toBeInTheDocument();
+    expect(getByText('Дата вакцинации')).toBeInTheDocument();
+    expect(getByText('Дата следующей вакцинации')).toBeInTheDocument();
 
-    expect(await findByText('Следующая')).toBeInTheDocument();
+    const markAsDoneButtons = await findAllByRole('button', { name: 'Отметить сделанной' });
+    expect(markAsDoneButtons.length).toBeGreaterThan(0);
+
+    await user.click(markAsDoneButtons[0]);
+    await user.clear(getByLabelText('Дата выполненной вакцинации'));
+    await user.type(getByLabelText('Дата выполненной вакцинации'), completedFromPlannedDate);
+    await user.selectOptions(getByLabelText('Тип выполненной вакцинации'), 'revaccination');
+    await user.click(getByRole('button', { name: 'Сохранить выполненную вакцинацию' }));
+
+    expect(queryAllByRole('button', { name: 'Отметить сделанной' })).toHaveLength(0);
+    expect(await findByRole('button', { name: 'Показать историю (2)' })).toBeInTheDocument();
+
+    await user.click(getByRole('button', { name: 'Добавить дозу/ревакцинацию' }));
+    await user.type(getByLabelText('Дата выполненной вакцинации'), additionalCompletedDate);
+    await user.selectOptions(getByLabelText('Тип выполненной вакцинации'), 'revaccination');
+    await user.click(getByRole('button', { name: 'Сохранить выполненную вакцинацию' }));
+
+    expect(queryAllByRole('button', { name: 'Отметить сделанной' })).toHaveLength(0);
+
+    const measlesHeading = await findByRole('heading', { name: 'Корь' });
+    const measlesCard = measlesHeading.closest('article');
+
+    if (!measlesCard) {
+      throw new Error('Measles card is not found.');
+    }
+
+    const measlesCardQueries = within(measlesCard);
+
+    expect(measlesCardQueries.getByRole('button', { name: 'Показать историю (3)' })).toBeInTheDocument();
+    expect(measlesCardQueries.queryAllByRole('listitem')).toHaveLength(0);
+    expect(measlesCardQueries.queryByText(/^Сделана$/i)).not.toBeInTheDocument();
+    expect(measlesCardQueries.queryByText(/^Следующая$/i)).not.toBeInTheDocument();
+
+    await user.click(measlesCardQueries.getByRole('button', { name: 'Показать историю (3)' }));
+    expect(measlesCardQueries.getByRole('button', { name: 'Скрыть историю (3)' })).toBeInTheDocument();
+    expect(measlesCardQueries.queryAllByRole('listitem')).toHaveLength(3);
 
     await user.clear(getByLabelText('Поиск по заболеванию'));
     await user.type(getByLabelText('Поиск по заболеванию'), 'столбняк');
@@ -70,8 +122,60 @@ describe('InternalHomePage', () => {
     expect(within(catalogSection).getByText('Столбняк')).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Удалить' }));
+    expect(await findByText('Это действие нельзя отменить.')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'Удалить запись' }));
 
     expect(await findByText('Записей пока нет.')).toBeInTheDocument();
+  });
+
+  it('shows future dates without duplicating the nearest one', async () => {
+    const user = userEvent.setup();
+    const nextDueDate = toIsoDateShiftedFromToday(5);
+    const futureDueDate = toIsoDateShiftedFromToday(30);
+
+    const { findByRole, getAllByLabelText, getByLabelText, getByRole, getByText } = render(<InternalHomePage />);
+
+    await user.click(getByText('Россия'));
+    await user.click(getByRole('button', { name: 'Подтвердить страну' }));
+    await user.click(getByRole('button', { name: 'Добавить выполненную вакцинацию' }));
+
+    await user.selectOptions(getByLabelText('Заболевание'), 'tetanus');
+    await user.type(getByLabelText('Дата выполненной вакцинации'), '2024-03-01');
+    await user.selectOptions(getByLabelText('Тип выполненной вакцинации'), 'nextDose');
+    await user.selectOptions(getByLabelText('Планирование следующих доз'), 'manual');
+    await user.type(getByLabelText('Будущая дата 1'), nextDueDate);
+    await user.selectOptions(getByLabelText('Тип запланированной вакцинации'), 'nextDose');
+    await user.click(getByRole('button', { name: 'Добавить дату' }));
+    await user.type(getByLabelText('Будущая дата 2'), futureDueDate);
+    await user.selectOptions(getAllByLabelText('Тип запланированной вакцинации')[1], 'revaccination');
+    await user.click(getByRole('button', { name: 'Сохранить запись' }));
+
+    const recordsSectionHeading = await findByRole('heading', { name: 'Записи вакцинации' });
+    const recordsSection = recordsSectionHeading.closest('section');
+
+    if (!recordsSection) {
+      throw new Error('Records section is not found.');
+    }
+
+    const tetanusHeading = within(recordsSection).getByRole('heading', { name: 'Столбняк' });
+    const tetanusCard = tetanusHeading.closest('article');
+
+    if (!tetanusCard) {
+      throw new Error('Tetanus card is not found.');
+    }
+
+    const tetanusCardQueries = within(tetanusCard);
+    const futureDatesBlock = tetanusCardQueries.getByText(/Далее по графику:/).closest('div');
+
+    if (!futureDatesBlock) {
+      throw new Error('Future dates block is not found.');
+    }
+
+    expect(tetanusCardQueries.getByText('Дата вакцинации')).toBeInTheDocument();
+    expect(tetanusCardQueries.getByText('Дата следующей вакцинации')).toBeInTheDocument();
+    expect(tetanusCardQueries.queryByRole('button', { name: /Показать историю/i })).not.toBeInTheDocument();
+    expect(within(futureDatesBlock).getByText(formatDateByLanguage(futureDueDate, 'ru'))).toBeInTheDocument();
+    expect(within(futureDatesBlock).queryByText(formatDateByLanguage(nextDueDate, 'ru'))).not.toBeInTheDocument();
   });
 
   it('shows disease names in selected language', async () => {
@@ -79,7 +183,7 @@ describe('InternalHomePage', () => {
 
     await i18n.changeLanguage('en');
 
-    const { getByLabelText, getByRole, getByText } = render(<InternalHomePage user={USER_FIXTURE} />);
+    const { getByLabelText, getByRole, getByText } = render(<InternalHomePage />);
 
     await user.click(getByText('Russia'));
     await user.click(getByRole('button', { name: 'Confirm country' }));
@@ -93,7 +197,7 @@ describe('InternalHomePage', () => {
   it('prefills disease field when catalog card is clicked', async () => {
     const user = userEvent.setup();
 
-    const { findByLabelText, getByRole, getByText } = render(<InternalHomePage user={USER_FIXTURE} />);
+    const { findByLabelText, getByRole, getByText } = render(<InternalHomePage />);
 
     await user.click(getByText('Россия'));
     await user.click(getByRole('button', { name: 'Подтвердить страну' }));
@@ -103,5 +207,20 @@ describe('InternalHomePage', () => {
     const diseaseSelect = (await findByLabelText('Заболевание')) as HTMLSelectElement;
 
     expect(diseaseSelect.value).toBe('tetanus');
+  });
+
+  it('shows universal catalog without recommendation badges in "no recommendations" mode', async () => {
+    const user = userEvent.setup();
+    const { findByRole, getByRole, getByText, queryByText } = render(<InternalHomePage />);
+
+    await user.click(getByText('Без рекомендаций'));
+    await user.click(getByRole('button', { name: 'Подтвердить страну' }));
+
+    expect(await findByRole('heading', { name: 'Что ещё можно сделать' })).toBeInTheDocument();
+    expect(getByText('Корь')).toBeInTheDocument();
+    expect(queryByText('Рекомендуемые')).not.toBeInTheDocument();
+    expect(queryByText('Опциональные')).not.toBeInTheDocument();
+    expect(queryByText('Рекомендуемая')).not.toBeInTheDocument();
+    expect(queryByText('Опциональная')).not.toBeInTheDocument();
   });
 });

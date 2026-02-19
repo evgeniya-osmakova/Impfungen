@@ -1,20 +1,20 @@
+import classNames from 'classnames';
 import type { PropsWithChildren } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import type { AuthUser } from '../interfaces/auth';
+import { HTML_BUTTON_TYPE, HTML_ROLE } from '../constants/ui';
+import {
+  resolveAppLanguage,
+  supportedLanguages,
+} from '../i18n/resources';
+import { useLanguageStore } from '../store/languageStore';
 
 import styles from './InternalLayout.module.css';
 
-interface InternalLayoutProps {
-  user: AuthUser;
-}
-
-const getUserInitial = (user: AuthUser) => {
-  const source = user.name || user.login || user.email;
-
-  return source.trim().charAt(0).toUpperCase();
-};
-
-export const InternalLayout = ({ children, user }: PropsWithChildren<InternalLayoutProps>) => {
+export const InternalLayout = ({ children }: PropsWithChildren) => {
+  const { i18n, t } = useTranslation();
+  const { changeLanguage } = useLanguageStore();
+  const selectedLanguage = resolveAppLanguage(i18n.resolvedLanguage);
   const currentYear = new Date().getFullYear();
 
   return (
@@ -22,15 +22,25 @@ export const InternalLayout = ({ children, user }: PropsWithChildren<InternalLay
       <header className={styles.layout__header}>
         <div className={styles.layout__headerInner}>
           <p className={styles.layout__brand}>Impfungen</p>
-          <div className={styles.layout__userBlock}>
-            <span aria-hidden className={styles.layout__avatar}>
-              {getUserInitial(user)}
-            </span>
-            <div className={styles.layout__userData}>
-              <p className={styles.layout__userName}>{user.name}</p>
-              <p className={styles.layout__userMeta}>{user.login}</p>
-              <p className={styles.layout__userMeta}>{user.email}</p>
-            </div>
+          <div
+            aria-label={t('language.label')}
+            className={styles.layout__language}
+            role={HTML_ROLE.group}
+          >
+            {supportedLanguages.map((language) => (
+              <button
+                aria-pressed={selectedLanguage === language}
+                className={classNames(
+                  styles.layout__languageButton,
+                  selectedLanguage === language && styles.layout__languageButtonActive,
+                )}
+                key={language}
+                onClick={() => changeLanguage(language)}
+                type={HTML_BUTTON_TYPE.button}
+              >
+                {t(`language.${language}`)}
+              </button>
+            ))}
           </div>
         </div>
       </header>

@@ -1,9 +1,9 @@
+export { Content } from './Content';
 export { CountryOnboarding } from './CountryOnboarding';
 export { CountrySwitcher } from './CountrySwitcher';
-export { InternalHomeContent } from './InternalHomeContent';
 export { VaccinationCatalog } from './VaccinationCatalog';
+export { VaccinationCompleteDoseForm } from './VaccinationCompleteDoseForm';
 export { VaccinationForm } from './VaccinationForm';
 export { VaccinationRecords } from './VaccinationRecords';
 export { VaccinationSummary } from './VaccinationSummary';
-export { VaccinationTimeline } from './VaccinationTimeline';
 export { VaccinationUpcoming } from './VaccinationUpcoming';

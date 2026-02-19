@@ -17,10 +17,15 @@
 }
 
 .countrySwitcher__controls {
-  display: inline-grid;
-  width: fit-content;
-  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .countrySwitcher__controls {
+    grid-template-columns: 1fr;
+  }
 }
 
 .countrySwitcher__description {

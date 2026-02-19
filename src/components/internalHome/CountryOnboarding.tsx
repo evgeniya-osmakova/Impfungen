@@ -19,8 +19,17 @@ export const CountryOnboarding = ({
   selectedCountry,
 }: CountryOnboardingProps) => {
   const { t } = useTranslation();
-  const resolveCountryLabel = (countryCode: VaccinationCountryCode) =>
-    countryCode === VACCINATION_COUNTRY.RU ? t('internal.country.ru') : t('internal.country.de');
+  const resolveCountryLabel = (countryCode: VaccinationCountryCode) => {
+    if (countryCode === VACCINATION_COUNTRY.RU) {
+      return t('internal.country.ru');
+    }
+
+    if (countryCode === VACCINATION_COUNTRY.DE) {
+      return t('internal.country.de');
+    }
+
+    return t('internal.country.none');
+  };
 
   const countryOptions = VACCINATION_COUNTRY_OPTIONS.map((countryCode) => ({
     label: resolveCountryLabel(countryCode),

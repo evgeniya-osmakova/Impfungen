@@ -1,15 +1,20 @@
+import {
+  VACCINATION_CATEGORY_FILTER,
+  VACCINATION_COUNTRY,
+} from '../constants/vaccination';
 import type { AppLanguage } from '../interfaces/language';
 import type {
   VaccinationCategory,
   VaccinationCategoryFilter,
   VaccinationCountryCode,
   VaccinationDisease,
+  VaccinationRecommendationCountryCode,
   VaccinationRecord,
   VaccinationRecordView,
 } from '../interfaces/vaccination';
 
 import { getTodayIsoDate, parseIsoDateToUtc } from './date';
-import { resolveVaccinationRecordNextDueAt } from './vaccinationSchedule';
+import { resolveVaccinationRecordNextDue } from './vaccinationSchedule';
 
 interface FilterDiseasesOptions {
   categoryFilter: VaccinationCategoryFilter;
@@ -20,6 +25,10 @@ interface FilterDiseasesOptions {
 }
 
 const sanitizeSearchValue = (value: string): string => value.trim().toLowerCase();
+const isRecommendationCountryCode = (
+  country: VaccinationCountryCode,
+): country is VaccinationRecommendationCountryCode =>
+  country === VACCINATION_COUNTRY.RU || country === VACCINATION_COUNTRY.DE;
 
 const toSearchAliases = (disease: VaccinationDisease, language: AppLanguage): string[] => [
   ...disease.searchAliases[language],
@@ -31,7 +40,13 @@ const toSearchAliases = (disease: VaccinationDisease, language: AppLanguage): st
 export const getCountryRelevantDiseases = (
   diseases: readonly VaccinationDisease[],
   country: VaccinationCountryCode,
-): VaccinationDisease[] => diseases.filter((disease) => Boolean(disease.countryCategory[country]));
+): VaccinationDisease[] => {
+  if (!isRecommendationCountryCode(country)) {
+    return [...diseases];
+  }
+
+  return diseases.filter((disease) => Boolean(disease.countryCategory[country]));
+};
 
 export const getAvailableDiseases = (
   diseases: readonly VaccinationDisease[],
@@ -50,16 +65,22 @@ export const filterDiseases = (
   { categoryFilter, country, language, query, resolveDiseaseLabel }: FilterDiseasesOptions,
 ): VaccinationDisease[] => {
   const normalizedQuery = sanitizeSearchValue(query);
+  const hasCountryRecommendations = isRecommendationCountryCode(country);
 
   return diseases.filter((disease) => {
-    const diseaseCategory = disease.countryCategory[country];
+    if (hasCountryRecommendations) {
+      const diseaseCategory = disease.countryCategory[country];
 
-    if (!diseaseCategory) {
-      return false;
-    }
+      if (!diseaseCategory) {
+        return false;
+      }
 
-    if (categoryFilter !== 'all' && diseaseCategory !== categoryFilter) {
-      return false;
+      if (
+        categoryFilter !== VACCINATION_CATEGORY_FILTER.all
+        && diseaseCategory !== categoryFilter
+      ) {
+        return false;
+      }
     }
 
     if (!normalizedQuery) {
@@ -77,8 +98,12 @@ export const filterDiseases = (
 export const getCategoryCounts = (
   diseases: readonly VaccinationDisease[],
   country: VaccinationCountryCode,
-): Record<VaccinationCategory, number> =>
-  diseases.reduce<Record<VaccinationCategory, number>>(
+): Record<VaccinationCategory, number> => {
+  if (!isRecommendationCountryCode(country)) {
+    return { optional: 0, recommended: 0 };
+  }
+
+  return diseases.reduce<Record<VaccinationCategory, number>>(
     (accumulator, disease) => {
       const category = disease.countryCategory[country];
 
@@ -92,6 +117,7 @@ export const getCategoryCounts = (
     },
     { optional: 0, recommended: 0 },
   );
+};
 
 export const sortRecordsByNextDueDate = (
   records: readonly VaccinationRecord[],
@@ -99,18 +125,18 @@ export const sortRecordsByNextDueDate = (
   records
     .map((record) => ({
       ...record,
-      nextDueAt: resolveVaccinationRecordNextDueAt(record),
+      nextDue: resolveVaccinationRecordNextDue(record),
     }))
     .sort((leftRecord, rightRecord) => {
-      if (leftRecord.nextDueAt && rightRecord.nextDueAt) {
-        return leftRecord.nextDueAt.localeCompare(rightRecord.nextDueAt);
+      if (leftRecord.nextDue && rightRecord.nextDue) {
+        return leftRecord.nextDue.dueAt.localeCompare(rightRecord.nextDue.dueAt);
       }
 
-      if (leftRecord.nextDueAt && !rightRecord.nextDueAt) {
+      if (leftRecord.nextDue && !rightRecord.nextDue) {
         return -1;
       }
 
-      if (!leftRecord.nextDueAt && rightRecord.nextDueAt) {
+      if (!leftRecord.nextDue && rightRecord.nextDue) {
         return 1;
       }
 
@@ -119,7 +145,7 @@ export const sortRecordsByNextDueDate = (
 
 export const getRecordsWithNextDateCount = (records: readonly VaccinationRecord[]): number =>
   records.reduce(
-    (accumulator, record) => accumulator + Number(Boolean(resolveVaccinationRecordNextDueAt(record))),
+    (accumulator, record) => accumulator + Number(Boolean(resolveVaccinationRecordNextDue(record))),
     0,
   );
 
@@ -141,11 +167,11 @@ export const getRecordsDueInNextYear = (
   );
 
   return records.filter((record) => {
-    if (!record.nextDueAt) {
+    if (!record.nextDue) {
       return false;
     }
 
-    const dueDate = parseIsoDateToUtc(record.nextDueAt);
+    const dueDate = parseIsoDateToUtc(record.nextDue.dueAt);
 
     if (!dueDate) {
       return false;

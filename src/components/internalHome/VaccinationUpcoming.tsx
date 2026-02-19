@@ -1,19 +1,28 @@
 import { useTranslation } from 'react-i18next';
 
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../constants/ui';
 import type { AppLanguage } from '../../interfaces/language';
-import type { VaccinationRecordView } from '../../interfaces/vaccination';
+import type { VaccinationDoseKind, VaccinationRecordView } from '../../interfaces/vaccination';
+import { Button } from '../../ui';
 import { formatDateByLanguage } from '../../utils/date';
 
 import styles from './VaccinationUpcoming.module.css';
 
 interface VaccinationUpcomingProps {
   language: AppLanguage;
+  onMarkPlannedDone: (payload: {
+    diseaseId: string;
+    dueAt: string;
+    kind: VaccinationDoseKind;
+    plannedDoseId: string | null;
+  }) => void;
   records: readonly VaccinationRecordView[];
   resolveDiseaseLabelById: (diseaseId: string) => string;
 }
 
 export const VaccinationUpcoming = ({
   language,
+  onMarkPlannedDone,
   records,
   resolveDiseaseLabelById,
 }: VaccinationUpcomingProps) => {
@@ -30,7 +39,9 @@ export const VaccinationUpcoming = ({
       {records.length > 0 ? (
         <ul className={styles.vaccinationUpcoming__list}>
           {records.map((record) => {
-            if (!record.nextDueAt) {
+            const nextDue = record.nextDue;
+
+            if (!nextDue) {
               return null;
             }
 
@@ -39,10 +50,25 @@ export const VaccinationUpcoming = ({
                 <h3 className={styles.vaccinationUpcoming__itemTitle}>
                   {resolveDiseaseLabelById(record.diseaseId)}
                 </h3>
-                <p className={styles.vaccinationUpcoming__itemMeta}>
-                  <span>{t('internal.upcomingYear.dueLabel')}</span>
-                  <strong>{formatDateByLanguage(record.nextDueAt, language)}</strong>
-                </p>
+                <div className={styles.vaccinationUpcoming__itemActionRow}>
+                  <p className={styles.vaccinationUpcoming__itemMeta}>
+                    <span>{t('internal.upcomingYear.dueLabel')}</span>
+                    <strong>{formatDateByLanguage(nextDue.dueAt, language)}</strong>
+                  </p>
+                  <Button
+                    className={styles.vaccinationUpcoming__actionButton}
+                    onClick={() => onMarkPlannedDone({
+                      diseaseId: record.diseaseId,
+                      dueAt: nextDue.dueAt,
+                      kind: nextDue.kind,
+                      plannedDoseId: nextDue.plannedDoseId,
+                    })}
+                    type={HTML_BUTTON_TYPE.button}
+                    variant={BUTTON_VARIANT.secondary}
+                  >
+                    {t('internal.form.actions.markPlannedDone')}
+                  </Button>
+                </div>
               </li>
             );
           })}

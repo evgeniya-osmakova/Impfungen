@@ -1,4 +1,3 @@
 export const APP_ROUTE = {
-  app: '/app',
-  login: '/',
+  home: '/',
 } as const;

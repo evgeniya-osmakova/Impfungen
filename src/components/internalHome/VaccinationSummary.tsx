@@ -14,8 +14,11 @@ interface VaccinationSummaryProps {
 export const VaccinationSummary = ({ country, recordsTotal, withNextDate }: VaccinationSummaryProps) => {
   const { t } = useTranslation();
   const withoutNextDate = recordsTotal - withNextDate;
-  const countryLabel =
-    country === VACCINATION_COUNTRY.RU ? t('internal.country.ru') : t('internal.country.de');
+  const countryLabel = country === VACCINATION_COUNTRY.RU
+    ? t('internal.country.ru')
+    : country === VACCINATION_COUNTRY.DE
+      ? t('internal.country.de')
+      : t('internal.country.none');
 
   return (
     <section className={styles.vaccinationSummary}>

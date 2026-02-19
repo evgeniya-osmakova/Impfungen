@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { VACCINATION_DISEASE_CATALOG } from '../constants/vaccinationCatalog';
-import type { VaccinationRecord } from '../interfaces/vaccination';
+import {
+  VACCINATION_NEXT_DUE_SOURCE,
+  type VaccinationRecord,
+  type VaccinationRecordView,
+} from '../interfaces/vaccination';
 
 import {
   filterDiseases,
@@ -21,18 +25,29 @@ const getDateShiftedFromToday = (days: number) => {
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + days));
 };
 
+const createRecord = (
+  diseaseId: string,
+  options: Partial<VaccinationRecord> = {},
+): VaccinationRecord => ({
+  completedDoses: options.completedDoses ?? [{
+    batchNumber: null,
+    completedAt: '2024-01-01',
+    id: `done-${diseaseId}`,
+    kind: 'nextDose',
+    tradeName: null,
+  }],
+  diseaseId,
+  futureDueDoses: options.futureDueDoses ?? [],
+  repeatEvery: options.repeatEvery ?? null,
+  updatedAt: options.updatedAt ?? '2025-01-02T10:00:00.000Z',
+});
+
 describe('vaccinationSelectors', () => {
   it('excludes already recorded diseases from available list', () => {
     const records: VaccinationRecord[] = [
-      {
-        batchNumber: null,
-        completedAt: '2025-01-02',
-        diseaseId: 'measles',
-        futureDueDates: ['2027-01-02'],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-02T10:00:00.000Z',
-      },
+      createRecord('measles', {
+        futureDueDoses: [{ dueAt: '2027-01-02', id: 'plan-1', kind: 'nextDose' }],
+      }),
     ];
 
     const available = getAvailableDiseases(VACCINATION_DISEASE_CATALOG, records, 'RU');
@@ -66,63 +81,43 @@ describe('vaccinationSelectors', () => {
     expect(counts.optional).toBeGreaterThan(0);
   });
 
+  it('returns universal list without recommendation categorization for NONE country', () => {
+    const available = getAvailableDiseases(VACCINATION_DISEASE_CATALOG, [], 'NONE');
+    const filtered = filterDiseases(available, {
+      categoryFilter: 'recommended',
+      country: 'NONE',
+      language: 'ru',
+      query: '',
+      resolveDiseaseLabel: (disease) => resolveDiseaseLabel(disease.labelKey),
+    });
+    const counts = getCategoryCounts(available, 'NONE');
+
+    expect(available).toHaveLength(VACCINATION_DISEASE_CATALOG.length);
+    expect(filtered).toHaveLength(available.length);
+    expect(counts).toEqual({ optional: 0, recommended: 0 });
+  });
+
   it('sorts records by next due date and keeps no-date records at the end', () => {
     const records: VaccinationRecord[] = [
-      {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'influenza',
-        futureDueDates: [],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-02T10:00:00.000Z',
-      },
-      {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'hepatitisB',
-        futureDueDates: ['2029-01-01'],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-02T10:00:00.000Z',
-      },
-      {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'measles',
-        futureDueDates: ['2027-01-01'],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-02T10:00:00.000Z',
-      },
+      createRecord('influenza'),
+      createRecord('hepatitisB', {
+        futureDueDoses: [{ dueAt: '2029-01-01', id: 'plan-2', kind: 'nextDose' }],
+      }),
+      createRecord('measles', {
+        futureDueDoses: [{ dueAt: '2027-01-01', id: 'plan-1', kind: 'nextDose' }],
+      }),
     ];
 
     const sorted = sortRecordsByNextDueDate(records);
 
     expect(sorted.map((record) => record.diseaseId)).toEqual(['measles', 'hepatitisB', 'influenza']);
-    expect(sorted[0].nextDueAt).toBe('2027-01-01');
+    expect(sorted[0].nextDue?.dueAt).toBe('2027-01-01');
   });
 
   it('keeps stable order for records in the same due-date group', () => {
     const records: VaccinationRecord[] = [
-      {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'influenza',
-        futureDueDates: [],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-01T10:00:00.000Z',
-      },
-      {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'measles',
-        futureDueDates: [],
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2026-01-01T10:00:00.000Z',
-      },
+      createRecord('influenza', { updatedAt: '2025-01-01T10:00:00.000Z' }),
+      createRecord('measles', { updatedAt: '2026-01-01T10:00:00.000Z' }),
     ];
 
     const sorted = sortRecordsByNextDueDate(records);
@@ -131,36 +126,33 @@ describe('vaccinationSelectors', () => {
   });
 
   it('returns only records that are due within the next year', () => {
-    const records = [
+    const records: VaccinationRecordView[] = [
       {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'measles',
-        futureDueDates: [],
-        nextDueAt: toIsoDate(getDateShiftedFromToday(35)),
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-01T10:00:00.000Z',
+        ...createRecord('measles'),
+        nextDue: {
+          dueAt: toIsoDate(getDateShiftedFromToday(35)),
+          kind: 'nextDose',
+          plannedDoseId: 'plan-1',
+          source: VACCINATION_NEXT_DUE_SOURCE.manual,
+        },
       },
       {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'influenza',
-        futureDueDates: [],
-        nextDueAt: toIsoDate(getDateShiftedFromToday(500)),
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-01T10:00:00.000Z',
+        ...createRecord('influenza'),
+        nextDue: {
+          dueAt: toIsoDate(getDateShiftedFromToday(500)),
+          kind: 'revaccination',
+          plannedDoseId: null,
+          source: VACCINATION_NEXT_DUE_SOURCE.repeat,
+        },
       },
       {
-        batchNumber: null,
-        completedAt: '2024-01-01',
-        diseaseId: 'tetanus',
-        futureDueDates: [],
-        nextDueAt: toIsoDate(getDateShiftedFromToday(-10)),
-        repeatEvery: null,
-        tradeName: null,
-        updatedAt: '2025-01-01T10:00:00.000Z',
+        ...createRecord('tetanus'),
+        nextDue: {
+          dueAt: toIsoDate(getDateShiftedFromToday(-10)),
+          kind: 'nextDose',
+          plannedDoseId: 'plan-3',
+          source: VACCINATION_NEXT_DUE_SOURCE.manual,
+        },
       },
     ];
 

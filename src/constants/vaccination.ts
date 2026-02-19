@@ -4,10 +4,11 @@ import type {
   VaccinationRecord,
 } from '../interfaces/vaccination';
 
-export const VACCINATION_COUNTRY: Record<VaccinationCountryCode, VaccinationCountryCode> = {
+export const VACCINATION_COUNTRY = {
   RU: 'RU',
   DE: 'DE',
-};
+  NONE: 'NONE',
+} as const;
 
 export const VACCINATION_CATEGORY_FILTER: Record<
   VaccinationCategoryFilter,
@@ -21,6 +22,7 @@ export const VACCINATION_CATEGORY_FILTER: Record<
 export const VACCINATION_COUNTRY_OPTIONS: readonly VaccinationCountryCode[] = [
   VACCINATION_COUNTRY.RU,
   VACCINATION_COUNTRY.DE,
+  VACCINATION_COUNTRY.NONE,
 ];
 
 export const VACCINATION_CATEGORY_FILTER_OPTIONS: readonly VaccinationCategoryFilter[] = [
@@ -39,8 +41,21 @@ export const VACCINATION_REPEAT_UNIT_OPTIONS = [
   VACCINATION_REPEAT_UNIT.months,
 ] as const;
 
+export const VACCINATION_DOSE_KIND = {
+  nextDose: 'nextDose',
+  revaccination: 'revaccination',
+} as const;
+
+export type VaccinationDoseKind =
+  (typeof VACCINATION_DOSE_KIND)[keyof typeof VACCINATION_DOSE_KIND];
+
+export const VACCINATION_DOSE_KIND_OPTIONS: readonly VaccinationDoseKind[] = [
+  VACCINATION_DOSE_KIND.nextDose,
+  VACCINATION_DOSE_KIND.revaccination,
+];
+
 export const VACCINATION_STORAGE_KEY = 'impfungen.vaccination.state';
-export const VACCINATION_STORAGE_VERSION = 1;
+export const VACCINATION_STORAGE_VERSION = 2;
 export const VACCINATION_DEFAULT_CATEGORY_FILTER: VaccinationCategoryFilter =
   VACCINATION_CATEGORY_FILTER.all;
 export const VACCINATION_DEFAULT_SEARCH_QUERY = '';

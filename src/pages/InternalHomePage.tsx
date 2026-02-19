@@ -1,21 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
 import {
+  Content,
   CountryOnboarding,
-  InternalHomeContent,
 } from '../components/internalHome';
-import type { AuthUser } from '../interfaces/auth';
 import type { VaccinationCountryCode } from '../interfaces/vaccination';
 import { InternalLayout } from '../layouts/InternalLayout';
 import { useVaccinationStore } from '../store/vaccinationStore';
 
 import styles from './InternalHomePage.module.css';
 
-interface InternalHomePageProps {
-  user: AuthUser;
-}
-
-export const InternalHomePage = ({ user }: InternalHomePageProps) => {
+export const InternalHomePage = () => {
   const { t } = useTranslation();
 
   const {
@@ -30,7 +25,7 @@ export const InternalHomePage = ({ user }: InternalHomePageProps) => {
   const handleConfirmCountry = (nextCountry: VaccinationCountryCode) => confirmCountry(nextCountry);
 
   return (
-    <InternalLayout user={user}>
+    <InternalLayout>
       <section className={styles.internalHomePage}>
         <header className={styles.internalHomePage__header}>
           <h1 className={styles.internalHomePage__title}>{t('internal.page.title')}</h1>
@@ -44,7 +39,7 @@ export const InternalHomePage = ({ user }: InternalHomePageProps) => {
             selectedCountry={country}
           />
         ) : (
-          <InternalHomeContent />
+          <Content />
         )}
       </section>
     </InternalLayout>

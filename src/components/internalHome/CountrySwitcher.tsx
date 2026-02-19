@@ -14,8 +14,17 @@ interface CountrySwitcherProps {
 
 export const CountrySwitcher = ({ country, onChangeCountry }: CountrySwitcherProps) => {
   const { t } = useTranslation();
-  const resolveCountryLabel = (countryCode: VaccinationCountryCode) =>
-    countryCode === VACCINATION_COUNTRY.RU ? t('internal.country.ru') : t('internal.country.de');
+  const resolveCountryLabel = (countryCode: VaccinationCountryCode) => {
+    if (countryCode === VACCINATION_COUNTRY.RU) {
+      return t('internal.country.ru');
+    }
+
+    if (countryCode === VACCINATION_COUNTRY.DE) {
+      return t('internal.country.de');
+    }
+
+    return t('internal.country.none');
+  };
 
   const countryOptions = VACCINATION_COUNTRY_OPTIONS.map((countryOption) => ({
     label: resolveCountryLabel(countryOption),
@@ -33,7 +42,11 @@ export const CountrySwitcher = ({ country, onChangeCountry }: CountrySwitcherPro
         size={RADIO_PILL_GROUP_SIZE.compact}
         value={country}
       />
-      <p className={styles.countrySwitcher__description}>{t('internal.country.description')}</p>
+      <p className={styles.countrySwitcher__description}>
+        {country === VACCINATION_COUNTRY.NONE
+          ? t('internal.country.descriptionNoRecommendations')
+          : t('internal.country.description')}
+      </p>
     </section>
   );
 };

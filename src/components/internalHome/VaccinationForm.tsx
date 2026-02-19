@@ -12,17 +12,22 @@ import {
   HTML_INPUT_TYPE,
 } from '../../constants/ui';
 import {
+  VACCINATION_DOSE_KIND,
+  VACCINATION_DOSE_KIND_OPTIONS,
   VACCINATION_REPEAT_UNIT,
   VACCINATION_REPEAT_UNIT_OPTIONS,
 } from '../../constants/vaccination';
-import type {
-  VaccinationDisease,
-  VaccinationRecord,
-  VaccinationRecordInput,
-  VaccinationRepeatUnit,
+import {
+  VACCINATION_NEXT_DUE_SOURCE,
+  type VaccinationDisease,
+  type VaccinationDoseKind,
+  type VaccinationPlannedDose,
+  type VaccinationRecord,
+  type VaccinationRecordInput,
+  type VaccinationRepeatUnit,
 } from '../../interfaces/vaccination';
 import { Button } from '../../ui';
-import { normalizeDateInputValue } from '../../utils/date';
+import { getTodayIsoDate, normalizeDateInputValue } from '../../utils/date';
 import { normalizeOptionalText } from '../../utils/string';
 
 import styles from './VaccinationForm.module.css';
@@ -40,13 +45,31 @@ interface VaccinationFormProps {
 }
 
 const VACCINATION_SCHEDULE_MODE = {
-  manual: 'manual',
+  manual: VACCINATION_NEXT_DUE_SOURCE.manual,
   none: 'none',
-  repeat: 'repeat',
+  repeat: VACCINATION_NEXT_DUE_SOURCE.repeat,
 } as const;
 
 type VaccinationScheduleMode =
   (typeof VACCINATION_SCHEDULE_MODE)[keyof typeof VACCINATION_SCHEDULE_MODE];
+
+const createDoseId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const resolveLatestCompletedDose = (recordForEdit: VaccinationRecord | null) => {
+  if (!recordForEdit || recordForEdit.completedDoses.length === 0) {
+    return null;
+  }
+
+  return [...recordForEdit.completedDoses].sort((leftDose, rightDose) =>
+    leftDose.completedAt.localeCompare(rightDose.completedAt),
+  )[recordForEdit.completedDoses.length - 1] ?? null;
+};
 
 const resolveInitialDiseaseId = (recordForEdit: VaccinationRecord | null): string => {
   if (recordForEdit?.diseaseId) {
@@ -63,19 +86,23 @@ const resolveInitialScheduleMode = (
     return VACCINATION_SCHEDULE_MODE.repeat;
   }
 
-  if (recordForEdit && recordForEdit.futureDueDates.length > 0) {
+  if (recordForEdit && recordForEdit.futureDueDoses.length > 0) {
     return VACCINATION_SCHEDULE_MODE.manual;
   }
 
   return VACCINATION_SCHEDULE_MODE.none;
 };
 
-const resolveInitialFutureDates = (recordForEdit: VaccinationRecord | null): string[] => {
-  if (!recordForEdit || recordForEdit.futureDueDates.length === 0) {
-    return [INTERNAL_HOME_EMPTY_FIELD_VALUE];
+const resolveInitialFutureDoses = (recordForEdit: VaccinationRecord | null): VaccinationPlannedDose[] => {
+  if (!recordForEdit || recordForEdit.futureDueDoses.length === 0) {
+    return [{
+      dueAt: INTERNAL_HOME_EMPTY_FIELD_VALUE,
+      id: createDoseId(),
+      kind: VACCINATION_DOSE_KIND.nextDose,
+    }];
   }
 
-  return [...recordForEdit.futureDueDates];
+  return recordForEdit.futureDueDoses.map((dose) => ({ ...dose }));
 };
 
 const resolveInitialRepeatInterval = (recordForEdit: VaccinationRecord | null): string => {
@@ -94,10 +121,20 @@ const resolveInitialRepeatUnit = (recordForEdit: VaccinationRecord | null): Vacc
   return recordForEdit.repeatEvery.unit;
 };
 
+const resolveInitialRepeatKind = (recordForEdit: VaccinationRecord | null): VaccinationDoseKind => {
+  if (!recordForEdit?.repeatEvery) {
+    return VACCINATION_DOSE_KIND.nextDose;
+  }
+
+  return recordForEdit.repeatEvery.kind;
+};
+
 const resolveRepeatUnitTextKey = (unit: VaccinationRepeatUnit): string =>
   unit === VACCINATION_REPEAT_UNIT.years
     ? 'internal.form.repeatUnits.years'
     : 'internal.form.repeatUnits.months';
+
+const resolveDoseKindTextKey = (kind: VaccinationDoseKind): string => `internal.doseKind.${kind}`;
 
 export const VaccinationForm = ({
   diseases,
@@ -112,32 +149,42 @@ export const VaccinationForm = ({
 }: VaccinationFormProps) => {
   const { t } = useTranslation();
   const isEditMode = Boolean(recordForEdit);
+  const todayIsoDate = getTodayIsoDate();
+  const latestCompletedDose = resolveLatestCompletedDose(recordForEdit);
 
   const [selectedDiseaseId, setSelectedDiseaseId] = useState(() => resolveInitialDiseaseId(recordForEdit));
   const [completedAt, setCompletedAt] = useState(
-    recordForEdit?.completedAt ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
+    latestCompletedDose?.completedAt ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
   );
-  const [tradeName, setTradeName] = useState(recordForEdit?.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
+  const [completedDoseKind, setCompletedDoseKind] = useState<VaccinationDoseKind>(
+    latestCompletedDose?.kind ?? VACCINATION_DOSE_KIND.nextDose,
+  );
+  const [tradeName, setTradeName] = useState(latestCompletedDose?.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
   const [batchNumber, setBatchNumber] = useState(
-    recordForEdit?.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
+    latestCompletedDose?.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
   );
   const [scheduleMode, setScheduleMode] = useState(() => resolveInitialScheduleMode(recordForEdit));
-  const [futureDueDates, setFutureDueDates] = useState(() => resolveInitialFutureDates(recordForEdit));
+  const [futureDueDoses, setFutureDueDoses] = useState(() => resolveInitialFutureDoses(recordForEdit));
   const [repeatInterval, setRepeatInterval] = useState(() => resolveInitialRepeatInterval(recordForEdit));
   const [repeatUnit, setRepeatUnit] = useState<VaccinationRepeatUnit>(() => resolveInitialRepeatUnit(recordForEdit));
+  const [repeatKind, setRepeatKind] = useState<VaccinationDoseKind>(() => resolveInitialRepeatKind(recordForEdit));
 
   const hasDiseasesForAdd = diseases.length > 0;
   const canSubmit = Boolean(selectedDiseaseId) && Boolean(completedAt);
 
   useEffect(() => {
+    const nextLatestCompletedDose = resolveLatestCompletedDose(recordForEdit);
+
     setSelectedDiseaseId(resolveInitialDiseaseId(recordForEdit));
-    setCompletedAt(recordForEdit?.completedAt ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
-    setTradeName(recordForEdit?.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
-    setBatchNumber(recordForEdit?.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
+    setCompletedAt(nextLatestCompletedDose?.completedAt ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
+    setCompletedDoseKind(nextLatestCompletedDose?.kind ?? VACCINATION_DOSE_KIND.nextDose);
+    setTradeName(nextLatestCompletedDose?.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
+    setBatchNumber(nextLatestCompletedDose?.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
     setScheduleMode(resolveInitialScheduleMode(recordForEdit));
-    setFutureDueDates(resolveInitialFutureDates(recordForEdit));
+    setFutureDueDoses(resolveInitialFutureDoses(recordForEdit));
     setRepeatInterval(resolveInitialRepeatInterval(recordForEdit));
     setRepeatUnit(resolveInitialRepeatUnit(recordForEdit));
+    setRepeatKind(resolveInitialRepeatKind(recordForEdit));
   }, [recordForEdit]);
 
   useEffect(() => {
@@ -161,21 +208,25 @@ export const VaccinationForm = ({
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const normalizedFutureDates = futureDueDates
-      .map((futureDate) => normalizeDateInputValue(futureDate))
-      .filter((futureDate): futureDate is string => Boolean(futureDate));
+    const normalizedFutureDoses = futureDueDoses
+      .map((futureDose) => ({
+        ...futureDose,
+        dueAt: normalizeDateInputValue(futureDose.dueAt),
+      }))
+      .filter((futureDose): futureDose is VaccinationPlannedDose => Boolean(futureDose.dueAt));
     const repeatIntervalValue = Number.parseInt(repeatInterval, 10);
     const hasRepeatInterval = Number.isInteger(repeatIntervalValue) && repeatIntervalValue > 0;
 
     onSubmitRecord({
       batchNumber: normalizeOptionalText(batchNumber),
       completedAt,
+      completedDoseKind,
       diseaseId: selectedDiseaseId,
-      futureDueDates:
-        scheduleMode === VACCINATION_SCHEDULE_MODE.manual ? normalizedFutureDates : [],
+      futureDueDoses:
+        scheduleMode === VACCINATION_SCHEDULE_MODE.manual ? normalizedFutureDoses : [],
       repeatEvery:
         scheduleMode === VACCINATION_SCHEDULE_MODE.repeat && hasRepeatInterval
-          ? { interval: repeatIntervalValue, unit: repeatUnit }
+          ? { interval: repeatIntervalValue, kind: repeatKind, unit: repeatUnit }
           : null,
       tradeName: normalizeOptionalText(tradeName),
     });
@@ -184,21 +235,36 @@ export const VaccinationForm = ({
   const handleScheduleModeChange = (mode: VaccinationScheduleMode) => {
     setScheduleMode(mode);
 
-    if (mode === VACCINATION_SCHEDULE_MODE.manual && futureDueDates.length === 0) {
-      setFutureDueDates([INTERNAL_HOME_EMPTY_FIELD_VALUE]);
+    if (mode === VACCINATION_SCHEDULE_MODE.manual && futureDueDoses.length === 0) {
+      setFutureDueDoses([{
+        dueAt: INTERNAL_HOME_EMPTY_FIELD_VALUE,
+        id: createDoseId(),
+        kind: VACCINATION_DOSE_KIND.nextDose,
+      }]);
     }
   };
 
-  const handleFutureDateChange = (index: number, value: string) => {
-    setFutureDueDates((prev) => prev.map((entry, idx) => (idx === index ? value : entry)));
+  const handleFutureDateChange = (id: string, value: string) => {
+    setFutureDueDoses((prev) => prev.map((entry) => (entry.id === id ? { ...entry, dueAt: value } : entry)));
+  };
+
+  const handleFutureKindChange = (id: string, kind: VaccinationDoseKind) => {
+    setFutureDueDoses((prev) => prev.map((entry) => (entry.id === id ? { ...entry, kind } : entry)));
   };
 
   const handleAddFutureDate = () => {
-    setFutureDueDates((prev) => [...prev, INTERNAL_HOME_EMPTY_FIELD_VALUE]);
+    setFutureDueDoses((prev) => [
+      ...prev,
+      {
+        dueAt: INTERNAL_HOME_EMPTY_FIELD_VALUE,
+        id: createDoseId(),
+        kind: VACCINATION_DOSE_KIND.nextDose,
+      },
+    ]);
   };
 
-  const handleRemoveFutureDate = (index: number) => {
-    setFutureDueDates((prev) => prev.filter((_, idx) => idx !== index));
+  const handleRemoveFutureDate = (id: string) => {
+    setFutureDueDoses((prev) => prev.filter((entry) => entry.id !== id));
   };
 
   return (
@@ -246,11 +312,31 @@ export const VaccinationForm = ({
         <input
           className={styles.vaccinationForm__fieldControl}
           id={INTERNAL_HOME_FORM_FIELD_ID.completedAt}
+          max={todayIsoDate}
           onChange={(event) => setCompletedAt(event.target.value)}
           required
           type={HTML_INPUT_TYPE.date}
           value={completedAt}
         />
+
+        <label
+          className={styles.vaccinationForm__fieldLabel}
+          htmlFor={INTERNAL_HOME_FORM_FIELD_ID.completedDoseKind}
+        >
+          {t('internal.form.fields.completedDoseKind')}
+        </label>
+        <select
+          className={styles.vaccinationForm__fieldControl}
+          id={INTERNAL_HOME_FORM_FIELD_ID.completedDoseKind}
+          onChange={(event) => setCompletedDoseKind(event.target.value as VaccinationDoseKind)}
+          value={completedDoseKind}
+        >
+          {VACCINATION_DOSE_KIND_OPTIONS.map((kind) => (
+            <option key={kind} value={kind}>
+              {t(resolveDoseKindTextKey(kind))}
+            </option>
+          ))}
+        </select>
 
         <label
           className={styles.vaccinationForm__fieldLabel}
@@ -299,27 +385,28 @@ export const VaccinationForm = ({
 
         {scheduleMode === VACCINATION_SCHEDULE_MODE.manual && (
           <div className={styles.vaccinationForm__futureDates}>
-            {futureDueDates.map((futureDate, index) => {
-              const inputId = `${INTERNAL_HOME_FORM_FIELD_ID.futureDatePrefix}${index}`;
+            {futureDueDoses.map((futureDose, index) => {
+              const dateInputId = `${INTERNAL_HOME_FORM_FIELD_ID.futureDatePrefix}${index}`;
+              const kindInputId = `${INTERNAL_HOME_FORM_FIELD_ID.futureDoseKindPrefix}${index}`;
 
               return (
-                <div className={styles.vaccinationForm__futureDateRow} key={inputId}>
-                  <label className={styles.vaccinationForm__fieldLabel} htmlFor={inputId}>
+                <div className={styles.vaccinationForm__futureDateRow} key={futureDose.id}>
+                  <label className={styles.vaccinationForm__fieldLabel} htmlFor={dateInputId}>
                     {t('internal.form.fields.futureDate', { index: index + 1 })}
                   </label>
                   <div className={styles.vaccinationForm__futureDateControl}>
                     <input
                       className={styles.vaccinationForm__fieldControl}
-                      id={inputId}
+                      id={dateInputId}
                       min={completedAt || undefined}
-                      onChange={(event) => handleFutureDateChange(index, event.target.value)}
+                      onChange={(event) => handleFutureDateChange(futureDose.id, event.target.value)}
                       type={HTML_INPUT_TYPE.date}
-                      value={futureDate}
+                      value={futureDose.dueAt}
                     />
-                    {futureDueDates.length > 1 && (
+                    {futureDueDoses.length > 1 && (
                       <Button
                         className={styles.vaccinationForm__futureDateButton}
-                        onClick={() => handleRemoveFutureDate(index)}
+                        onClick={() => handleRemoveFutureDate(futureDose.id)}
                         type={HTML_BUTTON_TYPE.button}
                         variant={BUTTON_VARIANT.secondary}
                       >
@@ -327,6 +414,21 @@ export const VaccinationForm = ({
                       </Button>
                     )}
                   </div>
+                  <label className={styles.vaccinationForm__fieldLabel} htmlFor={kindInputId}>
+                    {t('internal.form.fields.plannedDoseKind')}
+                  </label>
+                  <select
+                    className={styles.vaccinationForm__fieldControl}
+                    id={kindInputId}
+                    onChange={(event) => handleFutureKindChange(futureDose.id, event.target.value as VaccinationDoseKind)}
+                    value={futureDose.kind}
+                  >
+                    {VACCINATION_DOSE_KIND_OPTIONS.map((kind) => (
+                      <option key={kind} value={kind}>
+                        {t(resolveDoseKindTextKey(kind))}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               );
             })}
@@ -374,6 +476,24 @@ export const VaccinationForm = ({
               {VACCINATION_REPEAT_UNIT_OPTIONS.map((unit) => (
                 <option key={unit} value={unit}>
                   {t(resolveRepeatUnitTextKey(unit))}
+                </option>
+              ))}
+            </select>
+            <label
+              className={styles.vaccinationForm__fieldLabel}
+              htmlFor={INTERNAL_HOME_FORM_FIELD_ID.repeatKind}
+            >
+              {t('internal.form.fields.plannedDoseKind')}
+            </label>
+            <select
+              className={styles.vaccinationForm__fieldControl}
+              id={INTERNAL_HOME_FORM_FIELD_ID.repeatKind}
+              onChange={(event) => setRepeatKind(event.target.value as VaccinationDoseKind)}
+              value={repeatKind}
+            >
+              {VACCINATION_DOSE_KIND_OPTIONS.map((kind) => (
+                <option key={kind} value={kind}>
+                  {t(resolveDoseKindTextKey(kind))}
                 </option>
               ))}
             </select>

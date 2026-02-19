@@ -88,37 +88,68 @@
 
 .vaccinationCatalog__countLabel {
   margin: 0;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 70%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 86%, var(--accent-50));
   font-size: 0.85rem;
   color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .vaccinationCatalog__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
 }
 
 .vaccinationCatalog__card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  position: relative;
+  display: grid;
+  gap: 12px;
+  align-content: space-between;
   width: 100%;
-  padding: 12px;
-  border-radius: 12px;
+  min-height: 108px;
+  padding: 14px;
+  border-radius: 14px;
   border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
-  background: var(--surface-0);
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, var(--surface-0) 90%, var(--brand-50)),
+      var(--surface-0)
+    );
   color: inherit;
   text-align: left;
   font: inherit;
   cursor: pointer;
   transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
     border-color 160ms ease,
     background-color 160ms ease;
+  overflow: hidden;
+}
+
+.vaccinationCatalog__card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--brand-400) 78%, var(--surface-0)),
+    color-mix(in oklab, var(--accent-400) 72%, var(--surface-0))
+  );
+  opacity: 0.85;
 }
 
 .vaccinationCatalog__card:hover {
   border-color: color-mix(in oklab, var(--brand-300) 60%, var(--surface-0));
-  background: color-mix(in oklab, var(--brand-50) 35%, var(--surface-0));
+  background: color-mix(in oklab, var(--brand-50) 40%, var(--surface-0));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgb(15 23 42 / 0.08);
 }
 
 .vaccinationCatalog__card:focus-visible {
@@ -126,9 +157,40 @@
   outline-offset: 2px;
 }
 
+.vaccinationCatalog__cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
 .vaccinationCatalog__cardTitle {
   margin: 0;
-  line-height: 1.45;
+  font-size: 1.07rem;
+  line-height: 1.36;
+  font-weight: 650;
+}
+
+.vaccinationCatalog__cardAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--brand-300) 60%, var(--surface-0));
+  background: color-mix(in oklab, var(--brand-50) 76%, var(--surface-0));
+  color: var(--brand-700);
+}
+
+.vaccinationCatalog__card:hover .vaccinationCatalog__cardAction {
+  background: color-mix(in oklab, var(--brand-100) 72%, var(--surface-0));
+}
+
+.vaccinationCatalog__cardActionIcon {
+  width: 15px;
+  height: 15px;
 }
 
 .vaccinationCatalog__cardBadge {
@@ -136,14 +198,14 @@
   align-items: center;
   justify-content: center;
   width: fit-content;
-  height: 34px;
+  height: 30px;
   margin: auto 0 0;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--brand-300) 50%, var(--surface-0));
   color: var(--text-secondary);
   background: color-mix(in oklab, var(--brand-50) 80%, var(--surface-0));
-  font-size: 0.77rem;
+  font-size: 0.72rem;
   line-height: 1;
   white-space: nowrap;
   text-transform: uppercase;

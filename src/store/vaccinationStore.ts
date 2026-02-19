@@ -4,11 +4,23 @@ import {
   VACCINATION_DEFAULT_CATEGORY_FILTER,
   VACCINATION_DEFAULT_SEARCH_QUERY,
 } from '../constants/vaccination';
-import type { VaccinationCategoryFilter, VaccinationCountryCode, VaccinationRecordInput, VaccinationStoreState } from '../interfaces/vaccination';
+import { VACCINATION_VALIDATION_ERROR_CODE } from '../constants/vaccinationValidation';
+import type {
+  VaccinationCategoryFilter,
+  VaccinationCompletedDose,
+  VaccinationCompleteDoseInput,
+  VaccinationCountryCode,
+  VaccinationRecordInput,
+  VaccinationStoreState,
+} from '../interfaces/vaccination';
 import { normalizeOptionalText } from '../utils/string';
 import { createVaccinationPersistedDefaults, vaccinationRepositoryLocal } from '../utils/vaccinationRepositoryLocal';
-import { normalizeFutureDueDates } from '../utils/vaccinationSchedule';
-import { type VaccinationValidationErrorCode, validateVaccinationRecordInput } from '../utils/vaccinationValidation';
+import { normalizeFutureDueDoses } from '../utils/vaccinationSchedule';
+import {
+  type VaccinationValidationErrorCode,
+  validateVaccinationCompleteDoseInput,
+  validateVaccinationRecordInput,
+} from '../utils/vaccinationValidation';
 
 interface VaccinationStore extends VaccinationStoreState {
   cancelEdit: () => void;
@@ -18,6 +30,7 @@ interface VaccinationStore extends VaccinationStoreState {
   setCategoryFilter: (categoryFilter: VaccinationCategoryFilter) => void;
   setCountry: (country: VaccinationCountryCode) => void;
   setSearchQuery: (searchQuery: string) => void;
+  submitCompletedDose: (record: VaccinationCompleteDoseInput) => VaccinationValidationErrorCode | null;
   submitRecord: (record: VaccinationRecordInput) => VaccinationValidationErrorCode | null;
   startEditRecord: (diseaseId: string) => void;
   upsertRecord: (record: VaccinationRecordInput) => void;
@@ -50,28 +63,114 @@ const loadPersistedState = () => {
   return toStoreState(persistedState);
 };
 
+const createDoseId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const sortCompletedDoses = (completedDoses: VaccinationCompletedDose[]): VaccinationCompletedDose[] =>
+  [...completedDoses].sort((leftDose, rightDose) => leftDose.completedAt.localeCompare(rightDose.completedAt));
+
+const resolveEditedCompletedDoses = (
+  prevCompletedDoses: VaccinationCompletedDose[],
+  input: VaccinationRecordInput,
+): VaccinationCompletedDose[] => {
+  if (prevCompletedDoses.length === 0) {
+    return [{
+      batchNumber: normalizeOptionalText(input.batchNumber),
+      completedAt: input.completedAt,
+      id: createDoseId(),
+      kind: input.completedDoseKind,
+      tradeName: normalizeOptionalText(input.tradeName),
+    }];
+  }
+
+  const sorted = sortCompletedDoses(prevCompletedDoses);
+  const lastDose = sorted[sorted.length - 1];
+
+  if (!lastDose) {
+    return sorted;
+  }
+
+  return sortCompletedDoses(
+    sorted.map((dose) => {
+      if (dose.id !== lastDose.id) {
+        return dose;
+      }
+
+      return {
+        ...dose,
+        batchNumber: normalizeOptionalText(input.batchNumber),
+        completedAt: input.completedAt,
+        kind: input.completedDoseKind,
+        tradeName: normalizeOptionalText(input.tradeName),
+      };
+    }),
+  );
+};
+
 const resolveNextRecords = (
   records: VaccinationStoreState['records'],
   input: VaccinationRecordInput,
 ) => {
   const nextUpdatedAt = new Date().toISOString();
+  const existingRecord = records.find((record) => record.diseaseId === input.diseaseId);
+
+  const nextCompletedDoses = existingRecord
+    ? resolveEditedCompletedDoses(existingRecord.completedDoses, input)
+    : [{
+        batchNumber: normalizeOptionalText(input.batchNumber),
+        completedAt: input.completedAt,
+        id: createDoseId(),
+        kind: input.completedDoseKind,
+        tradeName: normalizeOptionalText(input.tradeName),
+      }];
+
   const nextRecord = {
-    batchNumber: normalizeOptionalText(input.batchNumber),
-    completedAt: input.completedAt,
+    completedDoses: sortCompletedDoses(nextCompletedDoses),
     diseaseId: input.diseaseId,
-    futureDueDates: normalizeFutureDueDates(input.futureDueDates),
+    futureDueDoses: normalizeFutureDueDoses(input.futureDueDoses),
     repeatEvery: input.repeatEvery ? { ...input.repeatEvery } : null,
-    tradeName: normalizeOptionalText(input.tradeName),
     updatedAt: nextUpdatedAt,
   };
-  const hasExistingRecord = records.some((record) => record.diseaseId === input.diseaseId);
 
-  if (!hasExistingRecord) {
+  if (!existingRecord) {
     return [...records, nextRecord];
   }
 
   return records.map((record) => (record.diseaseId === input.diseaseId ? nextRecord : record));
 };
+
+const resolveRecordsWithCompletedDose = (
+  records: VaccinationStoreState['records'],
+  input: VaccinationCompleteDoseInput,
+) => records.map((record) => {
+  if (record.diseaseId !== input.diseaseId) {
+    return record;
+  }
+
+  const nextCompletedDose: VaccinationCompletedDose = {
+    batchNumber: normalizeOptionalText(input.batchNumber),
+    completedAt: input.completedAt,
+    id: createDoseId(),
+    kind: input.kind,
+    tradeName: normalizeOptionalText(input.tradeName),
+  };
+
+  const nextFutureDueDoses = input.plannedDoseId
+    ? record.futureDueDoses.filter((dose) => dose.id !== input.plannedDoseId)
+    : record.futureDueDoses;
+
+  return {
+    ...record,
+    completedDoses: sortCompletedDoses([...record.completedDoses, nextCompletedDose]),
+    futureDueDoses: nextFutureDueDoses,
+    updatedAt: new Date().toISOString(),
+  };
+});
 
 export const createVaccinationStoreDefaults = (): VaccinationStoreState =>
   toStoreState(createVaccinationPersistedDefaults());
@@ -134,6 +233,31 @@ export const useVaccinationStore = create<VaccinationStore>((set, get) => ({
   },
   setSearchQuery: (searchQuery) => {
     set({ searchQuery });
+  },
+  submitCompletedDose: (recordInput) => {
+    const validationResult = validateVaccinationCompleteDoseInput(recordInput);
+
+    if (!validationResult.isValid) {
+      return validationResult.errorCode;
+    }
+
+    const hasTargetRecord = get().records.some((record) => record.diseaseId === recordInput.diseaseId);
+
+    if (!hasTargetRecord) {
+      return VACCINATION_VALIDATION_ERROR_CODE.disease_required;
+    }
+
+    set((state) => {
+      const nextState = {
+        records: resolveRecordsWithCompletedDose(state.records, recordInput),
+      };
+
+      savePersistedSlice({ ...state, ...nextState });
+
+      return nextState;
+    });
+
+    return null;
   },
   submitRecord: (recordInput) => {
     const validationResult = validateVaccinationRecordInput(recordInput);

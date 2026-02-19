@@ -1,8 +1,9 @@
-import { VACCINATION_REPEAT_UNIT } from '../constants/vaccination';
+import { VACCINATION_REPEAT_UNIT, type VaccinationDoseKind } from '../constants/vaccination';
 
 import type { AppLanguage } from './language';
 
-export type VaccinationCountryCode = 'RU' | 'DE';
+export type VaccinationCountryCode = 'RU' | 'DE' | 'NONE';
+export type VaccinationRecommendationCountryCode = Exclude<VaccinationCountryCode, 'NONE'>;
 
 export type VaccinationCategory = 'recommended' | 'optional';
 
@@ -10,40 +11,79 @@ export type VaccinationCategoryFilter = 'all' | VaccinationCategory;
 
 export type VaccinationRepeatUnit =
   (typeof VACCINATION_REPEAT_UNIT)[keyof typeof VACCINATION_REPEAT_UNIT];
+export type { VaccinationDoseKind };
+
+export interface VaccinationCompletedDose {
+  batchNumber: string | null;
+  completedAt: string;
+  id: string;
+  kind: VaccinationDoseKind;
+  tradeName: string | null;
+}
+
+export interface VaccinationPlannedDose {
+  dueAt: string;
+  id: string;
+  kind: VaccinationDoseKind;
+}
 
 export interface VaccinationRepeatRule {
   interval: number;
+  kind: VaccinationDoseKind;
   unit: VaccinationRepeatUnit;
 }
 
 export interface VaccinationDisease {
-  countryCategory: Record<VaccinationCountryCode, VaccinationCategory | null>;
+  countryCategory: Record<VaccinationRecommendationCountryCode, VaccinationCategory | null>;
   id: string;
   labelKey: string;
   searchAliases: Record<AppLanguage, readonly string[]>;
 }
 
 export interface VaccinationRecord {
-  batchNumber: string | null;
-  completedAt: string;
+  completedDoses: VaccinationCompletedDose[];
   diseaseId: string;
-  futureDueDates: string[];
+  futureDueDoses: VaccinationPlannedDose[];
   repeatEvery: VaccinationRepeatRule | null;
-  tradeName: string | null;
   updatedAt: string;
 }
 
 export interface VaccinationRecordInput {
   batchNumber: string | null;
   completedAt: string;
+  completedDoseKind: VaccinationDoseKind;
   diseaseId: string;
-  futureDueDates: string[];
+  futureDueDoses: VaccinationPlannedDose[];
   repeatEvery: VaccinationRepeatRule | null;
   tradeName: string | null;
 }
 
+export interface VaccinationCompleteDoseInput {
+  batchNumber: string | null;
+  completedAt: string;
+  diseaseId: string;
+  kind: VaccinationDoseKind;
+  plannedDoseId: string | null;
+  tradeName: string | null;
+}
+
+export const VACCINATION_NEXT_DUE_SOURCE = {
+  manual: 'manual',
+  repeat: 'repeat',
+} as const;
+
+export type VaccinationNextDueSource =
+  (typeof VACCINATION_NEXT_DUE_SOURCE)[keyof typeof VACCINATION_NEXT_DUE_SOURCE];
+
+export interface VaccinationNextDue {
+  dueAt: string;
+  kind: VaccinationDoseKind;
+  plannedDoseId: string | null;
+  source: VaccinationNextDueSource;
+}
+
 export interface VaccinationRecordView extends VaccinationRecord {
-  nextDueAt: string | null;
+  nextDue: VaccinationNextDue | null;
 }
 
 export interface VaccinationPersistedState {

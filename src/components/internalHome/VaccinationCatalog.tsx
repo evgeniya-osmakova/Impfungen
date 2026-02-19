@@ -1,11 +1,13 @@
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
+import PlusIcon from 'src/assets/icons/plus.svg';
 
 import { INTERNAL_HOME_CATALOG_FIELD_ID } from '../../constants/internalHomeUi';
 import { HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../constants/ui';
 import {
   VACCINATION_CATEGORY_FILTER,
   VACCINATION_CATEGORY_FILTER_OPTIONS,
+  VACCINATION_COUNTRY,
 } from '../../constants/vaccination';
 import type {
   VaccinationCategory,
@@ -75,12 +77,18 @@ export const VaccinationCatalog = ({
   searchQuery,
 }: VaccinationCatalogProps) => {
   const { t } = useTranslation();
+  const isUniversalCatalog = country === VACCINATION_COUNTRY.NONE;
+  const recommendationCountry = country === VACCINATION_COUNTRY.NONE ? null : country;
 
   return (
     <section className={styles.vaccinationCatalog}>
       <header className={styles.vaccinationCatalog__header}>
         <h2 className={styles.vaccinationCatalog__title}>{t('internal.catalog.title')}</h2>
-        <p className={styles.vaccinationCatalog__description}>{t('internal.catalog.description')}</p>
+        <p className={styles.vaccinationCatalog__description}>
+          {isUniversalCatalog
+            ? t('internal.catalog.descriptionNoRecommendations')
+            : t('internal.catalog.description')}
+        </p>
       </header>
 
       <label
@@ -98,27 +106,29 @@ export const VaccinationCatalog = ({
         value={searchQuery}
       />
 
-      <div
-        aria-label={t('internal.catalog.countLabel', { count: diseases.length })}
-        className={styles.vaccinationCatalog__filters}
-      >
-        {VACCINATION_CATEGORY_FILTER_OPTIONS.map((filter) => (
-          <button
-            className={classNames(
-              styles.vaccinationCatalog__filter,
-              filter === categoryFilter && styles.vaccinationCatalog__filterActive,
-            )}
-            key={filter}
-            onClick={() => onChangeCategoryFilter(filter)}
-            type={HTML_BUTTON_TYPE.button}
-          >
-            {t(resolveFilterTextKey(filter))}
-            <span className={styles.vaccinationCatalog__filterCount}>
-              {getFilterCount(filter, categoryCounts)}
-            </span>
-          </button>
-        ))}
-      </div>
+      {!isUniversalCatalog && (
+        <div
+          aria-label={t('internal.catalog.countLabel', { count: diseases.length })}
+          className={styles.vaccinationCatalog__filters}
+        >
+          {VACCINATION_CATEGORY_FILTER_OPTIONS.map((filter) => (
+            <button
+              className={classNames(
+                styles.vaccinationCatalog__filter,
+                filter === categoryFilter && styles.vaccinationCatalog__filterActive,
+              )}
+              key={filter}
+              onClick={() => onChangeCategoryFilter(filter)}
+              type={HTML_BUTTON_TYPE.button}
+            >
+              {t(resolveFilterTextKey(filter))}
+              <span className={styles.vaccinationCatalog__filterCount}>
+                {getFilterCount(filter, categoryCounts)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <p className={styles.vaccinationCatalog__countLabel}>
         {t('internal.catalog.countLabel', { count: diseases.length })}
@@ -127,9 +137,11 @@ export const VaccinationCatalog = ({
       {diseases.length > 0 ? (
         <div className={styles.vaccinationCatalog__list}>
           {diseases.map((disease) => {
-            const category = disease.countryCategory[country];
+            const category = recommendationCountry
+              ? disease.countryCategory[recommendationCountry]
+              : null;
 
-            if (!category) {
+            if (!isUniversalCatalog && !category) {
               return null;
             }
 
@@ -140,10 +152,17 @@ export const VaccinationCatalog = ({
                 onClick={() => onSelectDiseaseFromCatalog(disease.id)}
                 type={HTML_BUTTON_TYPE.button}
               >
-                <p className={styles.vaccinationCatalog__cardTitle}>{resolveDiseaseLabel(disease)}</p>
-                <p className={styles.vaccinationCatalog__cardBadge}>
-                  {t(resolveBadgeTextKey(category))}
-                </p>
+                <div className={styles.vaccinationCatalog__cardHead}>
+                  <p className={styles.vaccinationCatalog__cardTitle}>{resolveDiseaseLabel(disease)}</p>
+                  <span aria-hidden className={styles.vaccinationCatalog__cardAction}>
+                    <PlusIcon className={styles.vaccinationCatalog__cardActionIcon} />
+                  </span>
+                </div>
+                {!isUniversalCatalog && category && (
+                  <p className={styles.vaccinationCatalog__cardBadge}>
+                    {t(resolveBadgeTextKey(category))}
+                  </p>
+                )}
               </button>
             );
           })}

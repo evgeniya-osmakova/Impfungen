@@ -34,7 +34,7 @@
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -55,8 +55,9 @@
 
 .vaccinationUpcoming__itemMeta {
   margin: 0;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  gap: 2px;
+  justify-items: start;
   gap: 8px;
   color: var(--text-secondary);
   font-size: 0.86rem;
@@ -65,7 +66,23 @@
 .vaccinationUpcoming__itemMeta strong {
   color: var(--text-primary);
   font-weight: 700;
-  text-align: right;
+  text-align: left;
+}
+
+.vaccinationUpcoming__itemActionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.vaccinationUpcoming__actionButton {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  border-color: color-mix(in oklab, var(--surface-300) 58%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 78%, transparent);
+  color: var(--text-secondary);
 }
 
 .vaccinationUpcoming__empty {
@@ -84,5 +101,10 @@
 
   .vaccinationUpcoming__list {
     grid-template-columns: 1fr;
+  }
+
+  .vaccinationUpcoming__itemActionRow {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
