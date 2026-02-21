@@ -1,4 +1,12 @@
-import { asc, eq, inArray, sql, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  eq,
+  inArray,
+  sql,
+  type InferInsertModel,
+  type InferSelectModel,
+} from 'drizzle-orm';
 
 import { db } from '../../db/client.js';
 import {
@@ -28,17 +36,6 @@ type AppProfileRow = InferSelectModel<typeof appProfile>;
 type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
 type CompletedDoseInsert = InferInsertModel<typeof completedDose>;
 type PlannedDoseInsert = InferInsertModel<typeof plannedDose>;
-
-interface ExistingSeriesRow {
-  diseaseId: string;
-  id: number;
-}
-
-interface SeriesReconciliationPlan {
-  createDiseaseIds: string[];
-  deleteSeriesIds: number[];
-  updateDiseaseIds: string[];
-}
 
 const toIsoDateTime = (
   value: Date | string,
@@ -136,7 +133,6 @@ const toVaccinationState = ({
 
   return {
     country: (profile.country as CountryCode | null) ?? null,
-    isCountryConfirmed: profile.isCountryConfirmed,
     records: seriesRows.map((series) => ({
       completedDoses: completedBySeriesId.get(series.id) ?? [],
       diseaseId: series.diseaseId,
@@ -154,54 +150,96 @@ const ensureDefaultProfileUsingDb = async (
     .insert(appProfile)
     .values({
       id: APP_PROFILE_ID,
-      isCountryConfirmed: false,
       language: 'ru',
     })
     .onConflictDoNothing();
 };
 
-const toSeriesReconciliationPlan = (
-  existingSeries: readonly ExistingSeriesRow[],
-  nextRecords: readonly VaccinationStorageRecord[],
-): SeriesReconciliationPlan => {
-  const existingByDiseaseId = new Map<string, ExistingSeriesRow>();
+const upsertVaccinationRecordUsingDb = async (
+  database: DatabaseClient,
+  record: VaccinationStorageRecord,
+): Promise<void> => {
+  await database.transaction(async (transaction) => {
+    const tx = transaction as unknown as DatabaseClient;
 
-  for (const row of existingSeries) {
-    existingByDiseaseId.set(row.diseaseId, row);
-  }
+    await ensureDefaultProfileUsingDb(tx);
 
-  const createDiseaseIds: string[] = [];
-  const updateDiseaseIds: string[] = [];
+    const repeatEvery = record.repeatEvery;
+    const seriesPayload = {
+      repeatInterval: repeatEvery?.interval ?? null,
+      repeatKind: repeatEvery?.kind ?? null,
+      repeatUnit: repeatEvery?.unit ?? null,
+      updatedAt: toDateTime(record.updatedAt),
+    };
 
-  for (const record of nextRecords) {
-    if (existingByDiseaseId.has(record.diseaseId)) {
-      updateDiseaseIds.push(record.diseaseId);
-      continue;
+    const [existingSeries] = await tx
+      .select({ id: vaccinationSeries.id })
+      .from(vaccinationSeries)
+      .where(and(
+        eq(vaccinationSeries.profileId, APP_PROFILE_ID),
+        eq(vaccinationSeries.diseaseId, record.diseaseId),
+      ))
+      .limit(1);
+    let seriesId: number;
+
+    if (existingSeries) {
+      seriesId = existingSeries.id;
+      await tx
+        .update(vaccinationSeries)
+        .set(seriesPayload)
+        .where(eq(vaccinationSeries.id, seriesId));
+    } else {
+      const [createdSeries] = await tx
+        .insert(vaccinationSeries)
+        .values({
+          diseaseId: record.diseaseId,
+          profileId: APP_PROFILE_ID,
+          ...seriesPayload,
+        })
+        .returning({ id: vaccinationSeries.id });
+
+      if (!createdSeries) {
+        throw new Error(`Unable to create vaccination series for ${record.diseaseId}.`);
+      }
+
+      seriesId = createdSeries.id;
     }
 
-    createDiseaseIds.push(record.diseaseId);
-  }
+    await tx.delete(completedDose).where(eq(completedDose.seriesId, seriesId));
+    await tx.delete(plannedDose).where(eq(plannedDose.seriesId, seriesId));
 
-  const nextDiseaseIds = new Set(nextRecords.map((record) => record.diseaseId));
-  const deleteSeriesIds: number[] = [];
+    if (record.completedDoses.length > 0) {
+      const completedRowsToInsert: CompletedDoseInsert[] = record.completedDoses.map((dose) => ({
+        batchNumber: dose.batchNumber,
+        completedAt: dose.completedAt,
+        externalId: dose.id,
+        kind: dose.kind,
+        seriesId,
+        tradeName: dose.tradeName,
+      }));
 
-  for (const existing of existingSeries) {
-    if (!nextDiseaseIds.has(existing.diseaseId)) {
-      deleteSeriesIds.push(existing.id);
+      await tx.insert(completedDose).values(completedRowsToInsert);
     }
-  }
 
-  return {
-    createDiseaseIds,
-    deleteSeriesIds,
-    updateDiseaseIds,
-  };
+    if (record.futureDueDoses.length > 0) {
+      const plannedRowsToInsert: PlannedDoseInsert[] = record.futureDueDoses.map((dose) => ({
+        dueAt: dose.dueAt,
+        externalId: dose.id,
+        kind: dose.kind,
+        seriesId,
+      }));
+
+      await tx.insert(plannedDose).values(plannedRowsToInsert);
+    }
+  });
 };
 
 export interface ProfileRepository {
   ensureDefaultProfile: () => Promise<void>;
   getProfileSnapshot: () => Promise<ProfileSnapshot>;
-  replaceVaccinationState: (state: VaccinationStorageState) => Promise<void>;
+  removeVaccinationRecord: (diseaseId: string) => Promise<void>;
+  setVaccinationCountry: (country: CountryCode) => Promise<void>;
+  upsertVaccinationRecord: (record: VaccinationStorageRecord) => Promise<void>;
   setLanguage: (language: AppLanguage) => Promise<void>;
 }
 
@@ -236,7 +274,6 @@ export const createProfileRepository = (
         language: profile.language as AppLanguage,
         vaccinationState: {
           country: (profile.country as CountryCode | null) ?? null,
-          isCountryConfirmed: profile.isCountryConfirmed,
           records: [],
         },
       };
@@ -273,102 +310,32 @@ export const createProfileRepository = (
       }),
     };
   },
-  replaceVaccinationState: async (state) => {
-    await database.transaction(async (transaction: any) => {
-      await ensureDefaultProfileUsingDb(transaction as DatabaseClient);
+  removeVaccinationRecord: async (diseaseId) => {
+    await database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
 
-      await transaction
-        .update(appProfile)
-        .set({
-          country: state.country,
-          isCountryConfirmed: state.isCountryConfirmed,
-          updatedAt: sql`now()`,
-        })
-        .where(eq(appProfile.id, APP_PROFILE_ID));
-
-      const existingSeries = await transaction
-        .select({
-          diseaseId: vaccinationSeries.diseaseId,
-          id: vaccinationSeries.id,
-        })
-        .from(vaccinationSeries)
-        .where(eq(vaccinationSeries.profileId, APP_PROFILE_ID));
-      const seriesByDiseaseId = new Map<string, ExistingSeriesRow>();
-
-      for (const series of existingSeries) {
-        seriesByDiseaseId.set(series.diseaseId, series);
-      }
-
-      const reconciliationPlan = toSeriesReconciliationPlan(existingSeries, state.records);
-
-      if (reconciliationPlan.deleteSeriesIds.length > 0) {
-        await transaction
-          .delete(vaccinationSeries)
-          .where(inArray(vaccinationSeries.id, reconciliationPlan.deleteSeriesIds));
-      }
-
-      for (const record of state.records) {
-        const repeatEvery = record.repeatEvery;
-        const seriesPayload = {
-          repeatInterval: repeatEvery?.interval ?? null,
-          repeatKind: repeatEvery?.kind ?? null,
-          repeatUnit: repeatEvery?.unit ?? null,
-          updatedAt: toDateTime(record.updatedAt),
-        };
-        const existingSeriesRow = seriesByDiseaseId.get(record.diseaseId);
-        let seriesId: number;
-
-        if (existingSeriesRow) {
-          seriesId = existingSeriesRow.id;
-          await transaction
-            .update(vaccinationSeries)
-            .set(seriesPayload)
-            .where(eq(vaccinationSeries.id, seriesId));
-        } else {
-          const [createdSeries] = await transaction
-            .insert(vaccinationSeries)
-            .values({
-              diseaseId: record.diseaseId,
-              profileId: APP_PROFILE_ID,
-              ...seriesPayload,
-            })
-            .returning({ id: vaccinationSeries.id });
-
-          if (!createdSeries) {
-            throw new Error(`Unable to create vaccination series for ${record.diseaseId}.`);
-          }
-
-          seriesId = createdSeries.id;
-        }
-
-        await transaction.delete(completedDose).where(eq(completedDose.seriesId, seriesId));
-        await transaction.delete(plannedDose).where(eq(plannedDose.seriesId, seriesId));
-
-        if (record.completedDoses.length > 0) {
-          const completedRowsToInsert: CompletedDoseInsert[] = record.completedDoses.map((dose) => ({
-            batchNumber: dose.batchNumber,
-            completedAt: dose.completedAt,
-            externalId: dose.id,
-            kind: dose.kind,
-            seriesId,
-            tradeName: dose.tradeName,
-          }));
-
-          await transaction.insert(completedDose).values(completedRowsToInsert);
-        }
-
-        if (record.futureDueDoses.length > 0) {
-          const plannedRowsToInsert: PlannedDoseInsert[] = record.futureDueDoses.map((dose) => ({
-            dueAt: dose.dueAt,
-            externalId: dose.id,
-            kind: dose.kind,
-            seriesId,
-          }));
-
-          await transaction.insert(plannedDose).values(plannedRowsToInsert);
-        }
-      }
+      await ensureDefaultProfileUsingDb(tx);
+      await tx
+        .delete(vaccinationSeries)
+        .where(and(
+          eq(vaccinationSeries.profileId, APP_PROFILE_ID),
+          eq(vaccinationSeries.diseaseId, diseaseId),
+        ));
     });
+  },
+  setVaccinationCountry: async (country) => {
+    await ensureDefaultProfileUsingDb(database);
+
+    await database
+      .update(appProfile)
+      .set({
+        country,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(appProfile.id, APP_PROFILE_ID));
+  },
+  upsertVaccinationRecord: async (record) => {
+    await upsertVaccinationRecordUsingDb(database, record);
   },
   setLanguage: async (language) => {
     await ensureDefaultProfileUsingDb(database);
@@ -383,6 +350,5 @@ export const createProfileRepository = (
   },
 });
 
-export { APP_PROFILE_ID, toSeriesReconciliationPlan };
+export { APP_PROFILE_ID };
 export { toVaccinationState };
-export type { ExistingSeriesRow, SeriesReconciliationPlan };

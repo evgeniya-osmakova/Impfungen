@@ -21,23 +21,33 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type ProfileSnapshot = RouterOutputs['profile']['get'];
 type SetLanguageInput = RouterInputs['profile']['setLanguage'];
-type SaveVaccinationStateInput = RouterInputs['profile']['saveVaccinationState'];
+type SetVaccinationCountryInput = RouterInputs['profile']['setVaccinationCountry'];
+type UpsertVaccinationRecordInput = RouterInputs['profile']['upsertVaccinationRecord'];
+type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
   getProfile: () => Promise<ProfileSnapshot>;
-  saveVaccinationState: (state: SaveVaccinationStateInput) => Promise<void>;
+  removeVaccinationRecord: (diseaseId: RemoveVaccinationRecordInput['diseaseId']) => Promise<void>;
   setLanguage: (language: SetLanguageInput['language']) => Promise<void>;
+  setVaccinationCountry: (country: SetVaccinationCountryInput['country']) => Promise<void>;
+  upsertVaccinationRecord: (record: UpsertVaccinationRecordInput) => Promise<void>;
 }
 
 let profileApiSingleton: ProfileApi | null = null;
 
 export const createProfileApi = (): ProfileApi => ({
   getProfile: () => trpc.profile.get.query(),
-  saveVaccinationState: async (state) => {
-    await trpc.profile.saveVaccinationState.mutate(state);
+  removeVaccinationRecord: async (diseaseId) => {
+    await trpc.profile.removeVaccinationRecord.mutate({ diseaseId });
   },
   setLanguage: async (language) => {
     await trpc.profile.setLanguage.mutate({ language });
+  },
+  setVaccinationCountry: async (country) => {
+    await trpc.profile.setVaccinationCountry.mutate({ country });
+  },
+  upsertVaccinationRecord: async (record) => {
+    await trpc.profile.upsertVaccinationRecord.mutate(record);
   },
 });
 

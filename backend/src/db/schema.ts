@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import {
-  boolean,
   check,
   date,
   integer,
@@ -17,7 +16,6 @@ export const appProfile = pgTable(
     id: integer('id').primaryKey(),
     language: text('language').notNull().default('ru'),
     country: text('country'),
-    isCountryConfirmed: boolean('is_country_confirmed').notNull().default(false),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

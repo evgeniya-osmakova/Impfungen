@@ -13,8 +13,25 @@ const createRepository = (
 ): ProfileRepository => ({
   ensureDefaultProfile: async () => undefined,
   getProfileSnapshot: async () => snapshot,
-  replaceVaccinationState: async (state) => {
-    snapshot.vaccinationState = state;
+  removeVaccinationRecord: async (diseaseId) => {
+    snapshot.vaccinationState.records = snapshot.vaccinationState.records.filter(
+      (record) => record.diseaseId !== diseaseId,
+    );
+  },
+  setVaccinationCountry: async (country) => {
+    snapshot.vaccinationState.country = country;
+  },
+  upsertVaccinationRecord: async (record) => {
+    const existingIndex = snapshot.vaccinationState.records.findIndex(
+      (current) => current.diseaseId === record.diseaseId,
+    );
+
+    if (existingIndex === -1) {
+      snapshot.vaccinationState.records.push(record);
+      return;
+    }
+
+    snapshot.vaccinationState.records[existingIndex] = record;
   },
   setLanguage: async (language) => {
     snapshot.language = language;
@@ -27,7 +44,6 @@ describe('tRPC Fastify transport', () => {
       language: 'ru',
       vaccinationState: {
         country: null,
-        isCountryConfirmed: false,
         records: [],
       },
     };
@@ -78,19 +94,51 @@ describe('tRPC Fastify transport', () => {
     });
     expect(snapshot.language).toBe('en');
 
-    const saveStateResponse = await app.inject({
+    const setCountryResponse = await app.inject({
       method: 'POST',
-      url: '/trpc/profile.saveVaccinationState',
+      url: '/trpc/profile.setVaccinationCountry',
       payload: {
         country: 'RU',
-        isCountryConfirmed: true,
-        records: [],
       },
     });
 
-    expect(saveStateResponse.statusCode).toBe(200);
+    expect(setCountryResponse.statusCode).toBe(200);
     expect(snapshot.vaccinationState.country).toBe('RU');
-    expect(snapshot.vaccinationState.isCountryConfirmed).toBe(true);
+
+    const nextRecord = {
+      completedDoses: [
+        {
+          batchNumber: null,
+          completedAt: '2025-01-10',
+          id: 'done-1',
+          kind: 'nextDose',
+          tradeName: null,
+        },
+      ],
+      diseaseId: 'measles',
+      futureDueDoses: [],
+      repeatEvery: null,
+      updatedAt: '2025-01-10T00:00:00.000Z',
+    };
+    const upsertRecordResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.upsertVaccinationRecord',
+      payload: nextRecord,
+    });
+
+    expect(upsertRecordResponse.statusCode).toBe(200);
+    expect(snapshot.vaccinationState.records).toEqual([nextRecord]);
+
+    const removeRecordResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.removeVaccinationRecord',
+      payload: {
+        diseaseId: 'measles',
+      },
+    });
+
+    expect(removeRecordResponse.statusCode).toBe(200);
+    expect(snapshot.vaccinationState.records).toEqual([]);
 
     await app.close();
   });

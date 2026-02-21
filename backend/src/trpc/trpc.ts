@@ -1,15 +1,18 @@
 import { initTRPC } from '@trpc/server';
 import type {
   AppLanguage,
+  CountryCode,
   ProfileSnapshot,
-  VaccinationStorageState,
+  VaccinationStorageRecord,
 } from '../modules/profile/profileTypes.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 interface TrpcProfileRepository {
   ensureDefaultProfile: () => Promise<void>;
   getProfileSnapshot: () => Promise<ProfileSnapshot>;
-  replaceVaccinationState: (state: VaccinationStorageState) => Promise<void>;
+  removeVaccinationRecord: (diseaseId: string) => Promise<void>;
+  setVaccinationCountry: (country: CountryCode) => Promise<void>;
+  upsertVaccinationRecord: (record: VaccinationStorageRecord) => Promise<void>;
   setLanguage: (language: AppLanguage) => Promise<void>;
 }
 

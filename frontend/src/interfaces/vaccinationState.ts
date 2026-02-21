@@ -3,7 +3,6 @@ import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord.ts'
 
 export interface VaccinationState {
   country: CountryCode | null;
-  isCountryConfirmed: boolean;
   records: ImmunizationSeries[];
 }
 

@@ -40,7 +40,6 @@ export interface VaccinationStorageRecord {
 
 export interface VaccinationStorageState {
   country: CountryCode | null;
-  isCountryConfirmed: boolean;
   records: VaccinationStorageRecord[];
 }
 

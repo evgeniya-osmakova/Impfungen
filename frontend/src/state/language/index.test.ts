@@ -9,7 +9,6 @@ const defaultProfileSnapshot: ProfileSnapshot = {
   language: 'ru',
   vaccinationState: {
     country: null,
-    isCountryConfirmed: false,
     records: [],
   },
 };
@@ -25,8 +24,10 @@ describe('languageStore', () => {
 
     setProfileApi({
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      saveVaccinationState: vi.fn(() => Promise.resolve()),
+      removeVaccinationRecord: vi.fn(() => Promise.resolve()),
       setLanguage,
+      setVaccinationCountry: vi.fn(() => Promise.resolve()),
+      upsertVaccinationRecord: vi.fn(() => Promise.resolve()),
     });
 
     useLanguageStore.getState().changeLanguage('en');
@@ -39,8 +40,10 @@ describe('languageStore', () => {
 
     setProfileApi({
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      saveVaccinationState: vi.fn(() => Promise.resolve()),
+      removeVaccinationRecord: vi.fn(() => Promise.resolve()),
       setLanguage,
+      setVaccinationCountry: vi.fn(() => Promise.resolve()),
+      upsertVaccinationRecord: vi.fn(() => Promise.resolve()),
     });
 
     useLanguageStore.getState().changeLanguage('ru');

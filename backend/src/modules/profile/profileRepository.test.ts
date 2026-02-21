@@ -3,49 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 import { appProfile, completedDose, plannedDose, vaccinationSeries } from '../../db/schema.js';
 
-import {
-  toSeriesReconciliationPlan,
-  toVaccinationState,
-} from './profileRepository.js';
+import { toVaccinationState } from './profileRepository.js';
 
 describe('profileRepository helpers', () => {
-  it('builds reconciliation plan for create/update/delete series', () => {
-    const plan = toSeriesReconciliationPlan(
-      [
-        { diseaseId: 'measles', id: 1 },
-        { diseaseId: 'tetanus', id: 2 },
-      ],
-      [
-        {
-          completedDoses: [],
-          diseaseId: 'measles',
-          futureDueDoses: [],
-          repeatEvery: null,
-          updatedAt: '2024-01-01T00:00:00.000Z',
-        },
-        {
-          completedDoses: [],
-          diseaseId: 'polio',
-          futureDueDoses: [],
-          repeatEvery: null,
-          updatedAt: '2024-01-01T00:00:00.000Z',
-        },
-      ],
-    );
-
-    expect(plan).toEqual({
-      createDiseaseIds: ['polio'],
-      deleteSeriesIds: [2],
-      updateDiseaseIds: ['measles'],
-    });
-  });
-
   it('maps db rows to vaccination state snapshot payload', () => {
     const profileRow: InferSelectModel<typeof appProfile> = {
       id: 1,
       language: 'ru',
       country: 'DE',
-      isCountryConfirmed: true,
       updatedAt: new Date('2025-01-01T00:00:00.000Z'),
     };
     const seriesRows: InferSelectModel<typeof vaccinationSeries>[] = [
@@ -89,7 +54,6 @@ describe('profileRepository helpers', () => {
 
     expect(vaccinationState).toEqual({
       country: 'DE',
-      isCountryConfirmed: true,
       records: [
         {
           diseaseId: 'measles',

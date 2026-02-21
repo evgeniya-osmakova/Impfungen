@@ -25,7 +25,6 @@ const toIsoDateShiftedFromToday = (days: number) => {
 const resetStores = () => {
   useVaccinationStore.setState({
     country: null,
-    isCountryConfirmed: false,
     records: [],
     categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
     editingDiseaseId: null,

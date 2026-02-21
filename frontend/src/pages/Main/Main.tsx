@@ -12,12 +12,10 @@ export const Main = () => {
   const { t } = useTranslation();
   const {
     country,
-    isCountryConfirmed,
     setCountry,
   } = useVaccinationStore(
     useShallow((state) => ({
       country: state.country,
-      isCountryConfirmed: state.isCountryConfirmed,
       setCountry: state.setCountry,
     })),
   );
@@ -30,7 +28,7 @@ export const Main = () => {
           <p className={styles.internalHomePage__description}>{t('internal.page.description')}</p>
         </header>
 
-        {!isCountryConfirmed || !country ? (
+        {!country ? (
           <CountryOnboarding
             onSelectCountry={setCountry}
             selectedCountry={country}

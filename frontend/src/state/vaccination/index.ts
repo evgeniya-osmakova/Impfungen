@@ -30,28 +30,35 @@ interface VaccinationStore extends VaccinationStoreState {
   upsertRecord: (record: ImmunizationSeriesInput) => Promise<void>;
 }
 
-const toVaccinationAppState = ({
-  country,
-  isCountryConfirmed,
-  records,
-}: VaccinationStoreState): VaccinationState => ({
-  country,
-  isCountryConfirmed,
-  records,
-});
+const resolveUpdatedRecord = (
+  diseaseId: string,
+  records: readonly VaccinationState['records'][number][],
+) => {
+  const updatedRecord = records.find((record) => record.diseaseId === diseaseId);
 
-const saveStoreState = async (
-  state: VaccinationStoreState,
-  patch: Partial<VaccinationStoreState>,
+  if (!updatedRecord) {
+    throw new Error(`Unable to resolve updated record for disease ${diseaseId}.`);
+  }
+
+  return updatedRecord;
+};
+
+const persistUpdatedRecord = async (
+  diseaseId: string,
+  records: readonly VaccinationState['records'][number][],
 ) => {
   const api = getProfileApi();
-  await api?.saveVaccinationState(toVaccinationAppState({ ...state, ...patch }));
+
+  if (!api) {
+    return;
+  }
+
+  await api.upsertVaccinationRecord(resolveUpdatedRecord(diseaseId, records));
 };
 
 export const useVaccinationStore =
   create<VaccinationStore>((set, get) => ({
     country: null,
-    isCountryConfirmed: false,
     records: [],
     categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
     editingDiseaseId: null,
@@ -63,17 +70,19 @@ export const useVaccinationStore =
         editingDiseaseId: state.editingDiseaseId === diseaseId ? null : state.editingDiseaseId,
         records: state.records.filter((record) => record.diseaseId !== diseaseId),
       };
+      const api = getProfileApi();
 
-      await saveStoreState(state, nextState);
+      await api?.removeVaccinationRecord(diseaseId);
       set(nextState);
     },
     setCategoryFilter: (categoryFilter) => {
       set({ categoryFilter });
     },
     setCountry: async (country) => {
-      const nextState = { country, isCountryConfirmed: true };
-      await saveStoreState(get(), nextState);
-      set(nextState);
+      const api = getProfileApi();
+
+      await api?.setVaccinationCountry(country);
+      set({ country });
     },
     setSearchQuery: (searchQuery) => {
       set({ searchQuery });
@@ -88,10 +97,8 @@ export const useVaccinationStore =
         return submissionResult.errorCode;
       }
 
-      const nextState = { records: submissionResult.records };
-
-      await saveStoreState(get(), nextState);
-      set(nextState);
+      await persistUpdatedRecord(recordInput.diseaseId, submissionResult.records);
+      set({ records: submissionResult.records });
 
       return null;
     },
@@ -102,13 +109,11 @@ export const useVaccinationStore =
         return submissionResult.errorCode;
       }
 
-      const nextState = {
+      await persistUpdatedRecord(recordInput.diseaseId, submissionResult.records);
+      set({
         editingDiseaseId: null,
         records: submissionResult.records,
-      };
-
-      await saveStoreState(get(), nextState);
-      set(nextState);
+      });
 
       return null;
     },
@@ -123,12 +128,12 @@ export const useVaccinationStore =
     },
     upsertRecord: async (recordInput) => {
       const state = get();
-      const nextState = {
-        editingDiseaseId: null,
-        records: upsertRecordUseCase(state.records, recordInput),
-      };
+      const nextRecords = upsertRecordUseCase(state.records, recordInput);
 
-      await saveStoreState(state, nextState);
-      set(nextState);
+      await persistUpdatedRecord(recordInput.diseaseId, nextRecords);
+      set({
+        editingDiseaseId: null,
+        records: nextRecords,
+      });
     },
   }));
