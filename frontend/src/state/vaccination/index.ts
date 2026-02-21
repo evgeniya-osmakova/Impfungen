@@ -1,4 +1,5 @@
 import { getProfileApi } from 'src/api/profileApi.ts'
+import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts';
 import type { VaccinationState, VaccinationStoreState } from 'src/interfaces/vaccinationState.ts'
 import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts'
 import {
@@ -43,17 +44,44 @@ const resolveUpdatedRecord = (
   return updatedRecord;
 };
 
+const applyServerUpdatedAt = (
+  records: readonly VaccinationState['records'][number][],
+  diseaseId: string,
+  updatedAt: string,
+): VaccinationState['records'] =>
+  records.map((record) => (
+    record.diseaseId === diseaseId
+      ? { ...record, updatedAt }
+      : record
+  ));
+
 const persistUpdatedRecord = async (
   diseaseId: string,
   records: readonly VaccinationState['records'][number][],
-) => {
+  expectedUpdatedAt: string | null,
+): Promise<string | null> => {
   const api = getProfileApi();
 
   if (!api) {
-    return;
+    return null;
   }
 
-  await api.upsertVaccinationRecord(resolveUpdatedRecord(diseaseId, records));
+  const result = await api.upsertVaccinationRecord({
+    ...resolveUpdatedRecord(diseaseId, records),
+    expectedUpdatedAt,
+  });
+
+  return result.updatedAt;
+};
+
+const isTrpcConflictError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const errorWithData = error as { data?: { code?: string } };
+
+  return errorWithData.data?.code === 'CONFLICT';
 };
 
 export const useVaccinationStore =
@@ -91,29 +119,67 @@ export const useVaccinationStore =
       set(store);
     },
     submitCompletedDose: async (recordInput) => {
-      const submissionResult = submitCompletedDoseUseCase(get().records, recordInput);
+      const currentRecords = get().records;
+      const currentRecord = currentRecords.find((record) => record.diseaseId === recordInput.diseaseId);
+      const submissionResult = submitCompletedDoseUseCase(currentRecords, recordInput);
 
       if (submissionResult.errorCode || !submissionResult.records) {
         return submissionResult.errorCode;
       }
 
-      await persistUpdatedRecord(recordInput.diseaseId, submissionResult.records);
-      set({ records: submissionResult.records });
+      try {
+        const persistedUpdatedAt = await persistUpdatedRecord(
+          recordInput.diseaseId,
+          submissionResult.records,
+          currentRecord?.updatedAt ?? null,
+        );
+
+        const records = persistedUpdatedAt
+          ? applyServerUpdatedAt(submissionResult.records, recordInput.diseaseId, persistedUpdatedAt)
+          : submissionResult.records;
+
+        set({ records });
+      } catch (error) {
+        if (isTrpcConflictError(error)) {
+          return VACCINATION_VALIDATION_ERROR_CODE.sync_conflict;
+        }
+
+        throw error;
+      }
 
       return null;
     },
     submitRecord: async (recordInput) => {
-      const submissionResult = submitRecordUseCase(get().records, recordInput);
+      const currentRecords = get().records;
+      const currentRecord = currentRecords.find((record) => record.diseaseId === recordInput.diseaseId);
+      const submissionResult = submitRecordUseCase(currentRecords, recordInput);
 
       if (submissionResult.errorCode || !submissionResult.records) {
         return submissionResult.errorCode;
       }
 
-      await persistUpdatedRecord(recordInput.diseaseId, submissionResult.records);
-      set({
-        editingDiseaseId: null,
-        records: submissionResult.records,
-      });
+      try {
+        const persistedUpdatedAt = await persistUpdatedRecord(
+          recordInput.diseaseId,
+          submissionResult.records,
+          currentRecord?.updatedAt ?? null,
+        );
+
+        const records = persistedUpdatedAt
+          ? applyServerUpdatedAt(submissionResult.records, recordInput.diseaseId, persistedUpdatedAt)
+          : submissionResult.records;
+
+        set({
+          editingDiseaseId: null,
+          records,
+        });
+      } catch (error) {
+        if (isTrpcConflictError(error)) {
+          return VACCINATION_VALIDATION_ERROR_CODE.sync_conflict;
+        }
+
+        throw error;
+      }
 
       return null;
     },
@@ -128,12 +194,22 @@ export const useVaccinationStore =
     },
     upsertRecord: async (recordInput) => {
       const state = get();
+      const currentRecord = state.records.find((record) => record.diseaseId === recordInput.diseaseId);
       const nextRecords = upsertRecordUseCase(state.records, recordInput);
 
-      await persistUpdatedRecord(recordInput.diseaseId, nextRecords);
+      const persistedUpdatedAt = await persistUpdatedRecord(
+        recordInput.diseaseId,
+        nextRecords,
+        currentRecord?.updatedAt ?? null,
+      );
+
+      const records = persistedUpdatedAt
+        ? applyServerUpdatedAt(nextRecords, recordInput.diseaseId, persistedUpdatedAt)
+        : nextRecords;
+
       set({
         editingDiseaseId: null,
-        records: nextRecords,
+        records,
       });
     },
   }));

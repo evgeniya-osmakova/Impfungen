@@ -1,1 +1,1 @@
-export type AppLanguage = 'ru' | 'de' | 'en';
+export type { AppLanguage } from '@backend/contracts';

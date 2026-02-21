@@ -1,4 +1,4 @@
-import type { AppRouter } from '@backend/router';
+import type { AppRouter } from '@backend/contracts';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
@@ -23,6 +23,7 @@ export type ProfileSnapshot = RouterOutputs['profile']['get'];
 type SetLanguageInput = RouterInputs['profile']['setLanguage'];
 type SetVaccinationCountryInput = RouterInputs['profile']['setVaccinationCountry'];
 type UpsertVaccinationRecordInput = RouterInputs['profile']['upsertVaccinationRecord'];
+type UpsertVaccinationRecordOutput = RouterOutputs['profile']['upsertVaccinationRecord'];
 type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
@@ -30,7 +31,9 @@ interface ProfileApi {
   removeVaccinationRecord: (diseaseId: RemoveVaccinationRecordInput['diseaseId']) => Promise<void>;
   setLanguage: (language: SetLanguageInput['language']) => Promise<void>;
   setVaccinationCountry: (country: SetVaccinationCountryInput['country']) => Promise<void>;
-  upsertVaccinationRecord: (record: UpsertVaccinationRecordInput) => Promise<void>;
+  upsertVaccinationRecord: (
+    record: UpsertVaccinationRecordInput,
+  ) => Promise<UpsertVaccinationRecordOutput>;
 }
 
 let profileApiSingleton: ProfileApi | null = null;
@@ -46,9 +49,7 @@ export const createProfileApi = (): ProfileApi => ({
   setVaccinationCountry: async (country) => {
     await trpc.profile.setVaccinationCountry.mutate({ country });
   },
-  upsertVaccinationRecord: async (record) => {
-    await trpc.profile.upsertVaccinationRecord.mutate(record);
-  },
+  upsertVaccinationRecord: (record) => trpc.profile.upsertVaccinationRecord.mutate(record),
 });
 
 export const setProfileApi = (profileApi: ProfileApi | null): void => {

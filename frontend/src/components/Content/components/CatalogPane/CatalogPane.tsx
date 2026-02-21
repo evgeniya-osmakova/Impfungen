@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
 import { useInternalHomeUiStore } from '../../../../state/internalHomeUi';
 import { useVaccinationStore } from '../../../../state/vaccination';
-import { selectVaccinationViewData } from '../../../../state/vaccination/selectors';
+import { selectCatalogViewData } from '../../../../state/vaccination/selectors';
 import { filterDiseases } from '../../../../utils/vaccinationSelectors';
 
 import { VaccinationCatalog } from './components/VaccinationCatalog/VaccinationCatalog';
@@ -16,12 +16,12 @@ import styles from './CatalogPane.module.css';
 export const CatalogPane = () => {
   const { language } = useLanguageStore();
   const { resolveDiseaseLabel } = useDiseaseLabels();
+  const { availableDiseases, categoryCounts, country } = useVaccinationStore(
+    useShallow(selectCatalogViewData),
+  );
   const {
     cancelEdit,
     categoryFilter,
-    country,
-    editingDiseaseId,
-    records,
     searchQuery,
     setCategoryFilter,
     setSearchQuery,
@@ -29,9 +29,6 @@ export const CatalogPane = () => {
     useShallow((state) => ({
       cancelEdit: state.cancelEdit,
       categoryFilter: state.categoryFilter,
-      country: state.country,
-      editingDiseaseId: state.editingDiseaseId,
-      records: state.records,
       searchQuery: state.searchQuery,
       setCategoryFilter: state.setCategoryFilter,
       setSearchQuery: state.setSearchQuery,
@@ -41,11 +38,6 @@ export const CatalogPane = () => {
     (state) => state.openFormModalWithPrefilledDisease,
   );
 
-  const { availableDiseases, categoryCounts } = selectVaccinationViewData({
-    country,
-    editingDiseaseId,
-    records,
-  });
   const catalogDiseases = useMemo(() => {
     if (!country) {
       return [];

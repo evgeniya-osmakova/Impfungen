@@ -30,11 +30,18 @@ export interface VaccinationStorageRepeatRule {
   unit: RepeatUnit;
 }
 
-export interface VaccinationStorageRecord {
+export interface VaccinationStorageRecordInput {
   completedDoses: VaccinationStorageCompletedDose[];
   diseaseId: string;
   futureDueDoses: VaccinationStoragePlannedDose[];
   repeatEvery: VaccinationStorageRepeatRule | null;
+}
+
+export interface UpsertVaccinationStorageRecordInput extends VaccinationStorageRecordInput {
+  expectedUpdatedAt: string | null;
+}
+
+export interface VaccinationStorageRecord extends VaccinationStorageRecordInput {
   updatedAt: string;
 }
 

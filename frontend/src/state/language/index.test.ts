@@ -16,6 +16,7 @@ const defaultProfileSnapshot: ProfileSnapshot = {
 describe('languageStore', () => {
   beforeEach(async () => {
     setProfileApi(null);
+    useLanguageStore.setState({ language: 'ru' });
     await i18n.changeLanguage('ru');
   });
 
@@ -27,12 +28,16 @@ describe('languageStore', () => {
       removeVaccinationRecord: vi.fn(() => Promise.resolve()),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      upsertVaccinationRecord: vi.fn(() => Promise.resolve()),
+      upsertVaccinationRecord: vi.fn(() => Promise.resolve({
+        ok: true as const,
+        updatedAt: '2025-01-10T00:00:00.000Z',
+      })),
     });
 
     useLanguageStore.getState().changeLanguage('en');
 
     expect(setLanguage).toHaveBeenCalledWith('en');
+    expect(useLanguageStore.getState().language).toBe('en');
   });
 
   it('does nothing when selected language is already active', () => {
@@ -43,11 +48,24 @@ describe('languageStore', () => {
       removeVaccinationRecord: vi.fn(() => Promise.resolve()),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      upsertVaccinationRecord: vi.fn(() => Promise.resolve()),
+      upsertVaccinationRecord: vi.fn(() => Promise.resolve({
+        ok: true as const,
+        updatedAt: '2025-01-10T00:00:00.000Z',
+      })),
     });
 
     useLanguageStore.getState().changeLanguage('ru');
 
     expect(setLanguage).not.toHaveBeenCalled();
+    expect(useLanguageStore.getState().language).toBe('ru');
+  });
+
+  it('setLanguage synchronizes i18n language', async () => {
+    useLanguageStore.getState().setLanguage('de');
+
+    expect(useLanguageStore.getState().language).toBe('de');
+    await vi.waitFor(() => {
+      expect(i18n.resolvedLanguage).toBe('de');
+    });
   });
 });

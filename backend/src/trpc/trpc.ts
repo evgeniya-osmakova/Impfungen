@@ -3,7 +3,7 @@ import type {
   AppLanguage,
   CountryCode,
   ProfileSnapshot,
-  VaccinationStorageRecord,
+  UpsertVaccinationStorageRecordInput,
 } from '../modules/profile/profileTypes.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -12,7 +12,7 @@ interface TrpcProfileRepository {
   getProfileSnapshot: () => Promise<ProfileSnapshot>;
   removeVaccinationRecord: (diseaseId: string) => Promise<void>;
   setVaccinationCountry: (country: CountryCode) => Promise<void>;
-  upsertVaccinationRecord: (record: VaccinationStorageRecord) => Promise<void>;
+  upsertVaccinationRecord: (record: UpsertVaccinationStorageRecordInput) => Promise<string>;
   setLanguage: (language: AppLanguage) => Promise<void>;
 }
 

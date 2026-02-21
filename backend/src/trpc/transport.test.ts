@@ -22,16 +22,23 @@ const createRepository = (
     snapshot.vaccinationState.country = country;
   },
   upsertVaccinationRecord: async (record) => {
+    const { expectedUpdatedAt: _expectedUpdatedAt, ...payload } = record;
+    const persistedRecord = {
+      ...payload,
+      updatedAt: '2025-01-10T00:00:00.000Z',
+    };
     const existingIndex = snapshot.vaccinationState.records.findIndex(
       (current) => current.diseaseId === record.diseaseId,
     );
 
     if (existingIndex === -1) {
-      snapshot.vaccinationState.records.push(record);
-      return;
+      snapshot.vaccinationState.records.push(persistedRecord);
+      return persistedRecord.updatedAt;
     }
 
-    snapshot.vaccinationState.records[existingIndex] = record;
+    snapshot.vaccinationState.records[existingIndex] = persistedRecord;
+
+    return persistedRecord.updatedAt;
   },
   setLanguage: async (language) => {
     snapshot.language = language;
@@ -116,8 +123,15 @@ describe('tRPC Fastify transport', () => {
         },
       ],
       diseaseId: 'measles',
+      expectedUpdatedAt: null,
       futureDueDoses: [],
       repeatEvery: null,
+    };
+    const persistedRecord = {
+      completedDoses: nextRecord.completedDoses,
+      diseaseId: nextRecord.diseaseId,
+      futureDueDoses: nextRecord.futureDueDoses,
+      repeatEvery: nextRecord.repeatEvery,
       updatedAt: '2025-01-10T00:00:00.000Z',
     };
     const upsertRecordResponse = await app.inject({
@@ -127,7 +141,15 @@ describe('tRPC Fastify transport', () => {
     });
 
     expect(upsertRecordResponse.statusCode).toBe(200);
-    expect(snapshot.vaccinationState.records).toEqual([nextRecord]);
+    expect(upsertRecordResponse.json()).toMatchObject({
+      result: {
+        data: {
+          ok: true,
+          updatedAt: '2025-01-10T00:00:00.000Z',
+        },
+      },
+    });
+    expect(snapshot.vaccinationState.records).toEqual([persistedRecord]);
 
     const removeRecordResponse = await app.inject({
       method: 'POST',

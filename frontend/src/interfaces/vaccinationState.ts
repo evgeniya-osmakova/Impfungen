@@ -1,10 +1,7 @@
-import type { CategoryFilter, CountryCode } from 'src/interfaces/base.ts'
-import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord.ts'
+import type { VaccinationStorageState } from '@backend/contracts';
+import type { CategoryFilter } from 'src/interfaces/base.ts'
 
-export interface VaccinationState {
-  country: CountryCode | null;
-  records: ImmunizationSeries[];
-}
+export type VaccinationState = VaccinationStorageState;
 
 export interface VaccinationUiState {
   categoryFilter: CategoryFilter;

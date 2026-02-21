@@ -15,4 +15,5 @@ export const INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE = {
   [VACCINATION_VALIDATION_ERROR_CODE.repeat_interval_invalid]:
     'internal.form.errors.repeatIntervalInvalid',
   [VACCINATION_VALIDATION_ERROR_CODE.schedule_conflict]: 'internal.form.errors.scheduleConflict',
+  [VACCINATION_VALIDATION_ERROR_CODE.sync_conflict]: 'internal.form.errors.syncConflict',
 } as const;

@@ -22,6 +22,7 @@ import type {
   DoseKind,
   ProfileSnapshot,
   RepeatUnit,
+  UpsertVaccinationStorageRecordInput,
   VaccinationStorageCompletedDose,
   VaccinationStoragePlannedDose,
   VaccinationStorageRecord,
@@ -36,6 +37,13 @@ type AppProfileRow = InferSelectModel<typeof appProfile>;
 type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
 type CompletedDoseInsert = InferInsertModel<typeof completedDose>;
 type PlannedDoseInsert = InferInsertModel<typeof plannedDose>;
+
+export class OptimisticConcurrencyError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OptimisticConcurrencyError';
+  }
+}
 
 const toIsoDateTime = (
   value: Date | string,
@@ -53,16 +61,16 @@ const toIsoDateTime = (
   return new Date(timestamp).toISOString();
 };
 
-const toDateTime = (
+const normalizeIsoDateTime = (
   value: string,
-): Date => {
+): string | null => {
   const timestamp = Date.parse(value);
 
   if (!Number.isFinite(timestamp)) {
-    return new Date();
+    return null;
   }
 
-  return new Date(timestamp);
+  return new Date(timestamp).toISOString();
 };
 
 const toIsoDate = (
@@ -157,9 +165,9 @@ const ensureDefaultProfileUsingDb = async (
 
 const upsertVaccinationRecordUsingDb = async (
   database: DatabaseClient,
-  record: VaccinationStorageRecord,
-): Promise<void> => {
-  await database.transaction(async (transaction) => {
+  record: UpsertVaccinationStorageRecordInput,
+): Promise<string> => {
+  return database.transaction(async (transaction) => {
     const tx = transaction as unknown as DatabaseClient;
 
     await ensureDefaultProfileUsingDb(tx);
@@ -169,11 +177,11 @@ const upsertVaccinationRecordUsingDb = async (
       repeatInterval: repeatEvery?.interval ?? null,
       repeatKind: repeatEvery?.kind ?? null,
       repeatUnit: repeatEvery?.unit ?? null,
-      updatedAt: toDateTime(record.updatedAt),
+      updatedAt: sql`now()`,
     };
 
     const [existingSeries] = await tx
-      .select({ id: vaccinationSeries.id })
+      .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
       .from(vaccinationSeries)
       .where(and(
         eq(vaccinationSeries.profileId, APP_PROFILE_ID),
@@ -181,14 +189,39 @@ const upsertVaccinationRecordUsingDb = async (
       ))
       .limit(1);
     let seriesId: number;
+    let seriesUpdatedAt: Date | string;
 
     if (existingSeries) {
+      const expectedUpdatedAt = record.expectedUpdatedAt
+        ? normalizeIsoDateTime(record.expectedUpdatedAt)
+        : null;
+      const currentUpdatedAt = toIsoDateTime(existingSeries.updatedAt);
+
+      if (!expectedUpdatedAt || expectedUpdatedAt !== currentUpdatedAt) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${record.diseaseId}" has been modified by another request.`,
+        );
+      }
+
       seriesId = existingSeries.id;
-      await tx
+      const [updatedSeries] = await tx
         .update(vaccinationSeries)
         .set(seriesPayload)
-        .where(eq(vaccinationSeries.id, seriesId));
+        .where(eq(vaccinationSeries.id, seriesId))
+        .returning({ updatedAt: vaccinationSeries.updatedAt });
+
+      if (!updatedSeries) {
+        throw new Error(`Unable to update vaccination series for ${record.diseaseId}.`);
+      }
+
+      seriesUpdatedAt = updatedSeries.updatedAt;
     } else {
+      if (record.expectedUpdatedAt !== null) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${record.diseaseId}" no longer exists.`,
+        );
+      }
+
       const [createdSeries] = await tx
         .insert(vaccinationSeries)
         .values({
@@ -196,13 +229,17 @@ const upsertVaccinationRecordUsingDb = async (
           profileId: APP_PROFILE_ID,
           ...seriesPayload,
         })
-        .returning({ id: vaccinationSeries.id });
+        .returning({
+          id: vaccinationSeries.id,
+          updatedAt: vaccinationSeries.updatedAt,
+        });
 
       if (!createdSeries) {
         throw new Error(`Unable to create vaccination series for ${record.diseaseId}.`);
       }
 
       seriesId = createdSeries.id;
+      seriesUpdatedAt = createdSeries.updatedAt;
     }
 
     await tx.delete(completedDose).where(eq(completedDose.seriesId, seriesId));
@@ -231,6 +268,8 @@ const upsertVaccinationRecordUsingDb = async (
 
       await tx.insert(plannedDose).values(plannedRowsToInsert);
     }
+
+    return toIsoDateTime(seriesUpdatedAt);
   });
 };
 
@@ -239,7 +278,7 @@ export interface ProfileRepository {
   getProfileSnapshot: () => Promise<ProfileSnapshot>;
   removeVaccinationRecord: (diseaseId: string) => Promise<void>;
   setVaccinationCountry: (country: CountryCode) => Promise<void>;
-  upsertVaccinationRecord: (record: VaccinationStorageRecord) => Promise<void>;
+  upsertVaccinationRecord: (record: UpsertVaccinationStorageRecordInput) => Promise<string>;
   setLanguage: (language: AppLanguage) => Promise<void>;
 }
 
@@ -335,7 +374,7 @@ export const createProfileRepository = (
       .where(eq(appProfile.id, APP_PROFILE_ID));
   },
   upsertVaccinationRecord: async (record) => {
-    await upsertVaccinationRecordUsingDb(database, record);
+    return upsertVaccinationRecordUsingDb(database, record);
   },
   setLanguage: async (language) => {
     await ensureDefaultProfileUsingDb(database);

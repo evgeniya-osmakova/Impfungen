@@ -8,4 +8,5 @@ export const VACCINATION_VALIDATION_ERROR_CODE = {
   future_dates_invalid: 'future_dates_invalid',
   repeat_interval_invalid: 'repeat_interval_invalid',
   schedule_conflict: 'schedule_conflict',
+  sync_conflict: 'sync_conflict',
 } as const;

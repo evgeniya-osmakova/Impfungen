@@ -7,6 +7,7 @@ import {
   DOSE_KIND_VALUES,
   REPEAT_UNIT_VALUES,
 } from '../modules/profile/profileTypes.js';
+import { OptimisticConcurrencyError } from '../modules/profile/profileRepository.js';
 
 import { publicProcedure, router } from './trpc.js';
 import type { TrpcContext } from './trpc.js';
@@ -37,9 +38,9 @@ const repeatRuleSchema = z.object({
 const vaccinationRecordSchema = z.object({
   completedDoses: z.array(completedDoseSchema),
   diseaseId: z.string().min(1),
+  expectedUpdatedAt: isoDateTimeSchema.nullable(),
   futureDueDoses: z.array(plannedDoseSchema),
   repeatEvery: repeatRuleSchema.nullable(),
-  updatedAt: isoDateTimeSchema,
 });
 
 type SetLanguageInput = {
@@ -77,10 +78,18 @@ const profileRouter = router({
     .input(vaccinationRecordSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.profileRepository.upsertVaccinationRecord(input);
+        const updatedAt = await ctx.profileRepository.upsertVaccinationRecord(input);
 
-        return { ok: true as const };
+        return { ok: true as const, updatedAt };
       } catch (error) {
+        if (error instanceof OptimisticConcurrencyError) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Vaccination record was changed by another client. Refresh and retry.',
+            cause: error,
+          });
+        }
+
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to save vaccination record.',

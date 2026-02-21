@@ -15,7 +15,13 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@backend/contracts': path.resolve('../backend/src/contracts.ts'),
       src: path.resolve('src/'),
+    },
+  },
+  server: {
+    fs: {
+      allow: [path.resolve('..')],
     },
   },
   test: {

@@ -11,7 +11,7 @@ import type {
 } from '../../../../interfaces/immunizationRecord';
 import { useInternalHomeUiStore } from '../../../../state/internalHomeUi';
 import { useVaccinationStore } from '../../../../state/vaccination';
-import { selectVaccinationViewData } from '../../../../state/vaccination/selectors';
+import { selectModalsViewData } from '../../../../state/vaccination/selectors';
 import { Modal } from '../../../../ui';
 
 import { VaccinationCompleteDoseForm } from './components/VaccinationCompleteDoseForm/VaccinationCompleteDoseForm';
@@ -44,19 +44,16 @@ export const Modals = () => {
       setFormErrorKey: state.setFormErrorKey,
     })),
   );
+  const { diseasesForForm, recordForEdit } = useVaccinationStore(
+    useShallow(selectModalsViewData),
+  );
   const {
     cancelEdit,
-    country,
-    editingDiseaseId,
-    records,
     submitCompletedDose,
     submitRecord,
   } = useVaccinationStore(
     useShallow((state) => ({
       cancelEdit: state.cancelEdit,
-      country: state.country,
-      editingDiseaseId: state.editingDiseaseId,
-      records: state.records,
       submitCompletedDose: state.submitCompletedDose,
       submitRecord: state.submitRecord,
     })),
@@ -72,11 +69,6 @@ export const Modals = () => {
     diseaseFieldRef.current?.focus({ preventScroll: true });
   }, [isFormModalOpen]);
 
-  const { diseasesForForm, recordForEdit } = selectVaccinationViewData({
-    country,
-    editingDiseaseId,
-    records,
-  });
   const diseasesForFormSorted = sortDiseasesByLabel(diseasesForForm, resolveDiseaseLabel);
 
   const handleSubmitRecord = async (recordInput: ImmunizationSeriesInput) => {

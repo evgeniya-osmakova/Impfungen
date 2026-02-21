@@ -23,6 +23,27 @@ interface VaccinationStoreViewSource {
   records: readonly ImmunizationSeries[];
 }
 
+interface WorkspaceViewData {
+  country: CountryCode | null;
+  recordsForView: VaccinationStoreViewData['recordsForView'];
+}
+
+interface TopRowViewData {
+  country: CountryCode | null;
+  recordsDueInNextYear: VaccinationStoreViewData['recordsDueInNextYear'];
+}
+
+interface CatalogViewData {
+  availableDiseases: VaccinationStoreViewData['availableDiseases'];
+  categoryCounts: VaccinationStoreViewData['categoryCounts'];
+  country: CountryCode | null;
+}
+
+interface ModalsViewData {
+  diseasesForForm: VaccinationStoreViewData['diseasesForForm'];
+  recordForEdit: VaccinationStoreViewData['recordForEdit'];
+}
+
 const VACCINATION_DISEASES_BY_ID = new Map(
   VACCINATION_DISEASE_CATALOG.map((disease) => [disease.id, disease]),
 );
@@ -63,3 +84,96 @@ export const selectVaccinationViewData = ({
     recordsWithNextDate: getRecordsWithNextDateCount(records),
   };
 };
+
+type VaccinationViewDataProjector = (
+  source: VaccinationStoreViewSource,
+) => VaccinationStoreViewData;
+
+export const createMemoizedVaccinationViewDataProjector = (
+  projector: VaccinationViewDataProjector = selectVaccinationViewData,
+): VaccinationViewDataProjector => {
+  let cachedCountry: CountryCode | null | undefined;
+  let cachedEditingDiseaseId: string | null | undefined;
+  let cachedRecords: readonly ImmunizationSeries[] | null = null;
+  let cachedValue: VaccinationStoreViewData | null = null;
+
+  return (source) => {
+    if (
+      cachedValue
+      && cachedCountry === source.country
+      && cachedEditingDiseaseId === source.editingDiseaseId
+      && cachedRecords === source.records
+    ) {
+      return cachedValue;
+    }
+
+    const nextValue = projector(source);
+
+    cachedCountry = source.country;
+    cachedEditingDiseaseId = source.editingDiseaseId;
+    cachedRecords = source.records;
+    cachedValue = nextValue;
+
+    return nextValue;
+  };
+};
+
+export const createVaccinationStoreSelectors = (
+  projectVaccinationViewData: VaccinationViewDataProjector = createMemoizedVaccinationViewDataProjector(),
+) => {
+  const selectVaccinationViewDataFromStore = (
+    state: VaccinationStoreViewSource,
+  ): VaccinationStoreViewData => projectVaccinationViewData(state);
+
+  const selectWorkspaceViewData = (state: VaccinationStoreViewSource): WorkspaceViewData => {
+    const viewData = selectVaccinationViewDataFromStore(state);
+
+    return {
+      country: state.country,
+      recordsForView: viewData.recordsForView,
+    };
+  };
+
+  const selectTopRowViewData = (state: VaccinationStoreViewSource): TopRowViewData => {
+    const viewData = selectVaccinationViewDataFromStore(state);
+
+    return {
+      country: state.country,
+      recordsDueInNextYear: viewData.recordsDueInNextYear,
+    };
+  };
+
+  const selectCatalogViewData = (state: VaccinationStoreViewSource): CatalogViewData => {
+    const viewData = selectVaccinationViewDataFromStore(state);
+
+    return {
+      availableDiseases: viewData.availableDiseases,
+      categoryCounts: viewData.categoryCounts,
+      country: state.country,
+    };
+  };
+
+  const selectModalsViewData = (state: VaccinationStoreViewSource): ModalsViewData => {
+    const viewData = selectVaccinationViewDataFromStore(state);
+
+    return {
+      diseasesForForm: viewData.diseasesForForm,
+      recordForEdit: viewData.recordForEdit,
+    };
+  };
+
+  return {
+    selectCatalogViewData,
+    selectModalsViewData,
+    selectTopRowViewData,
+    selectVaccinationViewDataFromStore,
+    selectWorkspaceViewData,
+  };
+};
+
+const storeSelectors = createVaccinationStoreSelectors();
+
+export const selectWorkspaceViewData = storeSelectors.selectWorkspaceViewData;
+export const selectTopRowViewData = storeSelectors.selectTopRowViewData;
+export const selectCatalogViewData = storeSelectors.selectCatalogViewData;
+export const selectModalsViewData = storeSelectors.selectModalsViewData;

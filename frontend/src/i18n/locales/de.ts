@@ -131,6 +131,7 @@ export const de = {
           futureDatesInvalid: 'Bitte pruefe die eingegebenen zukuenftigen Daten.',
           repeatIntervalInvalid: 'Bitte ein gueltiges Wiederholungsintervall angeben (ganze Zahl > 0).',
           scheduleConflict: 'Bitte entweder manuelle Daten oder Wiederholungsintervall auswaehlen.',
+          syncConflict: 'Der Eintrag wurde in einer anderen Sitzung geaendert. Bitte aktualisieren und erneut versuchen.',
         },
       },
       records: {

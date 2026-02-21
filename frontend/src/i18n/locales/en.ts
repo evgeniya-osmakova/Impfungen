@@ -131,6 +131,7 @@ export const en = {
           futureDatesInvalid: 'Check that all future dates are valid.',
           repeatIntervalInvalid: 'Provide a valid repeat interval (positive integer).',
           scheduleConflict: 'Choose either manual dates or repeat interval, not both.',
+          syncConflict: 'This record was changed in another session. Refresh and try again.',
         },
       },
       records: {

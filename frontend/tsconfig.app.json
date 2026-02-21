@@ -14,7 +14,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@backend/router": ["../backend/src/trpc/router.ts"]
+      "@backend/contracts": ["../backend/src/contracts.ts"]
     },
     "jsx": "react-jsx",
     "types": ["vite/client", "vitest/globals"],

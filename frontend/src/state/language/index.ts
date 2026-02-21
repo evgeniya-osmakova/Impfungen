@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { getProfileApi } from '../../api/profileApi';
 import i18n from '../../i18n';
-import { resolveAppLanguage } from '../../i18n/resources';
+import { resolveAppLanguage, syncLanguage } from '../../i18n/resources'
 import type { AppLanguage } from '../../interfaces/language';
 
 interface LanguageStore {
@@ -11,14 +11,16 @@ interface LanguageStore {
   setLanguage: (initialLanguage: AppLanguage) => void;
 }
 
-export const useLanguageStore = create<LanguageStore>((set) => ({
-  language: 'en',
+export const useLanguageStore = create<LanguageStore>((set, get) => ({
+  language: resolveAppLanguage(i18n?.resolvedLanguage),
   changeLanguage: (nextLanguage) => {
-    const selectedLanguage = resolveAppLanguage(i18n.resolvedLanguage);
+    const selectedLanguage = get().language;
 
     if (nextLanguage === selectedLanguage) {
       return;
     }
+
+    set({ language: nextLanguage });
 
     const profileApi = getProfileApi();
 
@@ -28,9 +30,13 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
       });
     }
 
-    void i18n.changeLanguage(nextLanguage);
+    syncLanguage(nextLanguage);
   },
   setLanguage: (initialLanguage) => {
-    set({ language: initialLanguage })
-  }
+    if (get().language !== initialLanguage) {
+      set({ language: initialLanguage });
+    }
+
+    syncLanguage(initialLanguage);
+  },
 }));

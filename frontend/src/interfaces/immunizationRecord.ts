@@ -1,15 +1,11 @@
-import type { DoseKind } from './base';
-import type { CompletedDose, PlannedDose, RepeatRule } from './dose';
-import type { NextDue } from './nextDue';
+import type { VaccinationStorageRecord } from '@backend/contracts';
 import { VACCINATION_SCHEDULE_MODE } from 'src/constants/vaccination.ts'
 
-export interface ImmunizationSeries {
-  completedDoses: CompletedDose[];
-  diseaseId: string;
-  futureDueDoses: PlannedDose[];
-  repeatEvery: RepeatRule | null;
-  updatedAt: string;
-}
+import type { DoseKind } from './base';
+import type { PlannedDose, RepeatRule } from './dose';
+import type { NextDue } from './nextDue';
+
+export type ImmunizationSeries = VaccinationStorageRecord;
 
 export interface ImmunizationSeriesView extends ImmunizationSeries {
   nextDue: NextDue | null;
