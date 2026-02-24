@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -8,7 +9,8 @@ import {
   VACCINATION_DEFAULT_SEARCH_QUERY,
 } from '../../constants/vaccination';
 import i18n from '../../i18n';
-import { useInternalHomeUiStore } from '../../state/internalHomeUi';
+import { useMainPageUiStore } from 'src/state/mainPageUi';
+import { useLanguageStore } from '../../state/language';
 import { useVaccinationStore } from '../../state/vaccination';
 import { formatDateByLanguage } from '../../utils/date';
 
@@ -24,18 +26,20 @@ const toIsoDateShiftedFromToday = (days: number) => {
 
 const resetStores = () => {
   useVaccinationStore.setState({
+    activeAccountId: 1,
     country: null,
     records: [],
     categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
     editingDiseaseId: null,
     searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
   });
-  useInternalHomeUiStore.getState().resetUi();
+  useMainPageUiStore.getState().resetUi();
 };
 
 describe('Main', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('ru');
+    useLanguageStore.setState({ language: 'ru' });
     resetStores();
   });
 
@@ -44,6 +48,7 @@ describe('Main', () => {
     const plannedDueDate = toIsoDateShiftedFromToday(10);
     const completedFromPlannedDate = toIsoDateShiftedFromToday(0);
     const additionalCompletedDate = toIsoDateShiftedFromToday(-1);
+    useVaccinationStore.setState({ country: 'RU' });
 
     const {
       findAllByRole,
@@ -55,15 +60,11 @@ describe('Main', () => {
       getByText,
       queryAllByRole,
       queryByText,
-    } = render(<Main />);
-
-    expect(
-      getByRole('heading', {
-        name: 'Выберите страну рекомендаций',
-      }),
-    ).toBeInTheDocument();
-
-    await user.click(getByText('Россия'));
+    } = render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>,
+    );
 
     expect(await findByRole('heading', { name: 'Вакцинации на ближайший год' })).toBeInTheDocument();
 
@@ -76,6 +77,7 @@ describe('Main', () => {
     await user.click(getByRole('button', { name: 'Сохранить запись' }));
 
     expect(await findByRole('heading', { name: 'Корь' })).toBeInTheDocument();
+    expect(getByText('Дата вакцинации')).toBeInTheDocument();
     expect(queryByText('Следующая')).not.toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Редактировать' }));
@@ -137,7 +139,7 @@ describe('Main', () => {
     expect(within(catalogSection).getByText('Столбняк')).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Удалить' }));
-    expect(await findByText('Это действие нельзя отменить.')).toBeInTheDocument();
+    expect(await findByText('Это действие нельзя будет отменить.')).toBeInTheDocument();
     await user.click(getByRole('button', { name: 'Удалить запись' }));
 
     expect(await findByText('Записей пока нет.')).toBeInTheDocument();
@@ -147,10 +149,13 @@ describe('Main', () => {
     const user = userEvent.setup();
     const nextDueDate = toIsoDateShiftedFromToday(5);
     const futureDueDate = toIsoDateShiftedFromToday(30);
+    useVaccinationStore.setState({ country: 'RU' });
 
-    const { findByRole, getAllByLabelText, getByLabelText, getByRole, getByText } = render(<Main />);
-
-    await user.click(getByText('Россия'));
+    const { findByRole, getAllByLabelText, getByLabelText, getByRole } = render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>,
+    );
     await user.click(getByRole('button', { name: 'Добавить выполненную вакцинацию' }));
 
     await user.selectOptions(getByLabelText('Заболевание'), 'tetanus');
@@ -194,12 +199,15 @@ describe('Main', () => {
 
   it('shows disease names in selected language', async () => {
     const user = userEvent.setup();
+    useVaccinationStore.setState({ country: 'RU' });
 
     await i18n.changeLanguage('en');
 
-    const { getByLabelText, getByRole, getByText } = render(<Main />);
-
-    await user.click(getByText('Russia'));
+    const { getByLabelText, getByRole } = render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>,
+    );
     await user.click(getByRole('button', { name: 'Add completed vaccination' }));
 
     const diseaseSelect = getByLabelText('Disease');
@@ -209,10 +217,13 @@ describe('Main', () => {
 
   it('prefills disease field when catalog card is clicked', async () => {
     const user = userEvent.setup();
+    useVaccinationStore.setState({ country: 'RU' });
 
-    const { findByLabelText, getByRole, getByText } = render(<Main />);
-
-    await user.click(getByText('Россия'));
+    const { findByLabelText, getByRole } = render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>,
+    );
 
     await user.click(getByRole('button', { name: /столбняк/i }));
 
@@ -222,10 +233,12 @@ describe('Main', () => {
   });
 
   it('shows universal catalog without recommendation badges in "no recommendations" mode', async () => {
-    const user = userEvent.setup();
-    const { findByRole, getByText, queryByText } = render(<Main />);
-
-    await user.click(getByText('Без рекомендаций'));
+    useVaccinationStore.setState({ country: 'NONE' });
+    const { findByRole, getByText, queryByText } = render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>,
+    );
 
     expect(await findByRole('heading', { name: 'Что ещё можно сделать' })).toBeInTheDocument();
     expect(getByText('Корь')).toBeInTheDocument();

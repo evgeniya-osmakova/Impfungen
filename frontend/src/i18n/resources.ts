@@ -1,4 +1,3 @@
-import { APP_LANGUAGE_VALUES } from '@backend/contracts';
 import i18n from 'src/i18n/index.ts'
 
 import type { AppLanguage } from '../interfaces/language';
@@ -7,6 +6,7 @@ import { de } from './locales/de';
 import { en } from './locales/en';
 import { ru } from './locales/ru';
 
+const APP_LANGUAGE_VALUES = ['ru', 'de', 'en'] as const;
 export const supportedLanguages: readonly AppLanguage[] = APP_LANGUAGE_VALUES;
 export const DEFAULT_LANGUAGE: AppLanguage = 'en';
 

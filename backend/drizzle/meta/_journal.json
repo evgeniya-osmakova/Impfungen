@@ -15,6 +15,13 @@
       "when": 1761010000000,
       "tag": "0001_remove_is_country_confirmed",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761020000000,
+      "tag": "0002_profile_members",
+      "breakpoints": true
     }
   ]
 }

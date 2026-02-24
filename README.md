@@ -1,5 +1,11 @@
 # Impfungen Workspace
 
+## Current product scope (important)
+
+This project currently targets a single user and does not implement authentication or authorization.
+The intended usage is one person managing their own vaccination data and the data of family members
+inside one shared profile.
+
 Проект разделён на два сервиса:
 
 - `frontend` — React + Vite приложение

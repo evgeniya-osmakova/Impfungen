@@ -22,6 +22,7 @@
   --surface-50: #f8fafc;
   --surface-100: #f1f5f9;
   --surface-200: #e2e8f0;
+  --surface-300: #cbd5e1;
   --surface-900: #0f172a;
 
   --text-primary: #0f172a;
@@ -29,6 +30,7 @@
   --text-inverse: #ffffff;
 
   --danger-50: #fef2f2;
+  --danger-300: #fca5a5;
   --danger-500: #dc2626;
   --danger-600: #b91c1c;
   --danger-700: #991b1b;

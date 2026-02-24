@@ -1,0 +1,421 @@
+.vaccinationRecords {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--surface-0) 90%, var(--accent-50)),
+      color-mix(in oklab, var(--surface-0) 95%, var(--brand-50))
+    );
+}
+
+.vaccinationRecords__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vaccinationRecords__title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.vaccinationRecords__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: masonry;
+  gap: 14px;
+  align-items: start;
+}
+
+.vaccinationRecords__card {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  padding: 18px;
+  align-content: start;
+}
+
+.vaccinationRecords__cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.vaccinationRecords__cardTitle {
+  margin: 0;
+  min-width: 0;
+  font-size: clamp(1.18rem, 1.55vw, 1.42rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.vaccinationRecords__actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.vaccinationRecords__actionButton {
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  border-color: color-mix(in oklab, var(--surface-300) 58%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 78%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 560;
+}
+
+.vaccinationRecords__actionButton:hover {
+  filter: none;
+  box-shadow: none;
+  background: color-mix(in oklab, var(--surface-100) 64%, var(--surface-0));
+}
+
+.vaccinationRecords__actionButtonIcon {
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.vaccinationRecords__actionIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.vaccinationRecords__actionButtonDelete {
+  color: color-mix(in oklab, var(--danger-600) 60%, var(--text-secondary));
+  border-color: color-mix(in oklab, var(--danger-300) 42%, var(--surface-0));
+}
+
+.vaccinationRecords__actionButtonDelete:hover {
+  background: color-mix(in oklab, var(--danger-50) 68%, var(--surface-0));
+}
+
+.vaccinationRecords__status {
+  display: grid;
+  gap: 10px;
+}
+
+.vaccinationRecords__statusGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vaccinationRecords__statusGridSingle {
+  grid-template-columns: 1fr;
+}
+
+.vaccinationRecords__statusCard {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 88px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-50) 80%, var(--surface-0));
+}
+
+.vaccinationRecords__statusLabel {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.vaccinationRecords__statusDate {
+  color: var(--text-primary);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.vaccinationRecords__history {
+  display: grid;
+  gap: 8px;
+}
+
+.vaccinationRecords__historyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.vaccinationRecords__historyItem {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--surface-50) 72%, var(--surface-0));
+  border: 1px solid color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+}
+
+.vaccinationRecords__historyMain {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.86rem;
+}
+
+.vaccinationRecords__historyMain strong {
+  color: var(--text-primary);
+}
+
+.vaccinationRecords__historyMain span {
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.vaccinationRecords__historyMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.vaccinationRecords__details {
+  display: grid;
+  gap: 8px;
+}
+
+.vaccinationRecords__futureDates {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 4px;
+  align-items: start;
+}
+
+.vaccinationRecords__futureDatesLabel {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.vaccinationRecords__futureDatesList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  justify-self: end;
+  justify-items: end;
+  text-align: right;
+}
+
+.vaccinationRecords__futureDatesItem {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+}
+
+.vaccinationRecords__detailLine {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.vaccinationRecords__detailLine strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+}
+
+.vaccinationRecords__repeatLine {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vaccinationRecords__repeatLabel {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.vaccinationRecords__repeatValue {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+}
+
+.vaccinationRecords__markDoneButton {
+  justify-self: flex-end;
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  border-color: color-mix(in oklab, var(--surface-300) 58%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 78%, transparent);
+  color: var(--text-secondary);
+}
+
+.vaccinationRecords__historyToggle {
+  justify-self: flex-start;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 560;
+  line-height: 1.25;
+}
+
+.vaccinationRecords__historyToggle:hover {
+  filter: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.vaccinationRecords__historyToggleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+}
+
+.vaccinationRecords__historyToggleIcon::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform 0.12s ease;
+}
+
+.vaccinationRecords__historyToggleIconExpanded::before {
+  transform: rotate(-135deg);
+}
+
+.vaccinationRecords__historyToggleText {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.vaccinationRecords__empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in oklab, var(--surface-200) 70%, var(--surface-0));
+  background: var(--surface-0);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.vaccinationRecords__deleteModal {
+  display: grid;
+  gap: 12px;
+}
+
+.vaccinationRecords__deleteModalTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.vaccinationRecords__deleteModalText {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.vaccinationRecords__deleteModalWarning {
+  margin: 0;
+  color: var(--danger-600);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.vaccinationRecords__deleteModalActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.vaccinationRecords__deleteModalButton {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .vaccinationRecords {
+    padding: 16px;
+  }
+
+  .vaccinationRecords__list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .vaccinationRecords__cardHead {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vaccinationRecords__actions {
+    justify-content: flex-start;
+  }
+
+  .vaccinationRecords__actionButton {
+    font-size: 0.8rem;
+  }
+
+  .vaccinationRecords__deleteModalActions {
+    grid-template-columns: 1fr;
+  }
+
+  .vaccinationRecords__detailLine,
+  .vaccinationRecords__historyMain {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vaccinationRecords__statusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .vaccinationRecords__futureDates {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .vaccinationRecords__futureDatesList {
+    justify-self: start;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .vaccinationRecords__detailLine strong,
+  .vaccinationRecords__historyMain span {
+    text-align: left;
+  }
+}

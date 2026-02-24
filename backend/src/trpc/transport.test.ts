@@ -8,20 +8,78 @@ import type { ProfileSnapshot } from '../modules/profile/profileTypes.js';
 import { appRouter } from './router.js';
 import { createTrpcContext } from './trpc.js';
 
+const createSnapshot = (): ProfileSnapshot => ({
+  accountsState: {
+    accounts: [
+      {
+        birthYear: null,
+        country: null,
+        id: 1,
+        kind: 'primary',
+        name: null,
+      },
+    ],
+    selectedAccountId: 1,
+  },
+  language: 'ru',
+  vaccinationState: {
+    country: null,
+    records: [],
+  },
+});
+
 const createRepository = (
   snapshot: ProfileSnapshot,
 ): ProfileRepository => ({
+  createFamilyAccount: async ({ birthYear, country, name }) => {
+    const nextId = Math.max(...snapshot.accountsState.accounts.map((account) => account.id), 0) + 1;
+
+    snapshot.accountsState.accounts.push({
+      birthYear,
+      country,
+      id: nextId,
+      kind: 'family',
+      name,
+    });
+
+    return snapshot;
+  },
+  deleteFamilyAccount: async (accountId) => {
+    snapshot.accountsState.accounts = snapshot.accountsState.accounts.filter(
+      (account) => account.id !== accountId || account.kind === 'primary',
+    );
+
+    if (snapshot.accountsState.selectedAccountId === accountId) {
+      snapshot.accountsState.selectedAccountId = 1;
+      const selectedPrimary = snapshot.accountsState.accounts.find((account) => account.id === 1);
+      snapshot.vaccinationState.country = selectedPrimary?.country ?? null;
+    }
+
+    return snapshot;
+  },
   ensureDefaultProfile: async () => undefined,
   getProfileSnapshot: async () => snapshot,
-  removeVaccinationRecord: async (diseaseId) => {
+  removeVaccinationRecord: async (_accountId, diseaseId) => {
     snapshot.vaccinationState.records = snapshot.vaccinationState.records.filter(
       (record) => record.diseaseId !== diseaseId,
     );
   },
-  setVaccinationCountry: async (country) => {
+  setVaccinationCountry: async (accountId, country) => {
     snapshot.vaccinationState.country = country;
+    const selectedAccount = snapshot.accountsState.accounts.find(
+      (account) => account.id === accountId,
+    );
+
+    if (selectedAccount) {
+      selectedAccount.country = country;
+    }
   },
-  upsertVaccinationRecord: async (record) => {
+  selectAccount: async (accountId) => {
+    snapshot.accountsState.selectedAccountId = accountId;
+
+    return snapshot;
+  },
+  upsertVaccinationRecord: async (_accountId, record) => {
     const { expectedUpdatedAt: _expectedUpdatedAt, ...payload } = record;
     const persistedRecord = {
       ...payload,
@@ -43,17 +101,26 @@ const createRepository = (
   setLanguage: async (language) => {
     snapshot.language = language;
   },
+  updateAccount: async ({ accountId, birthYear, country, name }) => {
+    const account = snapshot.accountsState.accounts.find((current) => current.id === accountId);
+
+    if (account) {
+      account.birthYear = birthYear;
+      account.country = country;
+      account.name = name;
+    }
+
+    if (snapshot.accountsState.selectedAccountId === accountId) {
+      snapshot.vaccinationState.country = country;
+    }
+
+    return snapshot;
+  },
 });
 
 describe('tRPC Fastify transport', () => {
   it('handles profile procedures over HTTP transport', async () => {
-    const snapshot: ProfileSnapshot = {
-      language: 'ru',
-      vaccinationState: {
-        country: null,
-        records: [],
-      },
-    };
+    const snapshot = createSnapshot();
     const profileRepository = createRepository(snapshot);
     const app = Fastify();
 
@@ -105,6 +172,7 @@ describe('tRPC Fastify transport', () => {
       method: 'POST',
       url: '/trpc/profile.setVaccinationCountry',
       payload: {
+        accountId: 1,
         country: 'RU',
       },
     });
@@ -137,7 +205,10 @@ describe('tRPC Fastify transport', () => {
     const upsertRecordResponse = await app.inject({
       method: 'POST',
       url: '/trpc/profile.upsertVaccinationRecord',
-      payload: nextRecord,
+      payload: {
+        accountId: 1,
+        ...nextRecord,
+      },
     });
 
     expect(upsertRecordResponse.statusCode).toBe(200);
@@ -155,6 +226,7 @@ describe('tRPC Fastify transport', () => {
       method: 'POST',
       url: '/trpc/profile.removeVaccinationRecord',
       payload: {
+        accountId: 1,
         diseaseId: 'measles',
       },
     });

@@ -1,4 +1,5 @@
 import { createProfileApi, setProfileApi } from 'src/api/profileApi.ts'
+import { useAccountsStore } from 'src/state/accounts';
 import { useLanguageStore } from 'src/state/language'
 import { useVaccinationStore } from 'src/state/vaccination'
 import { create } from 'zustand'
@@ -23,7 +24,12 @@ export const useStore = create<Store>((set) => ({
       const { setLanguage } = useLanguageStore.getState();
       setLanguage(profile.language);
 
+      const { setAccountsState } = useAccountsStore.getState();
+      setAccountsState(profile.accountsState);
+
       const { setVaccinationStoreState } = useVaccinationStore.getState();
+      const { setActiveAccountId } = useVaccinationStore.getState();
+      setActiveAccountId(profile.accountsState.selectedAccountId);
       setVaccinationStoreState(profile.vaccinationState);
       set({ isLoaded: true });
     } catch (e) {

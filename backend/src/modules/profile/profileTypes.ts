@@ -4,6 +4,9 @@ export type AppLanguage = (typeof APP_LANGUAGE_VALUES)[number];
 export const COUNTRY_CODE_VALUES = ['RU', 'DE', 'NONE'] as const;
 export type CountryCode = (typeof COUNTRY_CODE_VALUES)[number];
 
+export const PROFILE_ACCOUNT_KIND_VALUES = ['primary', 'family'] as const;
+export type ProfileAccountKind = (typeof PROFILE_ACCOUNT_KIND_VALUES)[number];
+
 export const DOSE_KIND_VALUES = ['nextDose', 'revaccination'] as const;
 export type DoseKind = (typeof DOSE_KIND_VALUES)[number];
 
@@ -50,7 +53,21 @@ export interface VaccinationStorageState {
   records: VaccinationStorageRecord[];
 }
 
+export interface ProfileAccountSummary {
+  birthYear: number | null;
+  country: CountryCode | null;
+  id: number;
+  kind: ProfileAccountKind;
+  name: string | null;
+}
+
+export interface ProfileAccountsState {
+  accounts: ProfileAccountSummary[];
+  selectedAccountId: number;
+}
+
 export interface ProfileSnapshot {
+  accountsState: ProfileAccountsState;
   language: AppLanguage;
   vaccinationState: VaccinationStorageState;
 }

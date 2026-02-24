@@ -1,0 +1,108 @@
+.addFamilyMemberModal {
+  display: grid;
+  gap: 12px;
+}
+
+.addFamilyMemberModal__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.addFamilyMemberModal__field {
+  position: relative;
+  padding-bottom: 24px;
+  display: grid;
+  gap: 6px;
+}
+
+.addFamilyMemberModal__fieldError {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.addFamilyMemberModal__requestErrorSlot {
+  position: relative;
+  min-height: 20px;
+}
+
+.addFamilyMemberModal__requestError {
+  position: absolute;
+  inset: 0 auto auto 0;
+  margin: 0;
+  color: var(--danger-600);
+  font-size: 0.86rem;
+}
+
+.addFamilyMemberModal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.addFamilyMemberModal__form {
+  display: grid;
+  gap: 12px;
+}
+
+.addFamilyMemberModal__selectWrap {
+  position: relative;
+}
+
+.addFamilyMemberModal__selectWrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  border-bottom: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  transform: translateY(-62%) rotate(45deg);
+  pointer-events: none;
+}
+
+.addFamilyMemberModal__label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.addFamilyMemberModal__input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 90%, var(--text-primary));
+  background: color-mix(in oklab, var(--surface-50) 92%, var(--surface-0));
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.addFamilyMemberModal__selectWrap > .addFamilyMemberModal__input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+}
+
+.addFamilyMemberModal__input:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent-500) 70%, white);
+  outline-offset: 1px;
+}
+
+.addFamilyMemberModal__error {
+  color: var(--danger-600);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 600px) {
+  .addFamilyMemberModal__actions {
+    justify-content: stretch;
+  }
+
+  .addFamilyMemberModal__actions > * {
+    flex: 1 1 0;
+  }
+}

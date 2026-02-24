@@ -6,6 +6,18 @@ import i18n from '../../i18n';
 import { useLanguageStore } from './index';
 
 const defaultProfileSnapshot: ProfileSnapshot = {
+  accountsState: {
+    accounts: [
+      {
+        birthYear: null,
+        country: null,
+        id: 1,
+        kind: 'primary',
+        name: null,
+      },
+    ],
+    selectedAccountId: 1,
+  },
   language: 'ru',
   vaccinationState: {
     country: null,
@@ -24,10 +36,14 @@ describe('languageStore', () => {
     const setLanguage = vi.fn(() => Promise.resolve());
 
     setProfileApi({
+      createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       removeVaccinationRecord: vi.fn(() => Promise.resolve()),
+      selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
+      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       upsertVaccinationRecord: vi.fn(() => Promise.resolve({
         ok: true as const,
         updatedAt: '2025-01-10T00:00:00.000Z',
@@ -44,10 +60,14 @@ describe('languageStore', () => {
     const setLanguage = vi.fn(() => Promise.resolve());
 
     setProfileApi({
+      createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       removeVaccinationRecord: vi.fn(() => Promise.resolve()),
+      selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
+      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       upsertVaccinationRecord: vi.fn(() => Promise.resolve({
         ok: true as const,
         updatedAt: '2025-01-10T00:00:00.000Z',

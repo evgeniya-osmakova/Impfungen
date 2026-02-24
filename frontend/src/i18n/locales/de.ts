@@ -43,6 +43,10 @@ export const de = {
       },
     },
     internal: {
+      nav: {
+        journal: 'Journal',
+        account: 'Profil',
+      },
       page: {
         title: 'Meine Impfungen und kommende Termine',
         description:
@@ -236,6 +240,72 @@ export const de = {
         typhoidFever: 'Typhus',
         varicella: 'Varizellen',
         yellowFever: 'Gelbfieber',
+      },
+    },
+    account: {
+      page: {
+        title: 'Konto und Familie',
+        description: 'Verwalte Familienprofile und Einstellungen fuer den Impfkalender.',
+        empty: 'Konten sind noch nicht geladen.',
+      },
+      mandatory: {
+        title: 'Hauptkonto ausfuellen',
+        description:
+          'Bitte Name, Geburtsjahr und Land fuer den Impfkalender des Hauptkontos angeben, um fortzufahren.',
+      },
+      list: {
+        title: 'Konten',
+        description: 'Zwischen Familienprofilen wechseln.',
+        selectLabel: 'Ausgewaehltes Konto',
+        selected: 'Ausgewaehlt',
+      },
+      edit: {
+        title: 'Kontodaten',
+        description: 'Daten des ausgewaehlten Kontos bearbeiten.',
+        primaryDescription: 'Bitte die Daten des Hauptkontos vervollstaendigen.',
+      },
+      add: {
+        title: 'Familienmitglied hinzufuegen',
+        description: 'Name und Geburtsjahr genuegen. Das Land kann spaeter gewaehlt werden.',
+      },
+      fields: {
+        name: 'Name',
+        birthYear: 'Geburtsjahr',
+        country: 'Land des Impfkalenders',
+        countryUnset: 'Kein Land ausgewaehlt',
+      },
+      placeholders: {
+        noName: 'Ohne Namen',
+        noBirthYear: 'Jahr fehlt',
+      },
+      kinds: {
+        primary: 'Hauptkonto',
+        family: 'Familie',
+      },
+      actions: {
+        save: 'Speichern',
+        saving: 'Speichert...',
+        addMember: 'Familienmitglied hinzufuegen',
+        adding: 'Wird hinzugefuegt...',
+        deleteMember: 'Familienmitglied loeschen',
+        deleting: 'Wird geloescht...',
+      },
+      validation: {
+        nameRequired: 'Bitte Namen angeben',
+        birthYearInvalid: 'Bitte ein gueltiges Geburtsjahr eingeben ({{min}}-{{max}})',
+        countryRequired: 'Bitte Land des Impfkalenders waehlen',
+      },
+      errors: {
+        saveFailed: 'Konto konnte nicht gespeichert werden, bitte erneut versuchen',
+        createFailed: 'Familienmitglied konnte nicht hinzugefuegt werden, bitte erneut versuchen',
+        deleteFailed: 'Familienmitglied konnte nicht geloescht werden, bitte erneut versuchen',
+      },
+      deleteConfirm: {
+        title: 'Familienmitglied loeschen?',
+        message: 'Sind Sie sicher, dass Sie das Profil \"{{name}}\" loeschen moechten?',
+        warning: 'Diese Aktion kann nicht rueckgaengig gemacht werden.',
+        cancel: 'Abbrechen',
+        confirm: 'Loeschen',
       },
     },
   },

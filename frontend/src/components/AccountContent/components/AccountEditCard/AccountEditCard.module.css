@@ -1,0 +1,149 @@
+.accountEditCard {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.accountEditCard__header {
+  display: grid;
+  gap: 10px;
+}
+
+.accountEditCard__headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accountEditCard__headerText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.accountEditCard__headerActionSlot {
+  width: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.accountEditCard__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.accountEditCard__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.accountEditCard__empty {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.accountEditCard__form {
+  display: grid;
+  gap: 12px;
+}
+
+.accountEditCard__field {
+  display: grid;
+  gap: 6px;
+}
+
+.accountEditCard__selectWrap {
+  position: relative;
+}
+
+.accountEditCard__selectWrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  border-bottom: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  transform: translateY(-62%) rotate(45deg);
+  pointer-events: none;
+}
+
+.accountEditCard__label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.accountEditCard__input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 90%, var(--text-primary));
+  background: color-mix(in oklab, var(--surface-50) 92%, var(--surface-0));
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.accountEditCard__selectWrap > .accountEditCard__input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+}
+
+.accountEditCard__input:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent-500) 70%, white);
+  outline-offset: 1px;
+}
+
+.accountEditCard__error,
+.accountEditCard__requestError {
+  color: var(--danger-600);
+  font-size: 0.86rem;
+}
+
+.accountEditCard__requestError {
+  margin: 0;
+}
+
+.accountEditCard__meta {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.accountEditCard__iconButton {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  padding: 0;
+  border-radius: 12px;
+}
+
+.accountEditCard__iconButton_danger {
+  color: var(--danger-700);
+  border-color: color-mix(in oklab, var(--danger-300) 42%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 78%, transparent);
+}
+
+.accountEditCard__iconButton_danger:hover {
+  filter: none;
+  box-shadow: none;
+  background: color-mix(in oklab, var(--danger-50) 68%, var(--surface-0));
+}
+
+.accountEditCard__actionIcon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 600px) {
+  .accountEditCard__headerTop {
+    align-items: center;
+  }
+}

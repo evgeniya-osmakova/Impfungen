@@ -13,6 +13,7 @@ import {
   appProfile,
   completedDose,
   plannedDose,
+  profileMember,
   vaccinationSeries,
 } from '../../db/schema.js';
 
@@ -20,6 +21,8 @@ import type {
   AppLanguage,
   CountryCode,
   DoseKind,
+  ProfileAccountSummary,
+  ProfileAccountsState,
   ProfileSnapshot,
   RepeatUnit,
   UpsertVaccinationStorageRecordInput,
@@ -34,6 +37,7 @@ const APP_PROFILE_ID = 1;
 type DatabaseClient = typeof db;
 
 type AppProfileRow = InferSelectModel<typeof appProfile>;
+type ProfileMemberRow = InferSelectModel<typeof profileMember>;
 type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
 type CompletedDoseInsert = InferInsertModel<typeof completedDose>;
 type PlannedDoseInsert = InferInsertModel<typeof plannedDose>;
@@ -42,6 +46,20 @@ export class OptimisticConcurrencyError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'OptimisticConcurrencyError';
+  }
+}
+
+export class ProfileAccountNotFoundError extends Error {
+  constructor(accountId: number) {
+    super(`Profile account ${accountId} is not found.`);
+    this.name = 'ProfileAccountNotFoundError';
+  }
+}
+
+export class ProfilePrimaryAccountDeletionError extends Error {
+  constructor(accountId: number) {
+    super(`Primary account ${accountId} cannot be deleted.`);
+    this.name = 'ProfilePrimaryAccountDeletionError';
   }
 }
 
@@ -101,15 +119,36 @@ const toRepeatEvery = (
   };
 };
 
+const toProfileAccountSummary = (
+  member: ProfileMemberRow,
+): ProfileAccountSummary => ({
+  birthYear: member.birthYear ?? null,
+  country: (member.country as CountryCode | null) ?? null,
+  id: member.id,
+  kind: member.kind as ProfileAccountSummary['kind'],
+  name: member.name ?? null,
+});
+
+const toAccountsState = ({
+  members,
+  selectedMember,
+}: {
+  members: ProfileMemberRow[];
+  selectedMember: ProfileMemberRow;
+}): ProfileAccountsState => ({
+  accounts: members.map(toProfileAccountSummary),
+  selectedAccountId: selectedMember.id,
+});
+
 const toVaccinationState = ({
   completedRows,
+  member,
   plannedRows,
-  profile,
   seriesRows,
 }: {
   completedRows: InferSelectModel<typeof completedDose>[];
+  member: Pick<ProfileMemberRow, 'country'>;
   plannedRows: InferSelectModel<typeof plannedDose>[];
-  profile: AppProfileRow;
   seriesRows: VaccinationSeriesRow[];
 }): VaccinationStorageState => {
   const completedBySeriesId = new Map<number, VaccinationStorageCompletedDose[]>();
@@ -140,7 +179,7 @@ const toVaccinationState = ({
   }
 
   return {
-    country: (profile.country as CountryCode | null) ?? null,
+    country: (member.country as CountryCode | null) ?? null,
     records: seriesRows.map((series) => ({
       completedDoses: completedBySeriesId.get(series.id) ?? [],
       diseaseId: series.diseaseId,
@@ -150,6 +189,32 @@ const toVaccinationState = ({
     })),
   };
 };
+
+const loadProfileRowUsingDb = async (
+  database: DatabaseClient,
+): Promise<AppProfileRow> => {
+  const [profile] = await database
+    .select()
+    .from(appProfile)
+    .where(eq(appProfile.id, APP_PROFILE_ID))
+    .limit(1);
+
+  if (!profile) {
+    throw new Error('Default application profile is missing.');
+  }
+
+  return profile;
+};
+
+const loadProfileMembersUsingDb = async (
+  database: DatabaseClient,
+): Promise<ProfileMemberRow[]> => (
+  database
+    .select()
+    .from(profileMember)
+    .where(eq(profileMember.appProfileId, APP_PROFILE_ID))
+    .orderBy(asc(profileMember.sortOrder), asc(profileMember.id))
+);
 
 const ensureDefaultProfileUsingDb = async (
   database: DatabaseClient,
@@ -161,10 +226,154 @@ const ensureDefaultProfileUsingDb = async (
       language: 'ru',
     })
     .onConflictDoNothing();
+
+  const profile = await loadProfileRowUsingDb(database);
+  let members = await loadProfileMembersUsingDb(database);
+  let primaryMember = members.find((member) => member.kind === 'primary') ?? null;
+
+  if (!primaryMember) {
+    const [createdPrimaryMember] = await database
+      .insert(profileMember)
+      .values({
+        appProfileId: APP_PROFILE_ID,
+        kind: 'primary',
+        country: profile.country,
+        sortOrder: 0,
+      })
+      .returning();
+
+    if (!createdPrimaryMember) {
+      throw new Error('Unable to create primary profile member.');
+    }
+
+    primaryMember = createdPrimaryMember;
+    members = await loadProfileMembersUsingDb(database);
+  }
+
+  const selectedMemberIsValid = members.some((member) => member.id === profile.selectedMemberId);
+
+  if (!selectedMemberIsValid) {
+    await database
+      .update(appProfile)
+      .set({
+        selectedMemberId: primaryMember.id,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(appProfile.id, APP_PROFILE_ID));
+  }
+};
+
+const getProfileContextUsingDb = async (
+  database: DatabaseClient,
+): Promise<{
+  members: ProfileMemberRow[];
+  profile: AppProfileRow;
+  selectedMember: ProfileMemberRow;
+}> => {
+  await ensureDefaultProfileUsingDb(database);
+
+  const [profile, members] = await Promise.all([
+    loadProfileRowUsingDb(database),
+    loadProfileMembersUsingDb(database),
+  ]);
+
+  const selectedMember = members.find((member) => member.id === profile.selectedMemberId) ?? null;
+
+  if (!selectedMember) {
+    throw new Error('Selected profile member is missing after initialization.');
+  }
+
+  return {
+    members,
+    profile,
+    selectedMember,
+  };
+};
+
+const getProfileMemberByIdUsingDb = async (
+  database: DatabaseClient,
+  accountId: number,
+): Promise<ProfileMemberRow> => {
+  await ensureDefaultProfileUsingDb(database);
+
+  const [member] = await database
+    .select()
+    .from(profileMember)
+    .where(and(
+      eq(profileMember.id, accountId),
+      eq(profileMember.appProfileId, APP_PROFILE_ID),
+    ))
+    .limit(1);
+
+  if (!member) {
+    throw new ProfileAccountNotFoundError(accountId);
+  }
+
+  return member;
+};
+
+const loadVaccinationStateForMemberUsingDb = async (
+  database: DatabaseClient,
+  member: ProfileMemberRow,
+): Promise<VaccinationStorageState> => {
+  const seriesRows = await database
+    .select()
+    .from(vaccinationSeries)
+    .where(eq(vaccinationSeries.memberId, member.id))
+    .orderBy(asc(vaccinationSeries.diseaseId));
+  const seriesIds = seriesRows.map((series: VaccinationSeriesRow) => series.id);
+
+  if (seriesIds.length === 0) {
+    return {
+      country: (member.country as CountryCode | null) ?? null,
+      records: [],
+    };
+  }
+
+  const [completedRows, plannedRows] = await Promise.all([
+    database
+      .select()
+      .from(completedDose)
+      .where(inArray(completedDose.seriesId, seriesIds))
+      .orderBy(
+        asc(completedDose.seriesId),
+        asc(completedDose.completedAt),
+        asc(completedDose.externalId),
+      ),
+    database
+      .select()
+      .from(plannedDose)
+      .where(inArray(plannedDose.seriesId, seriesIds))
+      .orderBy(
+        asc(plannedDose.seriesId),
+        asc(plannedDose.dueAt),
+        asc(plannedDose.externalId),
+      ),
+  ]);
+
+  return toVaccinationState({
+    completedRows,
+    member,
+    plannedRows,
+    seriesRows,
+  });
+};
+
+const getProfileSnapshotUsingDb = async (
+  database: DatabaseClient,
+): Promise<ProfileSnapshot> => {
+  const { members, profile, selectedMember } = await getProfileContextUsingDb(database);
+
+  return {
+    accountsState: toAccountsState({ members, selectedMember }),
+    language: profile.language as AppLanguage,
+    vaccinationState: await loadVaccinationStateForMemberUsingDb(database, selectedMember),
+  };
 };
 
 const upsertVaccinationRecordUsingDb = async (
   database: DatabaseClient,
+  memberId: number,
   record: UpsertVaccinationStorageRecordInput,
 ): Promise<string> => {
   return database.transaction(async (transaction) => {
@@ -184,7 +393,7 @@ const upsertVaccinationRecordUsingDb = async (
       .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
       .from(vaccinationSeries)
       .where(and(
-        eq(vaccinationSeries.profileId, APP_PROFILE_ID),
+        eq(vaccinationSeries.memberId, memberId),
         eq(vaccinationSeries.diseaseId, record.diseaseId),
       ))
       .limit(1);
@@ -226,6 +435,7 @@ const upsertVaccinationRecordUsingDb = async (
         .insert(vaccinationSeries)
         .values({
           diseaseId: record.diseaseId,
+          memberId,
           profileId: APP_PROFILE_ID,
           ...seriesPayload,
         })
@@ -274,107 +484,139 @@ const upsertVaccinationRecordUsingDb = async (
 };
 
 export interface ProfileRepository {
+  createFamilyAccount: (input: {
+    birthYear: number;
+    country: CountryCode | null;
+    name: string;
+  }) => Promise<ProfileSnapshot>;
+  deleteFamilyAccount: (accountId: number) => Promise<ProfileSnapshot>;
   ensureDefaultProfile: () => Promise<void>;
   getProfileSnapshot: () => Promise<ProfileSnapshot>;
-  removeVaccinationRecord: (diseaseId: string) => Promise<void>;
-  setVaccinationCountry: (country: CountryCode) => Promise<void>;
-  upsertVaccinationRecord: (record: UpsertVaccinationStorageRecordInput) => Promise<string>;
+  removeVaccinationRecord: (accountId: number, diseaseId: string) => Promise<void>;
+  selectAccount: (accountId: number) => Promise<ProfileSnapshot>;
+  setVaccinationCountry: (accountId: number, country: CountryCode) => Promise<void>;
+  upsertVaccinationRecord: (
+    accountId: number,
+    record: UpsertVaccinationStorageRecordInput,
+  ) => Promise<string>;
   setLanguage: (language: AppLanguage) => Promise<void>;
+  updateAccount: (input: {
+    accountId: number;
+    birthYear: number;
+    country: CountryCode | null;
+    name: string;
+  }) => Promise<ProfileSnapshot>;
 }
 
 export const createProfileRepository = (
   database: DatabaseClient = db,
 ): ProfileRepository => ({
-  ensureDefaultProfile: async () => {
-    await ensureDefaultProfileUsingDb(database);
-  },
-  getProfileSnapshot: async () => {
-    await ensureDefaultProfileUsingDb(database);
-
-    const [profile] = await database
-      .select()
-      .from(appProfile)
-      .where(eq(appProfile.id, APP_PROFILE_ID))
-      .limit(1);
-
-    if (!profile) {
-      throw new Error('Default application profile is missing.');
-    }
-
-    const seriesRows = await database
-      .select()
-      .from(vaccinationSeries)
-      .where(eq(vaccinationSeries.profileId, APP_PROFILE_ID))
-      .orderBy(asc(vaccinationSeries.diseaseId));
-    const seriesIds = seriesRows.map((series: VaccinationSeriesRow) => series.id);
-
-    if (seriesIds.length === 0) {
-      return {
-        language: profile.language as AppLanguage,
-        vaccinationState: {
-          country: (profile.country as CountryCode | null) ?? null,
-          records: [],
-        },
-      };
-    }
-
-    const [completedRows, plannedRows] = await Promise.all([
-      database
-        .select()
-        .from(completedDose)
-        .where(inArray(completedDose.seriesId, seriesIds))
-        .orderBy(
-          asc(completedDose.seriesId),
-          asc(completedDose.completedAt),
-          asc(completedDose.externalId),
-        ),
-      database
-        .select()
-        .from(plannedDose)
-        .where(inArray(plannedDose.seriesId, seriesIds))
-        .orderBy(
-          asc(plannedDose.seriesId),
-          asc(plannedDose.dueAt),
-          asc(plannedDose.externalId),
-        ),
-    ]);
-
-    return {
-      language: profile.language as AppLanguage,
-      vaccinationState: toVaccinationState({
-        completedRows,
-        plannedRows,
-        profile,
-        seriesRows,
-      }),
-    };
-  },
-  removeVaccinationRecord: async (diseaseId) => {
+  createFamilyAccount: async ({ birthYear, country, name }) => {
     await database.transaction(async (transaction) => {
       const tx = transaction as unknown as DatabaseClient;
 
       await ensureDefaultProfileUsingDb(tx);
-      await tx
-        .delete(vaccinationSeries)
-        .where(and(
-          eq(vaccinationSeries.profileId, APP_PROFILE_ID),
-          eq(vaccinationSeries.diseaseId, diseaseId),
-        ));
+      const members = await loadProfileMembersUsingDb(tx);
+      const nextSortOrder = members.reduce(
+        (maxSortOrder, member) => Math.max(maxSortOrder, member.sortOrder),
+        -1,
+      ) + 1;
+
+      await tx.insert(profileMember).values({
+        appProfileId: APP_PROFILE_ID,
+        birthYear,
+        country,
+        kind: 'family',
+        name,
+        sortOrder: nextSortOrder,
+      });
     });
+
+    return getProfileSnapshotUsingDb(database);
   },
-  setVaccinationCountry: async (country) => {
+  deleteFamilyAccount: async (accountId) => {
+    await database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
+      const member = await getProfileMemberByIdUsingDb(tx, accountId);
+
+      if (member.kind === 'primary') {
+        throw new ProfilePrimaryAccountDeletionError(accountId);
+      }
+
+      const profile = await loadProfileRowUsingDb(tx);
+
+      await tx
+        .delete(profileMember)
+        .where(and(
+          eq(profileMember.id, accountId),
+          eq(profileMember.appProfileId, APP_PROFILE_ID),
+        ));
+
+      if (profile.selectedMemberId === accountId) {
+        const membersAfterDelete = await loadProfileMembersUsingDb(tx);
+        const fallbackSelectedMember = membersAfterDelete.find((current) => current.kind === 'primary')
+          ?? membersAfterDelete[0];
+
+        if (!fallbackSelectedMember) {
+          throw new Error('Unable to resolve fallback account after deletion.');
+        }
+
+        await tx
+          .update(appProfile)
+          .set({
+            selectedMemberId: fallbackSelectedMember.id,
+            updatedAt: sql`now()`,
+          })
+          .where(eq(appProfile.id, APP_PROFILE_ID));
+      }
+    });
+
+    return getProfileSnapshotUsingDb(database);
+  },
+  ensureDefaultProfile: async () => {
     await ensureDefaultProfileUsingDb(database);
+  },
+  getProfileSnapshot: async () => {
+    return getProfileSnapshotUsingDb(database);
+  },
+  removeVaccinationRecord: async (accountId, diseaseId) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    await database
+      .delete(vaccinationSeries)
+      .where(and(
+        eq(vaccinationSeries.memberId, member.id),
+        eq(vaccinationSeries.diseaseId, diseaseId),
+      ));
+  },
+  selectAccount: async (accountId) => {
+    await getProfileMemberByIdUsingDb(database, accountId);
 
     await database
       .update(appProfile)
       .set({
-        country,
+        selectedMemberId: accountId,
         updatedAt: sql`now()`,
       })
       .where(eq(appProfile.id, APP_PROFILE_ID));
+
+    return getProfileSnapshotUsingDb(database);
   },
-  upsertVaccinationRecord: async (record) => {
-    return upsertVaccinationRecordUsingDb(database, record);
+  setVaccinationCountry: async (accountId, country) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    await database
+      .update(profileMember)
+      .set({
+        country,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(profileMember.id, member.id));
+  },
+  upsertVaccinationRecord: async (accountId, record) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    return upsertVaccinationRecordUsingDb(database, member.id, record);
   },
   setLanguage: async (language) => {
     await ensureDefaultProfileUsingDb(database);
@@ -386,6 +628,24 @@ export const createProfileRepository = (
         updatedAt: sql`now()`,
       })
       .where(eq(appProfile.id, APP_PROFILE_ID));
+  },
+  updateAccount: async ({ accountId, birthYear, country, name }) => {
+    await getProfileMemberByIdUsingDb(database, accountId);
+
+    await database
+      .update(profileMember)
+      .set({
+        birthYear,
+        country,
+        name,
+        updatedAt: sql`now()`,
+      })
+      .where(and(
+        eq(profileMember.id, accountId),
+        eq(profileMember.appProfileId, APP_PROFILE_ID),
+      ));
+
+    return getProfileSnapshotUsingDb(database);
   },
 });
 

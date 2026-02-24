@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import { resolveCountryLabel } from 'src/helpers/resolveLabel.ts'
 
 import { RADIO_PILL_GROUP_SIZE } from '../../constants/ui';
-import { VACCINATION_COUNTRY, VACCINATION_COUNTRY_OPTIONS } from '../../constants/vaccination';
+import { VACCINATION_COUNTRY_OPTIONS } from '../../constants/vaccination';
 import type { CountryCode } from '../../interfaces/base';
 import { RadioPillGroup } from '../../ui';
 
@@ -17,20 +18,9 @@ export const CountryOnboarding = ({
   selectedCountry,
 }: CountryOnboardingProps) => {
   const { t } = useTranslation();
-  const resolveCountryLabel = (countryCode: CountryCode) => {
-    if (countryCode === VACCINATION_COUNTRY.RU) {
-      return t('internal.country.ru');
-    }
-
-    if (countryCode === VACCINATION_COUNTRY.DE) {
-      return t('internal.country.de');
-    }
-
-    return t('internal.country.none');
-  };
 
   const countryOptions = VACCINATION_COUNTRY_OPTIONS.map((countryCode) => ({
-    label: resolveCountryLabel(countryCode),
+    label: resolveCountryLabel(t, countryCode),
     value: countryCode,
   }));
 

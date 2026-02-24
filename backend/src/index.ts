@@ -4,7 +4,6 @@ import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 
 import { env } from './config/env.js';
 import { closeDb } from './db/client.js';
-import { runMigrations } from './db/migrate.js';
 import { createProfileRepository } from './modules/profile/profileRepository.js';
 import { appRouter } from './trpc/router.js';
 import { createTrpcContext } from './trpc/trpc.js';
@@ -20,9 +19,6 @@ app.addHook('onClose', async () => {
 
 const start = async (): Promise<void> => {
   try {
-    await runMigrations();
-    await profileRepository.ensureDefaultProfile();
-
     await app.register(cors, {
       origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN,
     });

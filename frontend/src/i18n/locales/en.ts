@@ -43,6 +43,10 @@ export const en = {
       },
     },
     internal: {
+      nav: {
+        journal: 'Journal',
+        account: 'Profile',
+      },
       page: {
         title: 'My vaccinations and upcoming dates',
         description:
@@ -236,6 +240,72 @@ export const en = {
         typhoidFever: 'Typhoid fever',
         varicella: 'Varicella (chickenpox)',
         yellowFever: 'Yellow fever',
+      },
+    },
+    account: {
+      page: {
+        title: 'Account and family',
+        description: 'Manage family profiles and vaccination calendar settings.',
+        empty: 'Accounts are not loaded yet.',
+      },
+      mandatory: {
+        title: 'Complete the primary account',
+        description:
+          'Enter name, birth year, and vaccination calendar country for the primary account to continue to the journal.',
+      },
+      list: {
+        title: 'Accounts',
+        description: 'Switch between family member profiles.',
+        selectLabel: 'Selected account',
+        selected: 'Selected',
+      },
+      edit: {
+        title: 'Account details',
+        description: 'Edit the selected account.',
+        primaryDescription: 'Complete the primary account details.',
+      },
+      add: {
+        title: 'Add family member',
+        description: 'Only name and birth year are required. Country can be selected later.',
+      },
+      fields: {
+        name: 'Name',
+        birthYear: 'Birth year',
+        country: 'Vaccination calendar country',
+        countryUnset: 'Country is not selected',
+      },
+      placeholders: {
+        noName: 'No name',
+        noBirthYear: 'Year missing',
+      },
+      kinds: {
+        primary: 'Primary',
+        family: 'Family',
+      },
+      actions: {
+        save: 'Save',
+        saving: 'Saving...',
+        addMember: 'Add family member',
+        adding: 'Adding...',
+        deleteMember: 'Delete family member',
+        deleting: 'Deleting...',
+      },
+      validation: {
+        nameRequired: 'Enter a name',
+        birthYearInvalid: 'Enter a valid birth year ({{min}}-{{max}})',
+        countryRequired: 'Select a vaccination calendar country',
+      },
+      errors: {
+        saveFailed: 'Failed to save account, please try again',
+        createFailed: 'Failed to add family member, please try again',
+        deleteFailed: 'Failed to delete family member, please try again',
+      },
+      deleteConfirm: {
+        title: 'Delete family member?',
+        message: 'Are you sure you want to delete the profile \"{{name}}\"?',
+        warning: 'This action cannot be undone.',
+        cancel: 'Cancel',
+        confirm: 'Delete',
       },
     },
   },

@@ -15,6 +15,7 @@ export const appProfile = pgTable(
   {
     id: integer('id').primaryKey(),
     language: text('language').notNull().default('ru'),
+    selectedMemberId: integer('selected_member_id'),
     country: text('country'),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -28,6 +29,37 @@ export const appProfile = pgTable(
   ],
 );
 
+export const profileMember = pgTable(
+  'profile_member',
+  {
+    id: serial('id').primaryKey(),
+    appProfileId: integer('app_profile_id')
+      .notNull()
+      .references(() => appProfile.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    name: text('name'),
+    birthYear: integer('birth_year'),
+    country: text('country'),
+    sortOrder: integer('sort_order').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('profile_member_kind_check', sql`${table.kind} in ('primary', 'family')`),
+    check(
+      'profile_member_country_check',
+      sql`${table.country} is null or ${table.country} in ('RU', 'DE', 'NONE')`,
+    ),
+    check(
+      'profile_member_birth_year_check',
+      sql`${table.birthYear} is null or ${table.birthYear} >= 1900`,
+    ),
+    check(
+      'profile_member_sort_order_check',
+      sql`${table.sortOrder} >= 0`,
+    ),
+  ],
+);
+
 export const vaccinationSeries = pgTable(
   'vaccination_series',
   {
@@ -35,6 +67,9 @@ export const vaccinationSeries = pgTable(
     profileId: integer('profile_id')
       .notNull()
       .references(() => appProfile.id, { onDelete: 'cascade' }),
+    memberId: integer('member_id')
+      .notNull()
+      .references(() => profileMember.id, { onDelete: 'cascade' }),
     diseaseId: text('disease_id').notNull(),
     repeatInterval: integer('repeat_interval'),
     repeatKind: text('repeat_kind'),
@@ -42,7 +77,7 @@ export const vaccinationSeries = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    unique('vaccination_series_profile_disease_unique').on(table.profileId, table.diseaseId),
+    unique('vaccination_series_member_disease_unique').on(table.memberId, table.diseaseId),
     check(
       'vaccination_series_repeat_consistency_check',
       sql`((

@@ -19,8 +19,10 @@ import type {
 } from '../../interfaces/immunizationRecord'
 
 interface VaccinationStore extends VaccinationStoreState {
+  activeAccountId: number | null;
   cancelEdit: () => void;
   removeRecord: (diseaseId: string) => Promise<void>;
+  setActiveAccountId: (accountId: number | null) => void;
   setCategoryFilter: (categoryFilter: CategoryFilter) => void;
   setCountry: (country: CountryCode) => Promise<void>;
   setSearchQuery: (searchQuery: string) => void;
@@ -56,17 +58,19 @@ const applyServerUpdatedAt = (
   ));
 
 const persistUpdatedRecord = async (
+  accountId: number | null,
   diseaseId: string,
   records: readonly VaccinationState['records'][number][],
   expectedUpdatedAt: string | null,
 ): Promise<string | null> => {
   const api = getProfileApi();
 
-  if (!api) {
+  if (!api || accountId === null) {
     return null;
   }
 
   const result = await api.upsertVaccinationRecord({
+    accountId,
     ...resolveUpdatedRecord(diseaseId, records),
     expectedUpdatedAt,
   });
@@ -86,6 +90,7 @@ const isTrpcConflictError = (error: unknown): boolean => {
 
 export const useVaccinationStore =
   create<VaccinationStore>((set, get) => ({
+    activeAccountId: null,
     country: null,
     records: [],
     categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
@@ -94,22 +99,35 @@ export const useVaccinationStore =
     cancelEdit: () => set({ editingDiseaseId: null }),
     removeRecord: async (diseaseId) => {
       const state = get();
+      const accountId = state.activeAccountId;
       const nextState = {
         editingDiseaseId: state.editingDiseaseId === diseaseId ? null : state.editingDiseaseId,
         records: state.records.filter((record) => record.diseaseId !== diseaseId),
       };
       const api = getProfileApi();
 
-      await api?.removeVaccinationRecord(diseaseId);
+      if (accountId === null) {
+        return;
+      }
+
+      await api?.removeVaccinationRecord({ accountId, diseaseId });
       set(nextState);
+    },
+    setActiveAccountId: (activeAccountId) => {
+      set({ activeAccountId });
     },
     setCategoryFilter: (categoryFilter) => {
       set({ categoryFilter });
     },
     setCountry: async (country) => {
       const api = getProfileApi();
+      const accountId = get().activeAccountId;
 
-      await api?.setVaccinationCountry(country);
+      if (accountId === null) {
+        return;
+      }
+
+      await api?.setVaccinationCountry({ accountId, country });
       set({ country });
     },
     setSearchQuery: (searchQuery) => {
@@ -129,6 +147,7 @@ export const useVaccinationStore =
 
       try {
         const persistedUpdatedAt = await persistUpdatedRecord(
+          get().activeAccountId,
           recordInput.diseaseId,
           submissionResult.records,
           currentRecord?.updatedAt ?? null,
@@ -160,6 +179,7 @@ export const useVaccinationStore =
 
       try {
         const persistedUpdatedAt = await persistUpdatedRecord(
+          get().activeAccountId,
           recordInput.diseaseId,
           submissionResult.records,
           currentRecord?.updatedAt ?? null,
@@ -198,6 +218,7 @@ export const useVaccinationStore =
       const nextRecords = upsertRecordUseCase(state.records, recordInput);
 
       const persistedUpdatedAt = await persistUpdatedRecord(
+        state.activeAccountId,
         recordInput.diseaseId,
         nextRecords,
         currentRecord?.updatedAt ?? null,

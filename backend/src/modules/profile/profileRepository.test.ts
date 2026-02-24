@@ -1,21 +1,26 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { appProfile, completedDose, plannedDose, vaccinationSeries } from '../../db/schema.js';
+import { completedDose, plannedDose, profileMember, vaccinationSeries } from '../../db/schema.js';
 
 import { toVaccinationState } from './profileRepository.js';
 
 describe('profileRepository helpers', () => {
   it('maps db rows to vaccination state snapshot payload', () => {
-    const profileRow: InferSelectModel<typeof appProfile> = {
-      id: 1,
-      language: 'ru',
+    const memberRow: InferSelectModel<typeof profileMember> = {
+      appProfileId: 1,
+      birthYear: null,
       country: 'DE',
+      id: 1,
+      kind: 'primary',
+      name: null,
+      sortOrder: 0,
       updatedAt: new Date('2025-01-01T00:00:00.000Z'),
     };
     const seriesRows: InferSelectModel<typeof vaccinationSeries>[] = [
       {
         id: 100,
+        memberId: 1,
         profileId: 1,
         diseaseId: 'measles',
         repeatInterval: 10,
@@ -46,7 +51,7 @@ describe('profileRepository helpers', () => {
     ];
 
     const vaccinationState = toVaccinationState({
-      profile: profileRow,
+      member: memberRow,
       seriesRows,
       completedRows,
       plannedRows,

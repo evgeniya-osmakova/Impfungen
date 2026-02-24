@@ -1,0 +1,42 @@
+.deleteFamilyMemberModal {
+  display: grid;
+  gap: 12px;
+}
+
+.deleteFamilyMemberModal__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.deleteFamilyMemberModal__text,
+.deleteFamilyMemberModal__warning {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.deleteFamilyMemberModal__warning {
+  color: var(--danger-700);
+}
+
+.deleteFamilyMemberModal__requestError {
+  margin: 0;
+  color: var(--danger-600);
+  font-size: 0.86rem;
+}
+
+.deleteFamilyMemberModal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .deleteFamilyMemberModal__actions {
+    justify-content: stretch;
+  }
+
+  .deleteFamilyMemberModal__actions > * {
+    flex: 1 1 0;
+  }
+}

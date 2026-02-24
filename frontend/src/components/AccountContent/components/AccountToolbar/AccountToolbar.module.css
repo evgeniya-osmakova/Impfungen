@@ -1,0 +1,112 @@
+.accountToolbar {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-color: color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--brand-50) 76%, var(--surface-0)),
+      color-mix(in oklab, var(--accent-50) 62%, var(--surface-0))
+    );
+}
+
+.accountToolbar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accountToolbar__addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border-color: color-mix(in oklab, var(--surface-300) 58%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 78%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.accountToolbar__addButton:hover {
+  filter: none;
+  box-shadow: none;
+  background: color-mix(in oklab, var(--surface-100) 64%, var(--surface-0));
+  color: var(--text-primary);
+}
+
+.accountToolbar__addButtonIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.accountToolbar__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.accountToolbar__switcherInput {
+  min-height: 44px;
+  border-radius: 12px;
+  background: var(--surface-0);
+  border-color: color-mix(in oklab, var(--surface-200) 72%, var(--surface-0));
+}
+
+.accountToolbar__selectWrap {
+  position: relative;
+}
+
+.accountToolbar__selectWrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  border-bottom: 2px solid color-mix(in oklab, var(--text-secondary) 80%, var(--surface-0));
+  transform: translateY(-62%) rotate(45deg);
+  pointer-events: none;
+}
+
+.accountToolbar__input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--surface-200) 90%, var(--text-primary));
+  background: color-mix(in oklab, var(--surface-50) 92%, var(--surface-0));
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.accountToolbar__selectWrap > .accountToolbar__input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+}
+
+.accountToolbar__input:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent-500) 70%, white);
+  outline-offset: 1px;
+}
+
+@media (max-width: 600px) {
+  .accountToolbar__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .accountToolbar__head > * {
+    width: 100%;
+  }
+
+  .accountToolbar__addButton {
+    justify-content: center;
+  }
+}

@@ -19,6 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    command: sh -c "npm run db:migrate && npm run dev"
     depends_on:
       postgres:
         condition: service_healthy
