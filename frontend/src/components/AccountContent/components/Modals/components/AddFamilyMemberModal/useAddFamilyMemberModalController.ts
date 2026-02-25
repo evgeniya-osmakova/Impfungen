@@ -6,26 +6,18 @@ import {
 } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, NewMemberFieldErrors } from 'src/interfaces/accountForm';
-import { useAccountPageUiStore } from 'src/state/accountPageUi';
 import { useAccountsStore } from 'src/state/accounts';
-import { useShallow } from 'zustand/react/shallow';
+import type { AccountPageUi } from '../../../../accountPageUi';
 
-export const useAddFamilyMemberModalController = () => {
+export const useAddFamilyMemberModalController = (
+  ui: Pick<
+    AccountPageUi,
+    'closeAddMemberModal' | 'isAddMemberModalOpen' | 'isAddingMember' | 'setIsAddingMember'
+  >,
+) => {
   const { t } = useTranslation();
   const createFamilyAccount = useAccountsStore((state) => state.createFamilyAccount);
-  const {
-    closeAddMemberModal,
-    isAddMemberModalOpen,
-    isAddingMember,
-    setIsAddingMember,
-  } = useAccountPageUiStore(
-    useShallow((state) => ({
-      closeAddMemberModal: state.closeAddMemberModal,
-      isAddMemberModalOpen: state.isAddMemberModalOpen,
-      isAddingMember: state.isAddingMember,
-      setIsAddingMember: state.setIsAddingMember,
-    })),
-  );
+  const { closeAddMemberModal, isAddMemberModalOpen, isAddingMember, setIsAddingMember } = ui;
 
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberBirthYear, setNewMemberBirthYear] = useState('');

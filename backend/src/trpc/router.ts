@@ -22,14 +22,6 @@ const currentYear = new Date().getFullYear();
 const birthYearSchema = z.number().int().min(1900).max(currentYear);
 const accountIdSchema = z.number().int().positive();
 
-const completedDoseSchema = z.object({
-  batchNumber: z.string().nullable(),
-  completedAt: isoDateSchema,
-  id: z.string().min(1),
-  kind: z.enum(DOSE_KIND_VALUES),
-  tradeName: z.string().nullable(),
-});
-
 const plannedDoseSchema = z.object({
   dueAt: isoDateSchema,
   id: z.string().min(1),
@@ -42,12 +34,27 @@ const repeatRuleSchema = z.object({
   unit: z.enum(REPEAT_UNIT_VALUES),
 });
 
-const vaccinationRecordSchema = z.object({
-  completedDoses: z.array(completedDoseSchema),
+const submitVaccinationRecordSchema = z.object({
+  batchNumber: z.string().nullable(),
+  completedAt: isoDateSchema,
+  completedDoseId: z.string().min(1).nullable(),
+  completedDoseKind: z.enum(DOSE_KIND_VALUES),
   diseaseId: z.string().min(1),
   expectedUpdatedAt: isoDateTimeSchema.nullable(),
   futureDueDoses: z.array(plannedDoseSchema),
   repeatEvery: repeatRuleSchema.nullable(),
+  tradeName: z.string().nullable(),
+});
+
+const completeVaccinationDoseSchema = z.object({
+  batchNumber: z.string().nullable(),
+  completedAt: isoDateSchema,
+  diseaseId: z.string().min(1),
+  doseId: z.string().min(1),
+  expectedUpdatedAt: isoDateTimeSchema.nullable(),
+  kind: z.enum(DOSE_KIND_VALUES),
+  plannedDoseId: z.string().min(1).nullable(),
+  tradeName: z.string().nullable(),
 });
 
 type SetLanguageInput = {
@@ -178,14 +185,14 @@ const profileRouter = router({
         });
       }
     }),
-  upsertVaccinationRecord: publicProcedure
-    .input(vaccinationRecordSchema.extend({
+  submitVaccinationRecord: publicProcedure
+    .input(submitVaccinationRecordSchema.extend({
       accountId: accountIdSchema,
     }))
     .mutation(async ({ ctx, input }) => {
       try {
         const { accountId, ...record } = input;
-        const updatedAt = await ctx.profileRepository.upsertVaccinationRecord(accountId, record);
+        const updatedAt = await ctx.profileRepository.submitVaccinationRecord(accountId, record);
 
         return { ok: true as const, updatedAt };
       } catch (error) {
@@ -200,6 +207,32 @@ const profileRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to save vaccination record.',
+          cause: error,
+        });
+      }
+    }),
+  completeVaccinationDose: publicProcedure
+    .input(completeVaccinationDoseSchema.extend({
+      accountId: accountIdSchema,
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { accountId, ...dose } = input;
+        const updatedAt = await ctx.profileRepository.completeVaccinationDose(accountId, dose);
+
+        return { ok: true as const, updatedAt };
+      } catch (error) {
+        if (error instanceof OptimisticConcurrencyError) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Vaccination record was changed by another client. Refresh and retry.',
+            cause: error,
+          });
+        }
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to save completed dose.',
           cause: error,
         });
       }

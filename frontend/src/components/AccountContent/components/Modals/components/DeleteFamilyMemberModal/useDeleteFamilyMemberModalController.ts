@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAccountPageUiStore } from 'src/state/accountPageUi';
 import { useAccountsStore } from 'src/state/accounts';
 import { useShallow } from 'zustand/react/shallow';
+import type { AccountPageUi } from '../../../../accountPageUi';
 
-export const useDeleteFamilyMemberModalController = () => {
+export const useDeleteFamilyMemberModalController = (
+  ui: Pick<
+    AccountPageUi,
+    'closeDeleteFamilyMemberModal' | 'deleteCandidateAccountId' | 'isDeleting' | 'setIsDeleting'
+  >,
+) => {
   const { t } = useTranslation();
   const { accounts, deleteFamilyAccount } = useAccountsStore(
     useShallow((state) => ({
@@ -12,19 +17,7 @@ export const useDeleteFamilyMemberModalController = () => {
       deleteFamilyAccount: state.deleteFamilyAccount,
     })),
   );
-  const {
-    closeDeleteFamilyMemberModal,
-    deleteCandidateAccountId,
-    isDeleting,
-    setIsDeleting,
-  } = useAccountPageUiStore(
-    useShallow((state) => ({
-      closeDeleteFamilyMemberModal: state.closeDeleteFamilyMemberModal,
-      deleteCandidateAccountId: state.deleteCandidateAccountId,
-      isDeleting: state.isDeleting,
-      setIsDeleting: state.setIsDeleting,
-    })),
-  );
+  const { closeDeleteFamilyMemberModal, deleteCandidateAccountId, isDeleting, setIsDeleting } = ui;
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const deleteCandidateAccount = accounts.find((account) => account.id === deleteCandidateAccountId) ?? null;

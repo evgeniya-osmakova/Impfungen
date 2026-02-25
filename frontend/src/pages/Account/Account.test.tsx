@@ -53,6 +53,10 @@ const createApiMock = (responses?: {
   selectAccount?: ProfileSnapshot;
   updateAccount?: ProfileSnapshot;
 }) => ({
+  completeVaccinationDose: vi.fn(async () => ({
+    ok: true as const,
+    updatedAt: '2025-01-10T00:00:00.000Z',
+  })),
   createFamilyAccount: vi.fn(async () => responses?.createFamilyAccount ?? createSnapshot()),
   deleteFamilyAccount: vi.fn(async () => responses?.deleteFamilyAccount ?? createSnapshot()),
   getProfile: vi.fn(async () => createSnapshot()),
@@ -60,11 +64,11 @@ const createApiMock = (responses?: {
   selectAccount: vi.fn(async () => responses?.selectAccount ?? createSnapshot()),
   setLanguage: vi.fn(async () => undefined),
   setVaccinationCountry: vi.fn(async () => undefined),
-  updateAccount: vi.fn(async () => responses?.updateAccount ?? createSnapshot()),
-  upsertVaccinationRecord: vi.fn(async () => ({
+  submitVaccinationRecord: vi.fn(async () => ({
     ok: true as const,
     updatedAt: '2025-01-10T00:00:00.000Z',
   })),
+  updateAccount: vi.fn(async () => responses?.updateAccount ?? createSnapshot()),
 });
 
 describe('Account page', () => {

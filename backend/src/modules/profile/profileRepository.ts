@@ -25,10 +25,10 @@ import type {
   ProfileAccountsState,
   ProfileSnapshot,
   RepeatUnit,
-  UpsertVaccinationStorageRecordInput,
   VaccinationStorageCompletedDose,
   VaccinationStoragePlannedDose,
   VaccinationStorageRecord,
+  VaccinationStorageRepeatRule,
   VaccinationStorageState,
 } from './profileTypes.js';
 
@@ -39,8 +39,32 @@ type DatabaseClient = typeof db;
 type AppProfileRow = InferSelectModel<typeof appProfile>;
 type ProfileMemberRow = InferSelectModel<typeof profileMember>;
 type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
-type CompletedDoseInsert = InferInsertModel<typeof completedDose>;
+type CompletedDoseRow = InferSelectModel<typeof completedDose>;
+type PlannedDoseRow = InferSelectModel<typeof plannedDose>;
 type PlannedDoseInsert = InferInsertModel<typeof plannedDose>;
+
+interface SubmitVaccinationRecordInput {
+  batchNumber: string | null;
+  completedAt: string;
+  completedDoseKind: DoseKind;
+  completedDoseId: string | null;
+  diseaseId: string;
+  expectedUpdatedAt: string | null;
+  futureDueDoses: VaccinationStoragePlannedDose[];
+  repeatEvery: VaccinationStorageRepeatRule | null;
+  tradeName: string | null;
+}
+
+interface CompleteVaccinationDoseInput {
+  batchNumber: string | null;
+  completedAt: string;
+  diseaseId: string;
+  doseId: string;
+  expectedUpdatedAt: string | null;
+  kind: DoseKind;
+  plannedDoseId: string | null;
+  tradeName: string | null;
+}
 
 export class OptimisticConcurrencyError extends Error {
   constructor(message: string) {
@@ -371,116 +395,75 @@ const getProfileSnapshotUsingDb = async (
   };
 };
 
-const upsertVaccinationRecordUsingDb = async (
+const loadCompletedDoseRowsForSeriesUsingDb = async (
   database: DatabaseClient,
-  memberId: number,
-  record: UpsertVaccinationStorageRecordInput,
-): Promise<string> => {
-  return database.transaction(async (transaction) => {
-    const tx = transaction as unknown as DatabaseClient;
+  seriesId: number,
+): Promise<CompletedDoseRow[]> => (
+  database
+    .select()
+    .from(completedDose)
+    .where(eq(completedDose.seriesId, seriesId))
+    .orderBy(
+      asc(completedDose.completedAt),
+      asc(completedDose.externalId),
+    )
+);
 
-    await ensureDefaultProfileUsingDb(tx);
+const loadPlannedDoseRowsForSeriesUsingDb = async (
+  database: DatabaseClient,
+  seriesId: number,
+): Promise<PlannedDoseRow[]> => (
+  database
+    .select()
+    .from(plannedDose)
+    .where(eq(plannedDose.seriesId, seriesId))
+    .orderBy(
+      asc(plannedDose.dueAt),
+      asc(plannedDose.externalId),
+    )
+);
 
-    const repeatEvery = record.repeatEvery;
-    const seriesPayload = {
-      repeatInterval: repeatEvery?.interval ?? null,
-      repeatKind: repeatEvery?.kind ?? null,
-      repeatUnit: repeatEvery?.unit ?? null,
-      updatedAt: sql`now()`,
-    };
+const syncPlannedDosesForSeriesUsingDb = async (
+  database: DatabaseClient,
+  seriesId: number,
+  nextDoses: readonly VaccinationStoragePlannedDose[],
+): Promise<void> => {
+  const existingRows = await loadPlannedDoseRowsForSeriesUsingDb(database, seriesId);
+  const nextDoseByExternalId = new Map(nextDoses.map((dose) => [dose.id, dose]));
+  const existingRowByExternalId = new Map(existingRows.map((row) => [row.externalId, row]));
+  const plannedDoseIdsToDelete = existingRows
+    .filter((row) => !nextDoseByExternalId.has(row.externalId))
+    .map((row) => row.id);
 
-    const [existingSeries] = await tx
-      .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
-      .from(vaccinationSeries)
-      .where(and(
-        eq(vaccinationSeries.memberId, memberId),
-        eq(vaccinationSeries.diseaseId, record.diseaseId),
-      ))
-      .limit(1);
-    let seriesId: number;
-    let seriesUpdatedAt: Date | string;
+  if (plannedDoseIdsToDelete.length > 0) {
+    await database
+      .delete(plannedDose)
+      .where(inArray(plannedDose.id, plannedDoseIdsToDelete));
+  }
 
-    if (existingSeries) {
-      const expectedUpdatedAt = record.expectedUpdatedAt
-        ? normalizeIsoDateTime(record.expectedUpdatedAt)
-        : null;
-      const currentUpdatedAt = toIsoDateTime(existingSeries.updatedAt);
+  for (const dose of nextDoses) {
+    const existingRow = existingRowByExternalId.get(dose.id);
 
-      if (!expectedUpdatedAt || expectedUpdatedAt !== currentUpdatedAt) {
-        throw new OptimisticConcurrencyError(
-          `Vaccination series "${record.diseaseId}" has been modified by another request.`,
-        );
-      }
-
-      seriesId = existingSeries.id;
-      const [updatedSeries] = await tx
-        .update(vaccinationSeries)
-        .set(seriesPayload)
-        .where(eq(vaccinationSeries.id, seriesId))
-        .returning({ updatedAt: vaccinationSeries.updatedAt });
-
-      if (!updatedSeries) {
-        throw new Error(`Unable to update vaccination series for ${record.diseaseId}.`);
-      }
-
-      seriesUpdatedAt = updatedSeries.updatedAt;
-    } else {
-      if (record.expectedUpdatedAt !== null) {
-        throw new OptimisticConcurrencyError(
-          `Vaccination series "${record.diseaseId}" no longer exists.`,
-        );
-      }
-
-      const [createdSeries] = await tx
-        .insert(vaccinationSeries)
-        .values({
-          diseaseId: record.diseaseId,
-          memberId,
-          profileId: APP_PROFILE_ID,
-          ...seriesPayload,
-        })
-        .returning({
-          id: vaccinationSeries.id,
-          updatedAt: vaccinationSeries.updatedAt,
-        });
-
-      if (!createdSeries) {
-        throw new Error(`Unable to create vaccination series for ${record.diseaseId}.`);
-      }
-
-      seriesId = createdSeries.id;
-      seriesUpdatedAt = createdSeries.updatedAt;
-    }
-
-    await tx.delete(completedDose).where(eq(completedDose.seriesId, seriesId));
-    await tx.delete(plannedDose).where(eq(plannedDose.seriesId, seriesId));
-
-    if (record.completedDoses.length > 0) {
-      const completedRowsToInsert: CompletedDoseInsert[] = record.completedDoses.map((dose) => ({
-        batchNumber: dose.batchNumber,
-        completedAt: dose.completedAt,
-        externalId: dose.id,
-        kind: dose.kind,
-        seriesId,
-        tradeName: dose.tradeName,
-      }));
-
-      await tx.insert(completedDose).values(completedRowsToInsert);
-    }
-
-    if (record.futureDueDoses.length > 0) {
-      const plannedRowsToInsert: PlannedDoseInsert[] = record.futureDueDoses.map((dose) => ({
+    if (!existingRow) {
+      const plannedRowToInsert: PlannedDoseInsert = {
         dueAt: dose.dueAt,
         externalId: dose.id,
         kind: dose.kind,
         seriesId,
-      }));
+      };
 
-      await tx.insert(plannedDose).values(plannedRowsToInsert);
+      await database.insert(plannedDose).values(plannedRowToInsert);
+      continue;
     }
 
-    return toIsoDateTime(seriesUpdatedAt);
-  });
+    await database
+      .update(plannedDose)
+      .set({
+        dueAt: dose.dueAt,
+        kind: dose.kind,
+      })
+      .where(eq(plannedDose.id, existingRow.id));
+  }
 };
 
 export interface ProfileRepository {
@@ -495,9 +478,13 @@ export interface ProfileRepository {
   removeVaccinationRecord: (accountId: number, diseaseId: string) => Promise<void>;
   selectAccount: (accountId: number) => Promise<ProfileSnapshot>;
   setVaccinationCountry: (accountId: number, country: CountryCode) => Promise<void>;
-  upsertVaccinationRecord: (
+  submitVaccinationRecord: (
     accountId: number,
-    record: UpsertVaccinationStorageRecordInput,
+    input: SubmitVaccinationRecordInput,
+  ) => Promise<string>;
+  completeVaccinationDose: (
+    accountId: number,
+    input: CompleteVaccinationDoseInput,
   ) => Promise<string>;
   setLanguage: (language: AppLanguage) => Promise<void>;
   updateAccount: (input: {
@@ -613,10 +600,189 @@ export const createProfileRepository = (
       })
       .where(eq(profileMember.id, member.id));
   },
-  upsertVaccinationRecord: async (accountId, record) => {
+  submitVaccinationRecord: async (accountId, input) => {
     const member = await getProfileMemberByIdUsingDb(database, accountId);
 
-    return upsertVaccinationRecordUsingDb(database, member.id, record);
+    return database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
+
+      await ensureDefaultProfileUsingDb(tx);
+
+      const repeatEvery = input.repeatEvery;
+      const seriesPayload = {
+        repeatInterval: repeatEvery?.interval ?? null,
+        repeatKind: repeatEvery?.kind ?? null,
+        repeatUnit: repeatEvery?.unit ?? null,
+        updatedAt: sql`now()`,
+      };
+
+      const [existingSeries] = await tx
+        .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
+        .from(vaccinationSeries)
+        .where(and(
+          eq(vaccinationSeries.memberId, member.id),
+          eq(vaccinationSeries.diseaseId, input.diseaseId),
+        ))
+        .limit(1);
+
+      let seriesId: number;
+      let seriesUpdatedAt: Date | string;
+
+      if (existingSeries) {
+        const expectedUpdatedAt = input.expectedUpdatedAt
+          ? normalizeIsoDateTime(input.expectedUpdatedAt)
+          : null;
+        const currentUpdatedAt = toIsoDateTime(existingSeries.updatedAt);
+
+        if (!expectedUpdatedAt || expectedUpdatedAt !== currentUpdatedAt) {
+          throw new OptimisticConcurrencyError(
+            `Vaccination series "${input.diseaseId}" has been modified by another request.`,
+          );
+        }
+
+        seriesId = existingSeries.id;
+        const [updatedSeries] = await tx
+          .update(vaccinationSeries)
+          .set(seriesPayload)
+          .where(eq(vaccinationSeries.id, seriesId))
+          .returning({ updatedAt: vaccinationSeries.updatedAt });
+
+        if (!updatedSeries) {
+          throw new Error(`Unable to update vaccination series for ${input.diseaseId}.`);
+        }
+
+        seriesUpdatedAt = updatedSeries.updatedAt;
+      } else {
+        if (input.expectedUpdatedAt !== null) {
+          throw new OptimisticConcurrencyError(
+            `Vaccination series "${input.diseaseId}" no longer exists.`,
+          );
+        }
+
+        const [createdSeries] = await tx
+          .insert(vaccinationSeries)
+          .values({
+            diseaseId: input.diseaseId,
+            memberId: member.id,
+            profileId: APP_PROFILE_ID,
+            ...seriesPayload,
+          })
+          .returning({
+            id: vaccinationSeries.id,
+            updatedAt: vaccinationSeries.updatedAt,
+          });
+
+        if (!createdSeries) {
+          throw new Error(`Unable to create vaccination series for ${input.diseaseId}.`);
+        }
+
+        seriesId = createdSeries.id;
+        seriesUpdatedAt = createdSeries.updatedAt;
+      }
+
+      const completedRows = await loadCompletedDoseRowsForSeriesUsingDb(tx, seriesId);
+      const targetCompletedRow = input.completedDoseId
+        ? completedRows.find((row) => row.externalId === input.completedDoseId) ?? null
+        : completedRows[completedRows.length - 1] ?? null;
+
+      if (targetCompletedRow) {
+        await tx
+          .update(completedDose)
+          .set({
+            batchNumber: input.batchNumber,
+            completedAt: input.completedAt,
+            kind: input.completedDoseKind,
+            tradeName: input.tradeName,
+          })
+          .where(eq(completedDose.id, targetCompletedRow.id));
+      } else {
+        if (!input.completedDoseId) {
+          throw new Error(`Completed dose id is required to create vaccination series "${input.diseaseId}".`);
+        }
+
+        await tx
+          .insert(completedDose)
+          .values({
+            batchNumber: input.batchNumber,
+            completedAt: input.completedAt,
+            externalId: input.completedDoseId,
+            kind: input.completedDoseKind,
+            seriesId,
+            tradeName: input.tradeName,
+          });
+      }
+
+      await syncPlannedDosesForSeriesUsingDb(tx, seriesId, input.futureDueDoses);
+
+      return toIsoDateTime(seriesUpdatedAt);
+    });
+  },
+  completeVaccinationDose: async (accountId, input) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    return database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
+
+      await ensureDefaultProfileUsingDb(tx);
+
+      const [existingSeries] = await tx
+        .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
+        .from(vaccinationSeries)
+        .where(and(
+          eq(vaccinationSeries.memberId, member.id),
+          eq(vaccinationSeries.diseaseId, input.diseaseId),
+        ))
+        .limit(1);
+
+      if (!existingSeries) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${input.diseaseId}" no longer exists.`,
+        );
+      }
+
+      const expectedUpdatedAt = input.expectedUpdatedAt
+        ? normalizeIsoDateTime(input.expectedUpdatedAt)
+        : null;
+      const currentUpdatedAt = toIsoDateTime(existingSeries.updatedAt);
+
+      if (!expectedUpdatedAt || expectedUpdatedAt !== currentUpdatedAt) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${input.diseaseId}" has been modified by another request.`,
+        );
+      }
+
+      const [updatedSeries] = await tx
+        .update(vaccinationSeries)
+        .set({ updatedAt: sql`now()` })
+        .where(eq(vaccinationSeries.id, existingSeries.id))
+        .returning({ updatedAt: vaccinationSeries.updatedAt });
+
+      if (!updatedSeries) {
+        throw new Error(`Unable to update vaccination series for ${input.diseaseId}.`);
+      }
+
+      await tx
+        .insert(completedDose)
+        .values({
+          batchNumber: input.batchNumber,
+          completedAt: input.completedAt,
+          externalId: input.doseId,
+          kind: input.kind,
+          seriesId: existingSeries.id,
+          tradeName: input.tradeName,
+        });
+
+      if (input.plannedDoseId) {
+        await tx
+          .delete(plannedDose)
+          .where(and(
+            eq(plannedDose.seriesId, existingSeries.id),
+            eq(plannedDose.externalId, input.plannedDoseId),
+          ));
+      }
+
+      return toIsoDateTime(updatedSeries.updatedAt);
+    });
   },
   setLanguage: async (language) => {
     await ensureDefaultProfileUsingDb(database);

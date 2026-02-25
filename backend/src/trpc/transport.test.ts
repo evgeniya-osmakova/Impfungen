@@ -64,6 +64,7 @@ const createRepository = (
       (record) => record.diseaseId !== diseaseId,
     );
   },
+  completeVaccinationDose: async () => '2025-01-10T00:00:00.000Z',
   setVaccinationCountry: async (accountId, country) => {
     snapshot.vaccinationState.country = country;
     const selectedAccount = snapshot.accountsState.accounts.find(
@@ -79,14 +80,24 @@ const createRepository = (
 
     return snapshot;
   },
-  upsertVaccinationRecord: async (_accountId, record) => {
-    const { expectedUpdatedAt: _expectedUpdatedAt, ...payload } = record;
+  submitVaccinationRecord: async (_accountId, input) => {
     const persistedRecord = {
-      ...payload,
+      completedDoses: [
+        {
+          batchNumber: input.batchNumber,
+          completedAt: input.completedAt,
+          id: input.completedDoseId ?? 'done-1',
+          kind: input.completedDoseKind,
+          tradeName: input.tradeName,
+        },
+      ],
+      diseaseId: input.diseaseId,
+      futureDueDoses: input.futureDueDoses,
+      repeatEvery: input.repeatEvery,
       updatedAt: '2025-01-10T00:00:00.000Z',
     };
     const existingIndex = snapshot.vaccinationState.records.findIndex(
-      (current) => current.diseaseId === record.diseaseId,
+      (current) => current.diseaseId === input.diseaseId,
     );
 
     if (existingIndex === -1) {
@@ -181,6 +192,17 @@ describe('tRPC Fastify transport', () => {
     expect(snapshot.vaccinationState.country).toBe('RU');
 
     const nextRecord = {
+      batchNumber: null,
+      completedAt: '2025-01-10',
+      completedDoseId: 'done-1',
+      completedDoseKind: 'nextDose',
+      diseaseId: 'measles',
+      expectedUpdatedAt: null,
+      futureDueDoses: [],
+      repeatEvery: null,
+      tradeName: null,
+    };
+    const persistedRecord = {
       completedDoses: [
         {
           batchNumber: null,
@@ -190,29 +212,22 @@ describe('tRPC Fastify transport', () => {
           tradeName: null,
         },
       ],
-      diseaseId: 'measles',
-      expectedUpdatedAt: null,
-      futureDueDoses: [],
-      repeatEvery: null,
-    };
-    const persistedRecord = {
-      completedDoses: nextRecord.completedDoses,
       diseaseId: nextRecord.diseaseId,
       futureDueDoses: nextRecord.futureDueDoses,
       repeatEvery: nextRecord.repeatEvery,
       updatedAt: '2025-01-10T00:00:00.000Z',
     };
-    const upsertRecordResponse = await app.inject({
+    const submitRecordResponse = await app.inject({
       method: 'POST',
-      url: '/trpc/profile.upsertVaccinationRecord',
+      url: '/trpc/profile.submitVaccinationRecord',
       payload: {
         accountId: 1,
         ...nextRecord,
       },
     });
 
-    expect(upsertRecordResponse.statusCode).toBe(200);
-    expect(upsertRecordResponse.json()).toMatchObject({
+    expect(submitRecordResponse.statusCode).toBe(200);
+    expect(submitRecordResponse.json()).toMatchObject({
       result: {
         data: {
           ok: true,

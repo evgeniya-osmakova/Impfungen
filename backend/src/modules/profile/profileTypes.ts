@@ -40,10 +40,6 @@ export interface VaccinationStorageRecordInput {
   repeatEvery: VaccinationStorageRepeatRule | null;
 }
 
-export interface UpsertVaccinationStorageRecordInput extends VaccinationStorageRecordInput {
-  expectedUpdatedAt: string | null;
-}
-
 export interface VaccinationStorageRecord extends VaccinationStorageRecordInput {
   updatedAt: string;
 }

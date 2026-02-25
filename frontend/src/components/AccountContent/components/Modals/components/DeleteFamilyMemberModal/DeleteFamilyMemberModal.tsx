@@ -2,12 +2,20 @@ import { useTranslation } from 'react-i18next';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
 import { Button, Modal } from '../../../../../../ui';
+import type { AccountPageUi } from '../../../../accountPageUi';
 
 import { useDeleteFamilyMemberModalController } from './useDeleteFamilyMemberModalController';
 
 import styles from './DeleteFamilyMemberModal.module.css';
 
-export const DeleteFamilyMemberModal = () => {
+interface DeleteFamilyMemberModalProps {
+  ui: Pick<
+    AccountPageUi,
+    'closeDeleteFamilyMemberModal' | 'deleteCandidateAccountId' | 'isDeleting' | 'setIsDeleting'
+  >;
+}
+
+export const DeleteFamilyMemberModal = ({ ui }: DeleteFamilyMemberModalProps) => {
   const { t } = useTranslation();
   const {
     deleteCandidateAccount,
@@ -15,7 +23,7 @@ export const DeleteFamilyMemberModal = () => {
     handleDeleteFamilyMember,
     isDeleting,
     requestError,
-  } = useDeleteFamilyMemberModalController();
+  } = useDeleteFamilyMemberModalController(ui);
 
   return (
     <Modal

@@ -15,7 +15,6 @@ export type {
   ProfileAccountSummary,
   ProfileSnapshot,
   RepeatUnit,
-  UpsertVaccinationStorageRecordInput,
   VaccinationStorageCompletedDose,
   VaccinationStoragePlannedDose,
   VaccinationStorageRecord,

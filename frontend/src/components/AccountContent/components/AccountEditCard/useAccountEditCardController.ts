@@ -6,7 +6,6 @@ import {
 } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, FieldErrors } from 'src/interfaces/accountForm';
-import { useAccountPageUiStore } from 'src/state/accountPageUi';
 import {
   isProfileAccountComplete,
   resolvePrimaryAccount,
@@ -14,8 +13,11 @@ import {
   useAccountsStore,
 } from 'src/state/accounts';
 import { useShallow } from 'zustand/react/shallow';
+import type { AccountPageUi } from '../../accountPageUi';
 
-export const useAccountEditCardController = () => {
+export const useAccountEditCardController = (
+  ui: Pick<AccountPageUi, 'isDeleting' | 'openDeleteFamilyMemberModal'>,
+) => {
   const { t } = useTranslation();
   const pendingEditAutoSaveRef = useRef(false);
   const {
@@ -31,12 +33,7 @@ export const useAccountEditCardController = () => {
       updateSelectedAccount: state.updateSelectedAccount,
     })),
   );
-  const { isDeleting, openDeleteFamilyMemberModal } = useAccountPageUiStore(
-    useShallow((state) => ({
-      isDeleting: state.isDeleting,
-      openDeleteFamilyMemberModal: state.openDeleteFamilyMemberModal,
-    })),
-  );
+  const { isDeleting, openDeleteFamilyMemberModal } = ui;
 
   const primaryAccount = resolvePrimaryAccount(accounts);
   const selectedAccount = resolveSelectedAccount(accounts, selectedAccountId);

@@ -13,10 +13,15 @@ import type { CountryCode } from '../../../../interfaces/base';
 import { Button, Input, Select, SurfacePanel } from '../../../../ui';
 
 import { useAccountEditCardController } from './useAccountEditCardController';
+import type { AccountPageUi } from '../../accountPageUi';
 
 import styles from './AccountEditCard.module.css';
 
-export const AccountEditCard = () => {
+interface AccountEditCardProps {
+  ui: Pick<AccountPageUi, 'isDeleting' | 'openDeleteFamilyMemberModal'>;
+}
+
+export const AccountEditCard = ({ ui }: AccountEditCardProps) => {
   const { t } = useTranslation();
   const {
     editBirthYear,
@@ -34,7 +39,7 @@ export const AccountEditCard = () => {
     isPrimaryComplete,
     isSaving,
     saveEditingAccountIfNeeded,
-  } = useAccountEditCardController();
+  } = useAccountEditCardController(ui);
 
   return (
     <SurfacePanel as="section" className={styles.accountEditCard} topAccent>

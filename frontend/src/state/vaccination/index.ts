@@ -1,10 +1,11 @@
 import { getProfileApi } from 'src/api/profileApi.ts'
 import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts';
+import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import type { VaccinationState, VaccinationStoreState } from 'src/interfaces/vaccinationState.ts'
 import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts'
 import {
   submitCompletedDoseUseCase,
-  submitRecordUseCase, upsertRecordUseCase,
+  submitRecordUseCase,
 } from 'src/state/vaccination/vaccinationRecordUseCases.ts'
 import { create } from 'zustand';
 
@@ -30,7 +31,6 @@ interface VaccinationStore extends VaccinationStoreState {
   submitCompletedDose: (record: ImmunizationDoseInput) => Promise<VaccinationValidationErrorCode | null>;
   submitRecord: (record: ImmunizationSeriesInput) => Promise<VaccinationValidationErrorCode | null>;
   startEditRecord: (diseaseId: string) => void;
-  upsertRecord: (record: ImmunizationSeriesInput) => Promise<void>;
 }
 
 const resolveUpdatedRecord = (
@@ -57,11 +57,35 @@ const applyServerUpdatedAt = (
       : record
   ));
 
-const persistUpdatedRecord = async (
+const resolveNewCompletedDoseId = (
+  previousRecord: VaccinationState['records'][number] | undefined,
+  nextRecord: VaccinationState['records'][number],
+): string | null => {
+  const previousDoseIds = new Set((previousRecord?.completedDoses ?? []).map((dose) => dose.id));
+
+  return nextRecord.completedDoses.find((dose) => !previousDoseIds.has(dose.id))?.id ?? null;
+};
+
+const resolveSubmitRecordCompletedDoseId = (
+  previousRecord: VaccinationState['records'][number] | undefined,
+  nextRecord: VaccinationState['records'][number],
+): string | null => {
+  const previousLatestDose = previousRecord
+    ? resolveLatestCompletedDose(previousRecord.completedDoses)
+    : null;
+
+  if (previousLatestDose) {
+    return previousLatestDose.id;
+  }
+
+  return resolveNewCompletedDoseId(previousRecord, nextRecord);
+};
+
+const persistSubmittedRecord = async (
   accountId: number | null,
-  diseaseId: string,
-  records: readonly VaccinationState['records'][number][],
+  recordInput: ImmunizationSeriesInput,
   expectedUpdatedAt: string | null,
+  completedDoseId: string | null,
 ): Promise<string | null> => {
   const api = getProfileApi();
 
@@ -69,9 +93,32 @@ const persistUpdatedRecord = async (
     return null;
   }
 
-  const result = await api.upsertVaccinationRecord({
+  const result = await api.submitVaccinationRecord({
     accountId,
-    ...resolveUpdatedRecord(diseaseId, records),
+    ...recordInput,
+    completedDoseId,
+    expectedUpdatedAt,
+  });
+
+  return result.updatedAt;
+};
+
+const persistCompletedDose = async (
+  accountId: number | null,
+  doseInput: ImmunizationDoseInput,
+  expectedUpdatedAt: string | null,
+  doseId: string,
+): Promise<string | null> => {
+  const api = getProfileApi();
+
+  if (!api || accountId === null) {
+    return null;
+  }
+
+  const result = await api.completeVaccinationDose({
+    accountId,
+    ...doseInput,
+    doseId,
     expectedUpdatedAt,
   });
 
@@ -146,11 +193,18 @@ export const useVaccinationStore =
       }
 
       try {
-        const persistedUpdatedAt = await persistUpdatedRecord(
+        const nextRecord = resolveUpdatedRecord(recordInput.diseaseId, submissionResult.records);
+        const newDoseId = resolveNewCompletedDoseId(currentRecord, nextRecord);
+
+        if (!newDoseId) {
+          throw new Error(`Unable to resolve new completed dose id for disease ${recordInput.diseaseId}.`);
+        }
+
+        const persistedUpdatedAt = await persistCompletedDose(
           get().activeAccountId,
-          recordInput.diseaseId,
-          submissionResult.records,
+          recordInput,
           currentRecord?.updatedAt ?? null,
+          newDoseId,
         );
 
         const records = persistedUpdatedAt
@@ -178,11 +232,13 @@ export const useVaccinationStore =
       }
 
       try {
-        const persistedUpdatedAt = await persistUpdatedRecord(
+        const nextRecord = resolveUpdatedRecord(recordInput.diseaseId, submissionResult.records);
+        const completedDoseId = resolveSubmitRecordCompletedDoseId(currentRecord, nextRecord);
+        const persistedUpdatedAt = await persistSubmittedRecord(
           get().activeAccountId,
-          recordInput.diseaseId,
-          submissionResult.records,
+          recordInput,
           currentRecord?.updatedAt ?? null,
+          completedDoseId,
         );
 
         const records = persistedUpdatedAt
@@ -211,26 +267,5 @@ export const useVaccinationStore =
       }
 
       set({ editingDiseaseId: diseaseId });
-    },
-    upsertRecord: async (recordInput) => {
-      const state = get();
-      const currentRecord = state.records.find((record) => record.diseaseId === recordInput.diseaseId);
-      const nextRecords = upsertRecordUseCase(state.records, recordInput);
-
-      const persistedUpdatedAt = await persistUpdatedRecord(
-        state.activeAccountId,
-        recordInput.diseaseId,
-        nextRecords,
-        currentRecord?.updatedAt ?? null,
-      );
-
-      const records = persistedUpdatedAt
-        ? applyServerUpdatedAt(nextRecords, recordInput.diseaseId, persistedUpdatedAt)
-        : nextRecords;
-
-      set({
-        editingDiseaseId: null,
-        records,
-      });
     },
   }));

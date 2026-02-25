@@ -10,12 +10,20 @@ import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../../../.
 import { VACCINATION_COUNTRY_OPTIONS } from '../../../../../../constants/vaccination';
 import type { CountryCode } from '../../../../../../interfaces/base';
 import { Button, Input, Modal, Select } from '../../../../../../ui';
+import type { AccountPageUi } from '../../../../accountPageUi';
 
 import { useAddFamilyMemberModalController } from './useAddFamilyMemberModalController';
 
 import styles from './AddFamilyMemberModal.module.css';
 
-export const AddFamilyMemberModal = () => {
+interface AddFamilyMemberModalProps {
+  ui: Pick<
+    AccountPageUi,
+    'closeAddMemberModal' | 'isAddMemberModalOpen' | 'isAddingMember' | 'setIsAddingMember'
+  >;
+}
+
+export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
   const { t } = useTranslation();
   const {
     handleCloseAddMemberModal,
@@ -30,7 +38,7 @@ export const AddFamilyMemberModal = () => {
     newMemberErrors,
     newMemberName,
     newMemberRequestError,
-  } = useAddFamilyMemberModalController();
+  } = useAddFamilyMemberModalController(ui);
 
   return (
     <Modal

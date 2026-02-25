@@ -26,11 +26,16 @@ type SelectAccountInput = RouterInputs['profile']['selectAccount'];
 type CreateFamilyAccountInput = RouterInputs['profile']['createFamilyAccount'];
 type DeleteFamilyAccountInput = RouterInputs['profile']['deleteFamilyAccount'];
 type UpdateAccountInput = RouterInputs['profile']['updateAccount'];
-type UpsertVaccinationRecordInput = RouterInputs['profile']['upsertVaccinationRecord'];
-type UpsertVaccinationRecordOutput = RouterOutputs['profile']['upsertVaccinationRecord'];
+type SubmitVaccinationRecordInput = RouterInputs['profile']['submitVaccinationRecord'];
+type SubmitVaccinationRecordOutput = RouterOutputs['profile']['submitVaccinationRecord'];
+type CompleteVaccinationDoseInput = RouterInputs['profile']['completeVaccinationDose'];
+type CompleteVaccinationDoseOutput = RouterOutputs['profile']['completeVaccinationDose'];
 type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
+  completeVaccinationDose: (
+    input: CompleteVaccinationDoseInput,
+  ) => Promise<CompleteVaccinationDoseOutput>;
   createFamilyAccount: (input: CreateFamilyAccountInput) => Promise<ProfileSnapshot>;
   deleteFamilyAccount: (accountId: DeleteFamilyAccountInput['accountId']) => Promise<ProfileSnapshot>;
   getProfile: () => Promise<ProfileSnapshot>;
@@ -38,13 +43,16 @@ interface ProfileApi {
   selectAccount: (accountId: SelectAccountInput['accountId']) => Promise<ProfileSnapshot>;
   setLanguage: (language: SetLanguageInput['language']) => Promise<void>;
   setVaccinationCountry: (input: SetVaccinationCountryInput) => Promise<void>;
+  submitVaccinationRecord: (
+    input: SubmitVaccinationRecordInput,
+  ) => Promise<SubmitVaccinationRecordOutput>;
   updateAccount: (input: UpdateAccountInput) => Promise<ProfileSnapshot>;
-  upsertVaccinationRecord: (input: UpsertVaccinationRecordInput) => Promise<UpsertVaccinationRecordOutput>;
 }
 
 let profileApiSingleton: ProfileApi | null = null;
 
 export const createProfileApi = (): ProfileApi => ({
+  completeVaccinationDose: (input) => trpc.profile.completeVaccinationDose.mutate(input),
   createFamilyAccount: (input) => trpc.profile.createFamilyAccount.mutate(input),
   deleteFamilyAccount: (accountId) => trpc.profile.deleteFamilyAccount.mutate({ accountId }),
   getProfile: () => trpc.profile.get.query(),
@@ -58,8 +66,8 @@ export const createProfileApi = (): ProfileApi => ({
   setVaccinationCountry: async (input) => {
     await trpc.profile.setVaccinationCountry.mutate(input);
   },
+  submitVaccinationRecord: (input) => trpc.profile.submitVaccinationRecord.mutate(input),
   updateAccount: (input) => trpc.profile.updateAccount.mutate(input),
-  upsertVaccinationRecord: (input) => trpc.profile.upsertVaccinationRecord.mutate(input),
 });
 
 export const setProfileApi = (profileApi: ProfileApi | null): void => {

@@ -36,6 +36,10 @@ describe('languageStore', () => {
     const setLanguage = vi.fn(() => Promise.resolve());
 
     setProfileApi({
+      completeVaccinationDose: vi.fn(() => Promise.resolve({
+        ok: true as const,
+        updatedAt: '2025-01-10T00:00:00.000Z',
+      })),
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
@@ -43,11 +47,11 @@ describe('languageStore', () => {
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      upsertVaccinationRecord: vi.fn(() => Promise.resolve({
+      submitVaccinationRecord: vi.fn(() => Promise.resolve({
         ok: true as const,
         updatedAt: '2025-01-10T00:00:00.000Z',
       })),
+      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 
     useLanguageStore.getState().changeLanguage('en');
@@ -60,6 +64,10 @@ describe('languageStore', () => {
     const setLanguage = vi.fn(() => Promise.resolve());
 
     setProfileApi({
+      completeVaccinationDose: vi.fn(() => Promise.resolve({
+        ok: true as const,
+        updatedAt: '2025-01-10T00:00:00.000Z',
+      })),
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
@@ -67,11 +75,11 @@ describe('languageStore', () => {
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      upsertVaccinationRecord: vi.fn(() => Promise.resolve({
+      submitVaccinationRecord: vi.fn(() => Promise.resolve({
         ok: true as const,
         updatedAt: '2025-01-10T00:00:00.000Z',
       })),
+      updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 
     useLanguageStore.getState().changeLanguage('ru');

@@ -1,11 +1,24 @@
+import type { AccountPageUi } from '../../accountPageUi';
+
 import { AddFamilyMemberModal } from './components/AddFamilyMemberModal/AddFamilyMemberModal';
 import { DeleteFamilyMemberModal } from './components/DeleteFamilyMemberModal/DeleteFamilyMemberModal';
 
-export const Modals = () => {
+interface ModalsProps {
+  addFamilyMemberUi: Pick<
+    AccountPageUi,
+    'closeAddMemberModal' | 'isAddMemberModalOpen' | 'isAddingMember' | 'setIsAddingMember'
+  >;
+  deleteFamilyMemberUi: Pick<
+    AccountPageUi,
+    'closeDeleteFamilyMemberModal' | 'deleteCandidateAccountId' | 'isDeleting' | 'setIsDeleting'
+  >;
+}
+
+export const Modals = ({ addFamilyMemberUi, deleteFamilyMemberUi }: ModalsProps) => {
   return (
     <>
-      <AddFamilyMemberModal />
-      <DeleteFamilyMemberModal />
+      <AddFamilyMemberModal ui={addFamilyMemberUi} />
+      <DeleteFamilyMemberModal ui={deleteFamilyMemberUi} />
     </>
   );
 };

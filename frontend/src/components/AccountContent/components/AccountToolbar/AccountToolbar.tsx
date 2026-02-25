@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PlusIcon from 'src/assets/icons/plus.svg';
-import { useAccountPageUiStore } from 'src/state/accountPageUi';
 import { useShallow } from 'zustand/react/shallow';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../constants/ui';
@@ -10,8 +9,13 @@ import { Button, Select, SurfacePanel } from '../../../../ui';
 
 import styles from './AccountToolbar.module.css';
 import { resolveAccountOptionLabel } from 'src/helpers/resolveLabel.ts'
+import type { AccountPageUi } from '../../accountPageUi';
 
-export const AccountToolbar = () => {
+interface AccountToolbarProps {
+  ui: Pick<AccountPageUi, 'isAddingMember' | 'openAddMemberModal'>;
+}
+
+export const AccountToolbar = ({ ui }: AccountToolbarProps) => {
   const { t } = useTranslation();
   const [isSwitchingAccountId, setIsSwitchingAccountId] = useState<number | null>(null);
   const { accounts, selectAccount, selectedAccountId } = useAccountsStore(
@@ -21,15 +25,7 @@ export const AccountToolbar = () => {
       selectedAccountId: state.selectedAccountId,
     })),
   );
-  const {
-    isAddingMember,
-    openAddMemberModal,
-  } = useAccountPageUiStore(
-    useShallow((state) => ({
-      isAddingMember: state.isAddingMember,
-      openAddMemberModal: state.openAddMemberModal,
-    })),
-  );
+  const { isAddingMember, openAddMemberModal } = ui;
 
   const primaryAccount = resolvePrimaryAccount(accounts);
 
