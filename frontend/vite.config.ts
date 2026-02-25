@@ -16,6 +16,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@backend/contracts': path.resolve('../backend/src/contracts.ts'),
+      '@backend/router-types': path.resolve('../backend/src/trpc/routerTypes.ts'),
       src: path.resolve('src/'),
     },
   },

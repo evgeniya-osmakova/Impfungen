@@ -1,4 +1,4 @@
-import type { AppRouter } from '@backend/contracts';
+import type { AppRouter } from '@backend/router-types';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 

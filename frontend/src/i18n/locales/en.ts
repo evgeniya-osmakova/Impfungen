@@ -165,6 +165,28 @@ export const en = {
           edit: 'Edit',
           delete: 'Delete',
         },
+        export: {
+          unnamedProfile: 'Profile',
+          error: 'Failed to export file. Please try again.',
+          actions: {
+            csv: 'Export CSV',
+            pdf: 'Export PDF',
+            pdfLoading: 'Preparing PDF...',
+          },
+          columns: {
+            completedAt: 'Completed date',
+            disease: 'Disease',
+            doseKind: 'Dose type',
+            tradeName: 'Trade name',
+            batchNumber: 'Batch',
+          },
+          pdf: {
+            title: 'Completed vaccinations',
+            profileLabel: 'Profile',
+            exportedAtLabel: 'Exported at',
+            recordsCountLabel: 'Records',
+          },
+        },
         deleteConfirm: {
           title: 'Delete record?',
           message: 'Are you sure you want to delete the vaccination record for “{{disease}}”?',

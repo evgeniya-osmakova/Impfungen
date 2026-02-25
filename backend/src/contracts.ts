@@ -23,5 +23,3 @@ export type {
   VaccinationStorageRepeatRule,
   VaccinationStorageState,
 } from './modules/profile/profileTypes.js';
-
-export type { AppRouter } from './trpc/router.js';

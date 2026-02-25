@@ -5,12 +5,32 @@
 
 .workspace__toolbar {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: flex-start;
+  align-items: center;
 }
 
 .workspace__openFormButton {
   min-height: 44px;
   padding-inline: 18px;
+}
+
+.workspace__exportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.workspace__exportButton {
+  min-height: 44px;
+  padding-inline: 16px;
+}
+
+.workspace__exportError {
+  margin: 0;
+  color: #b42318;
+  font-size: 14px;
 }
 
 .workspace__recordsPane {
@@ -24,5 +44,21 @@
 
   .workspace__openFormButton {
     width: 100%;
+  }
+
+  .workspace__exportActions {
+    width: 100%;
+  }
+
+  .workspace__exportButton {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .workspace__exportButton {
+    width: 100%;
+    flex-basis: 100%;
   }
 }

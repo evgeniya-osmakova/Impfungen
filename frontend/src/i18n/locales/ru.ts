@@ -169,6 +169,28 @@ export const ru = {
           edit: 'Редактировать',
           delete: 'Удалить',
         },
+        export: {
+          unnamedProfile: 'Профиль',
+          error: 'Не удалось выгрузить файл. Попробуйте ещё раз.',
+          actions: {
+            csv: 'Экспорт CSV',
+            pdf: 'Экспорт PDF',
+            pdfLoading: 'Подготовка PDF...',
+          },
+          columns: {
+            completedAt: 'Дата выполнения',
+            disease: 'Заболевание',
+            doseKind: 'Тип дозы',
+            tradeName: 'Торговое название',
+            batchNumber: 'Серия',
+          },
+          pdf: {
+            title: 'Выполненные прививки',
+            profileLabel: 'Профиль',
+            exportedAtLabel: 'Дата выгрузки',
+            recordsCountLabel: 'Количество записей',
+          },
+        },
         deleteConfirm: {
           title: 'Удалить запись?',
           message: 'Вы уверены, что хотите удалить запись о вакцинации «{{disease}}»?',

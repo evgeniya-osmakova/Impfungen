@@ -6,15 +6,26 @@ import { create } from 'zustand'
 
 interface Store {
   isLoaded: boolean;
+  isLoading: boolean;
   isError: boolean;
   loadStore: () => Promise<void>
 }
 
 
-export const useStore = create<Store>((set) => ({
+export const useStore = create<Store>((set, get) => ({
   isError: false,
   isLoaded: false,
+  isLoading: false,
   loadStore: async () => {
+    if (get().isLoaded || get().isLoading) {
+      return;
+    }
+
+    set({
+      isError: false,
+      isLoading: true,
+    });
+
     const api = createProfileApi();
     setProfileApi(api);
 
@@ -31,10 +42,16 @@ export const useStore = create<Store>((set) => ({
       const { setActiveAccountId } = useVaccinationStore.getState();
       setActiveAccountId(profile.accountsState.selectedAccountId);
       setVaccinationStoreState(profile.vaccinationState);
-      set({ isLoaded: true });
+      set({
+        isLoaded: true,
+        isLoading: false,
+      });
     } catch (e) {
       console.error('Unable to load profile.', e);
-      set({ isError: true });
+      set({
+        isError: true,
+        isLoading: false,
+      });
     }
   },
 }));

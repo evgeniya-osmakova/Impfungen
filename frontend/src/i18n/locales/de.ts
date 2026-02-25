@@ -165,6 +165,28 @@ export const de = {
           edit: 'Bearbeiten',
           delete: 'Loeschen',
         },
+        export: {
+          unnamedProfile: 'Profil',
+          error: 'Datei konnte nicht exportiert werden. Bitte erneut versuchen.',
+          actions: {
+            csv: 'CSV exportieren',
+            pdf: 'PDF exportieren',
+            pdfLoading: 'PDF wird vorbereitet...',
+          },
+          columns: {
+            completedAt: 'Datum',
+            disease: 'Erkrankung',
+            doseKind: 'Dosis-Typ',
+            tradeName: 'Handelsname',
+            batchNumber: 'Charge',
+          },
+          pdf: {
+            title: 'Erledigte Impfungen',
+            profileLabel: 'Profil',
+            exportedAtLabel: 'Exportiert am',
+            recordsCountLabel: 'Anzahl Eintraege',
+          },
+        },
         deleteConfirm: {
           title: 'Eintrag loeschen?',
           message: 'Bist du sicher, dass du den Impfeintrag fuer „{{disease}}“ loeschen willst?',
