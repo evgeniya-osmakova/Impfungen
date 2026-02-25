@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 import { useAccountsStore } from 'src/state/accounts';
 import { useShallow } from 'zustand/react/shallow';
-import type { AccountPageUi } from '../../../../accountPageUi';
 
 export const useDeleteFamilyMemberModalController = (
   ui: Pick<

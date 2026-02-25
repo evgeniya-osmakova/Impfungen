@@ -1,3 +1,4 @@
+import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
 import { useLanguageStore } from 'src/state/language'
 import { useShallow } from 'zustand/react/shallow';
 
@@ -10,11 +11,27 @@ import { VaccinationUpcoming } from './components/VaccinationUpcoming/Vaccinatio
 
 import styles from './TopRow.module.css';
 
-export const TopRow = () => {
+interface TopRowProps {
+  ui: Pick<MainPageUi, 'openCompleteDoseModal'>;
+}
+
+export const TopRow = ({ ui }: TopRowProps) => {
   const { language } = useLanguageStore();
   const { resolveDiseaseLabelById } = useDiseaseLabels();
-  const { country, recordsDueInNextYear } = useVaccinationStore(useShallow(selectTopRowViewData));
-  const { openMarkPlannedDoneModal } = useDoseModalActions();
+  const { country, records } = useVaccinationStore(
+    useShallow((state) => ({
+      country: state.country,
+      records: state.records,
+    })),
+  );
+  const { recordsDueInNextYear } = selectTopRowViewData({
+    country,
+    editingDiseaseId: null,
+    records,
+  });
+  const { openMarkPlannedDoneModal } = useDoseModalActions({
+    openCompleteDoseModal: ui.openCompleteDoseModal,
+  });
 
   if (!country) {
     return null;

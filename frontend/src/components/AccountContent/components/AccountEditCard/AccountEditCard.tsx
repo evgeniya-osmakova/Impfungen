@@ -10,10 +10,10 @@ import { resolveCountryLabel } from 'src/helpers/resolveLabel.ts';
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../../../constants/ui';
 import { VACCINATION_COUNTRY_OPTIONS } from '../../../../constants/vaccination';
 import type { CountryCode } from '../../../../interfaces/base';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 import { Button, Input, Select, SurfacePanel } from '../../../../ui';
 
 import { useAccountEditCardController } from './useAccountEditCardController';
-import type { AccountPageUi } from '../../accountPageUi';
 
 import styles from './AccountEditCard.module.css';
 

@@ -2,7 +2,7 @@ import { AccountEditCard } from './components/AccountEditCard/AccountEditCard';
 import { AccountMandatoryNotice } from './components/AccountMandatoryNotice/AccountMandatoryNotice';
 import { AccountToolbar } from './components/AccountToolbar/AccountToolbar';
 import { Modals } from './components/Modals/Modals';
-import { useAccountPageUi } from './accountPageUi';
+import { useAccountPageUi } from 'src/components/AccountContent/useAccountPageUi.ts';
 
 import styles from './AccountContent.module.css';
 

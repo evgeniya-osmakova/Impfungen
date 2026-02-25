@@ -173,7 +173,7 @@ describe('tRPC Fastify transport', () => {
     expect(setLanguageResponse.json()).toMatchObject({
       result: {
         data: {
-          ok: true,
+          language: 'en',
         },
       },
     });
@@ -230,8 +230,14 @@ describe('tRPC Fastify transport', () => {
     expect(submitRecordResponse.json()).toMatchObject({
       result: {
         data: {
-          ok: true,
-          updatedAt: '2025-01-10T00:00:00.000Z',
+          vaccinationState: {
+            records: [
+              {
+                diseaseId: 'measles',
+                updatedAt: '2025-01-10T00:00:00.000Z',
+              },
+            ],
+          },
         },
       },
     });

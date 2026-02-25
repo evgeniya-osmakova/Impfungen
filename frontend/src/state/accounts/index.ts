@@ -1,5 +1,4 @@
 import type { ProfileAccountsState,ProfileAccountSummary } from '@backend/contracts';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
 import { create } from 'zustand';
 
 import type { ProfileSnapshot } from '../../api/profileApi';
@@ -69,7 +68,6 @@ const applySnapshot = (
   });
   useVaccinationStore.getState().setActiveAccountId(snapshot.accountsState.selectedAccountId);
   useVaccinationStore.getState().setVaccinationStoreState(snapshot.vaccinationState);
-  useMainPageUiStore.getState().resetUi();
 };
 
 export const useAccountsStore = create<AccountsStore>((set, get) => ({

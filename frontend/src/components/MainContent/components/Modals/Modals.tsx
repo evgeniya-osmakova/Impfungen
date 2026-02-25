@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sortDiseasesByLabel } from 'src/helpers/vaccinationListAdapter.ts';
+import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
+import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
 import { useShallow } from 'zustand/react/shallow';
 
 import { INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE } from '../../../../constants/internalHomeText';
@@ -9,7 +11,7 @@ import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
 } from '../../../../interfaces/immunizationRecord';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
+import { useVaccinationCommands } from '../../../../state/vaccination/commands';
 import { useVaccinationStore } from '../../../../state/vaccination';
 import { selectModalsViewData } from '../../../../state/vaccination/selectors';
 import { Modal } from '../../../../ui';
@@ -17,7 +19,24 @@ import { Modal } from '../../../../ui';
 import { VaccinationCompleteDoseForm } from './components/VaccinationCompleteDoseForm/VaccinationCompleteDoseForm';
 import { VaccinationForm } from './components/VaccinationForm/VaccinationForm';
 
-export const Modals = () => {
+interface ModalsProps {
+  ui: Pick<
+    MainPageUi,
+    | 'closeCompleteDoseModal'
+    | 'closeFormModal'
+    | 'completeDoseDraft'
+    | 'completeDoseErrorKey'
+    | 'formErrorKey'
+    | 'isCompleteDoseModalOpen'
+    | 'isFormModalOpen'
+    | 'prefilledDiseaseId'
+    | 'setCompleteDoseErrorKey'
+    | 'setFormErrorKey'
+  >;
+  vaccinationUi: Pick<VaccinationPageUi, 'cancelEdit' | 'editingDiseaseId'>;
+}
+
+export const Modals = ({ ui, vaccinationUi }: ModalsProps) => {
   const { t } = useTranslation();
   const {
     completeDoseDraft,
@@ -30,34 +49,20 @@ export const Modals = () => {
     closeFormModal,
     setCompleteDoseErrorKey,
     setFormErrorKey,
-  } = useMainPageUiStore(
+  } = ui;
+  const { country, records } = useVaccinationStore(
     useShallow((state) => ({
-      completeDoseDraft: state.completeDoseDraft,
-      completeDoseErrorKey: state.completeDoseErrorKey,
-      formErrorKey: state.formErrorKey,
-      isCompleteDoseModalOpen: state.isCompleteDoseModalOpen,
-      isFormModalOpen: state.isFormModalOpen,
-      prefilledDiseaseId: state.prefilledDiseaseId,
-      closeCompleteDoseModal: state.closeCompleteDoseModal,
-      closeFormModal: state.closeFormModal,
-      setCompleteDoseErrorKey: state.setCompleteDoseErrorKey,
-      setFormErrorKey: state.setFormErrorKey,
+      country: state.country,
+      records: state.records,
     })),
   );
-  const { diseasesForForm, recordForEdit } = useVaccinationStore(
-    useShallow(selectModalsViewData),
-  );
-  const {
-    cancelEdit,
-    submitCompletedDose,
-    submitRecord,
-  } = useVaccinationStore(
-    useShallow((state) => ({
-      cancelEdit: state.cancelEdit,
-      submitCompletedDose: state.submitCompletedDose,
-      submitRecord: state.submitRecord,
-    })),
-  );
+  const { diseasesForForm, recordForEdit } = selectModalsViewData({
+    country,
+    editingDiseaseId: vaccinationUi.editingDiseaseId,
+    records,
+  });
+  const { cancelEdit } = vaccinationUi;
+  const { submitCompletedDose, submitRecord } = useVaccinationCommands();
   const { resolveDiseaseLabel } = useDiseaseLabels();
   const diseaseFieldRef = useRef<HTMLSelectElement | null>(null);
 
@@ -80,6 +85,7 @@ export const Modals = () => {
       return;
     }
 
+    cancelEdit();
     closeFormModal();
   };
 

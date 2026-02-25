@@ -6,8 +6,8 @@ import {
 } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, NewMemberFieldErrors } from 'src/interfaces/accountForm';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 import { useAccountsStore } from 'src/state/accounts';
-import type { AccountPageUi } from '../../../../accountPageUi';
 
 export const useAddFamilyMemberModalController = (
   ui: Pick<

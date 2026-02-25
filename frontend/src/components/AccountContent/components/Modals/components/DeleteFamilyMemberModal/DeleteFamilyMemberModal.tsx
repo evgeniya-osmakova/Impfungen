@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
 import { Button, Modal } from '../../../../../../ui';
-import type { AccountPageUi } from '../../../../accountPageUi';
 
 import { useDeleteFamilyMemberModalController } from './useDeleteFamilyMemberModalController';
 

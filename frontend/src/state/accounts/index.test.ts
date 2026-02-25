@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ProfileSnapshot, setProfileApi } from '../../api/profileApi';
-import {
-  VACCINATION_DEFAULT_CATEGORY_FILTER,
-  VACCINATION_DEFAULT_SEARCH_QUERY,
-} from '../../constants/vaccination';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
 import { useVaccinationStore } from '../vaccination';
 
 import { useAccountsStore } from './index';
@@ -34,30 +29,21 @@ const createSnapshot = (overrides?: Partial<ProfileSnapshot>): ProfileSnapshot =
 const resetVaccinationState = () => {
   useVaccinationStore.setState({
     activeAccountId: null,
-    categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
     country: null,
-    editingDiseaseId: null,
     records: [],
-    searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
   });
 };
 
 const createApiMock = (snapshot: ProfileSnapshot) => ({
-  completeVaccinationDose: vi.fn(async () => ({
-    ok: true as const,
-    updatedAt: '2025-01-10T00:00:00.000Z',
-  })),
+  completeVaccinationDose: vi.fn(async () => snapshot),
   createFamilyAccount: vi.fn(async () => snapshot),
   deleteFamilyAccount: vi.fn(async () => snapshot),
   getProfile: vi.fn(async () => snapshot),
-  removeVaccinationRecord: vi.fn(async () => undefined),
+  removeVaccinationRecord: vi.fn(async () => snapshot),
   selectAccount: vi.fn(async () => snapshot),
-  setLanguage: vi.fn(async () => undefined),
-  setVaccinationCountry: vi.fn(async () => undefined),
-  submitVaccinationRecord: vi.fn(async () => ({
-    ok: true as const,
-    updatedAt: '2025-01-10T00:00:00.000Z',
-  })),
+  setLanguage: vi.fn(async () => snapshot),
+  setVaccinationCountry: vi.fn(async () => snapshot),
+  submitVaccinationRecord: vi.fn(async () => snapshot),
   updateAccount: vi.fn(async () => snapshot),
 });
 
@@ -66,7 +52,6 @@ describe('accountsStore', () => {
     setProfileApi(null);
     useAccountsStore.setState({ accounts: [], selectedAccountId: null });
     resetVaccinationState();
-    useMainPageUiStore.getState().resetUi();
   });
 
   it('replaces accounts and vaccination state from profile snapshot', () => {
@@ -79,7 +64,7 @@ describe('accountsStore', () => {
     expect(useVaccinationStore.getState().country).toBe('RU');
   });
 
-  it('selects account via api and resets modal ui', async () => {
+  it('selects account via api and applies returned snapshot', async () => {
     const snapshot = createSnapshot({
       accountsState: {
         accounts: [
@@ -108,14 +93,12 @@ describe('accountsStore', () => {
     const api = createApiMock(snapshot);
 
     setProfileApi(api);
-    useMainPageUiStore.getState().openFormModal();
 
     await useAccountsStore.getState().selectAccount(2);
 
     expect(api.selectAccount).toHaveBeenCalledWith(2);
     expect(useAccountsStore.getState().selectedAccountId).toBe(2);
     expect(useVaccinationStore.getState().country).toBe('DE');
-    expect(useMainPageUiStore.getState().isFormModalOpen).toBe(false);
   });
 
   it('deletes family account via api and applies returned snapshot', async () => {

@@ -1,4 +1,4 @@
-import type { AccountPageUi } from '../../accountPageUi';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 
 import { AddFamilyMemberModal } from './components/AddFamilyMemberModal/AddFamilyMemberModal';
 import { DeleteFamilyMemberModal } from './components/DeleteFamilyMemberModal/DeleteFamilyMemberModal';

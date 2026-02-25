@@ -6,10 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type ProfileSnapshot, setProfileApi } from '../../api/profileApi';
 import i18n from '../../i18n';
-import {
-  VACCINATION_DEFAULT_CATEGORY_FILTER,
-  VACCINATION_DEFAULT_SEARCH_QUERY,
-} from '../../constants/vaccination';
 import { useAccountsStore } from '../../state/accounts';
 import { useVaccinationStore } from '../../state/vaccination';
 
@@ -39,11 +35,8 @@ const createSnapshot = (overrides?: Partial<ProfileSnapshot>): ProfileSnapshot =
 const resetVaccinationState = () => {
   useVaccinationStore.setState({
     activeAccountId: null,
-    categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
     country: null,
-    editingDiseaseId: null,
     records: [],
-    searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
   });
 };
 
@@ -53,21 +46,15 @@ const createApiMock = (responses?: {
   selectAccount?: ProfileSnapshot;
   updateAccount?: ProfileSnapshot;
 }) => ({
-  completeVaccinationDose: vi.fn(async () => ({
-    ok: true as const,
-    updatedAt: '2025-01-10T00:00:00.000Z',
-  })),
+  completeVaccinationDose: vi.fn(async () => createSnapshot()),
   createFamilyAccount: vi.fn(async () => responses?.createFamilyAccount ?? createSnapshot()),
   deleteFamilyAccount: vi.fn(async () => responses?.deleteFamilyAccount ?? createSnapshot()),
   getProfile: vi.fn(async () => createSnapshot()),
-  removeVaccinationRecord: vi.fn(async () => undefined),
+  removeVaccinationRecord: vi.fn(async () => createSnapshot()),
   selectAccount: vi.fn(async () => responses?.selectAccount ?? createSnapshot()),
-  setLanguage: vi.fn(async () => undefined),
-  setVaccinationCountry: vi.fn(async () => undefined),
-  submitVaccinationRecord: vi.fn(async () => ({
-    ok: true as const,
-    updatedAt: '2025-01-10T00:00:00.000Z',
-  })),
+  setLanguage: vi.fn(async () => createSnapshot()),
+  setVaccinationCountry: vi.fn(async () => createSnapshot()),
+  submitVaccinationRecord: vi.fn(async () => createSnapshot()),
   updateAccount: vi.fn(async () => responses?.updateAccount ?? createSnapshot()),
 });
 
@@ -151,11 +138,8 @@ describe('Account page', () => {
     useAccountsStore.setState(snapshotAfterCreate.accountsState);
     useVaccinationStore.setState({
       activeAccountId: 1,
-      categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
       country: 'RU',
-      editingDiseaseId: null,
       records: [],
-      searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
     });
 
     const screen = render(
@@ -245,11 +229,8 @@ describe('Account page', () => {
     useAccountsStore.setState(initialSnapshot.accountsState);
     useVaccinationStore.setState({
       activeAccountId: 2,
-      categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
       country: 'DE',
-      editingDiseaseId: null,
       records: [],
-      searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
     });
 
     const screen = render(

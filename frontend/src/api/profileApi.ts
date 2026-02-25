@@ -27,25 +27,23 @@ type CreateFamilyAccountInput = RouterInputs['profile']['createFamilyAccount'];
 type DeleteFamilyAccountInput = RouterInputs['profile']['deleteFamilyAccount'];
 type UpdateAccountInput = RouterInputs['profile']['updateAccount'];
 type SubmitVaccinationRecordInput = RouterInputs['profile']['submitVaccinationRecord'];
-type SubmitVaccinationRecordOutput = RouterOutputs['profile']['submitVaccinationRecord'];
 type CompleteVaccinationDoseInput = RouterInputs['profile']['completeVaccinationDose'];
-type CompleteVaccinationDoseOutput = RouterOutputs['profile']['completeVaccinationDose'];
 type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
   completeVaccinationDose: (
     input: CompleteVaccinationDoseInput,
-  ) => Promise<CompleteVaccinationDoseOutput>;
+  ) => Promise<ProfileSnapshot>;
   createFamilyAccount: (input: CreateFamilyAccountInput) => Promise<ProfileSnapshot>;
   deleteFamilyAccount: (accountId: DeleteFamilyAccountInput['accountId']) => Promise<ProfileSnapshot>;
   getProfile: () => Promise<ProfileSnapshot>;
-  removeVaccinationRecord: (input: RemoveVaccinationRecordInput) => Promise<void>;
+  removeVaccinationRecord: (input: RemoveVaccinationRecordInput) => Promise<ProfileSnapshot>;
   selectAccount: (accountId: SelectAccountInput['accountId']) => Promise<ProfileSnapshot>;
-  setLanguage: (language: SetLanguageInput['language']) => Promise<void>;
-  setVaccinationCountry: (input: SetVaccinationCountryInput) => Promise<void>;
+  setLanguage: (language: SetLanguageInput['language']) => Promise<ProfileSnapshot>;
+  setVaccinationCountry: (input: SetVaccinationCountryInput) => Promise<ProfileSnapshot>;
   submitVaccinationRecord: (
     input: SubmitVaccinationRecordInput,
-  ) => Promise<SubmitVaccinationRecordOutput>;
+  ) => Promise<ProfileSnapshot>;
   updateAccount: (input: UpdateAccountInput) => Promise<ProfileSnapshot>;
 }
 
@@ -56,16 +54,10 @@ export const createProfileApi = (): ProfileApi => ({
   createFamilyAccount: (input) => trpc.profile.createFamilyAccount.mutate(input),
   deleteFamilyAccount: (accountId) => trpc.profile.deleteFamilyAccount.mutate({ accountId }),
   getProfile: () => trpc.profile.get.query(),
-  removeVaccinationRecord: async (input) => {
-    await trpc.profile.removeVaccinationRecord.mutate(input);
-  },
+  removeVaccinationRecord: (input) => trpc.profile.removeVaccinationRecord.mutate(input),
   selectAccount: (accountId) => trpc.profile.selectAccount.mutate({ accountId }),
-  setLanguage: async (language) => {
-    await trpc.profile.setLanguage.mutate({ language });
-  },
-  setVaccinationCountry: async (input) => {
-    await trpc.profile.setVaccinationCountry.mutate(input);
-  },
+  setLanguage: (language) => trpc.profile.setLanguage.mutate({ language }),
+  setVaccinationCountry: (input) => trpc.profile.setVaccinationCountry.mutate(input),
   submitVaccinationRecord: (input) => trpc.profile.submitVaccinationRecord.mutate(input),
   updateAccount: (input) => trpc.profile.updateAccount.mutate(input),
 });

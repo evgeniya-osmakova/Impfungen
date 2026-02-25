@@ -6,6 +6,7 @@ import {
 } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, FieldErrors } from 'src/interfaces/accountForm';
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 import {
   isProfileAccountComplete,
   resolvePrimaryAccount,
@@ -13,7 +14,6 @@ import {
   useAccountsStore,
 } from 'src/state/accounts';
 import { useShallow } from 'zustand/react/shallow';
-import type { AccountPageUi } from '../../accountPageUi';
 
 export const useAccountEditCardController = (
   ui: Pick<AccountPageUi, 'isDeleting' | 'openDeleteFamilyMemberModal'>,

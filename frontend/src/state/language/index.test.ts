@@ -33,24 +33,18 @@ describe('languageStore', () => {
   });
 
   it('persists selected language on backend when api is configured', () => {
-    const setLanguage = vi.fn(() => Promise.resolve());
+    const setLanguage = vi.fn(() => Promise.resolve(defaultProfileSnapshot));
 
     setProfileApi({
-      completeVaccinationDose: vi.fn(() => Promise.resolve({
-        ok: true as const,
-        updatedAt: '2025-01-10T00:00:00.000Z',
-      })),
+      completeVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      removeVaccinationRecord: vi.fn(() => Promise.resolve()),
+      removeVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
-      setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      submitVaccinationRecord: vi.fn(() => Promise.resolve({
-        ok: true as const,
-        updatedAt: '2025-01-10T00:00:00.000Z',
-      })),
+      setVaccinationCountry: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      submitVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 
@@ -61,24 +55,18 @@ describe('languageStore', () => {
   });
 
   it('does nothing when selected language is already active', () => {
-    const setLanguage = vi.fn(() => Promise.resolve());
+    const setLanguage = vi.fn(() => Promise.resolve(defaultProfileSnapshot));
 
     setProfileApi({
-      completeVaccinationDose: vi.fn(() => Promise.resolve({
-        ok: true as const,
-        updatedAt: '2025-01-10T00:00:00.000Z',
-      })),
+      completeVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
-      removeVaccinationRecord: vi.fn(() => Promise.resolve()),
+      removeVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
-      setVaccinationCountry: vi.fn(() => Promise.resolve()),
-      submitVaccinationRecord: vi.fn(() => Promise.resolve({
-        ok: true as const,
-        updatedAt: '2025-01-10T00:00:00.000Z',
-      })),
+      setVaccinationCountry: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      submitVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 

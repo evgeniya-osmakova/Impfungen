@@ -4,12 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  VACCINATION_DEFAULT_CATEGORY_FILTER,
-  VACCINATION_DEFAULT_SEARCH_QUERY,
-} from '../../constants/vaccination';
 import i18n from '../../i18n';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
 import { useLanguageStore } from '../../state/language';
 import { useVaccinationStore } from '../../state/vaccination';
 import { formatDateByLanguage } from '../../utils/date';
@@ -29,11 +24,7 @@ const resetStores = () => {
     activeAccountId: 1,
     country: null,
     records: [],
-    categoryFilter: VACCINATION_DEFAULT_CATEGORY_FILTER,
-    editingDiseaseId: null,
-    searchQuery: VACCINATION_DEFAULT_SEARCH_QUERY,
   });
-  useMainPageUiStore.getState().resetUi();
 };
 
 describe('Main', () => {

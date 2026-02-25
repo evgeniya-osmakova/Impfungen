@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { sortDiseasesByLabel } from 'src/helpers/vaccinationListAdapter.ts';
+import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
+import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
 import { useLanguageStore } from 'src/state/language'
 import { useShallow } from 'zustand/react/shallow';
 
 import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
 import { useVaccinationStore } from '../../../../state/vaccination';
 import { selectCatalogViewData } from '../../../../state/vaccination/selectors';
 import { filterDiseases } from '../../../../utils/vaccinationSelectors';
@@ -13,30 +14,38 @@ import { VaccinationCatalog } from './components/VaccinationCatalog/VaccinationC
 
 import styles from './CatalogPane.module.css';
 
-export const CatalogPane = () => {
+interface CatalogPaneProps {
+  ui: Pick<
+    MainPageUi,
+    'openFormModalWithPrefilledDisease'
+  > & Pick<
+    VaccinationPageUi,
+    'cancelEdit' | 'categoryFilter' | 'editingDiseaseId' | 'searchQuery' | 'setCategoryFilter' | 'setSearchQuery'
+  >;
+}
+
+export const CatalogPane = ({ ui }: CatalogPaneProps) => {
   const { language } = useLanguageStore();
   const { resolveDiseaseLabel } = useDiseaseLabels();
-  const { availableDiseases, categoryCounts, country } = useVaccinationStore(
-    useShallow(selectCatalogViewData),
+  const { country, records } = useVaccinationStore(
+    useShallow((state) => ({
+      country: state.country,
+      records: state.records,
+    })),
   );
+  const { availableDiseases, categoryCounts } = selectCatalogViewData({
+    country,
+    editingDiseaseId: ui.editingDiseaseId,
+    records,
+  });
   const {
     cancelEdit,
     categoryFilter,
     searchQuery,
     setCategoryFilter,
     setSearchQuery,
-  } = useVaccinationStore(
-    useShallow((state) => ({
-      cancelEdit: state.cancelEdit,
-      categoryFilter: state.categoryFilter,
-      searchQuery: state.searchQuery,
-      setCategoryFilter: state.setCategoryFilter,
-      setSearchQuery: state.setSearchQuery,
-    })),
-  );
-  const openFormModalWithPrefilledDisease = useMainPageUiStore(
-    (state) => state.openFormModalWithPrefilledDisease,
-  );
+    openFormModalWithPrefilledDisease,
+  } = ui;
 
   const catalogDiseases = useMemo(() => {
     if (!country) {

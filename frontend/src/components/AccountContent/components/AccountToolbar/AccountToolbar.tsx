@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PlusIcon from 'src/assets/icons/plus.svg';
+import { resolveAccountOptionLabel } from 'src/helpers/resolveLabel.ts'
+import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
 import { useShallow } from 'zustand/react/shallow';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../constants/ui';
@@ -8,8 +10,6 @@ import { isProfileAccountComplete, resolvePrimaryAccount, useAccountsStore } fro
 import { Button, Select, SurfacePanel } from '../../../../ui';
 
 import styles from './AccountToolbar.module.css';
-import { resolveAccountOptionLabel } from 'src/helpers/resolveLabel.ts'
-import type { AccountPageUi } from '../../accountPageUi';
 
 interface AccountToolbarProps {
   ui: Pick<AccountPageUi, 'isAddingMember' | 'openAddMemberModal'>;

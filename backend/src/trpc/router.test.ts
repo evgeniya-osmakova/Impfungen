@@ -149,7 +149,7 @@ describe('appRouter profile namespace', () => {
 
     expect(await caller.profile.get()).toEqual(snapshot);
 
-    expect(await caller.profile.setLanguage({ language: 'en' })).toEqual({ ok: true });
+    expect(await caller.profile.setLanguage({ language: 'en' })).toEqual(snapshot);
     expect(snapshot.language).toBe('en');
 
     const nextRecord = {
@@ -179,19 +179,16 @@ describe('appRouter profile namespace', () => {
       updatedAt: '2025-01-10T00:00:00.000Z',
     };
 
-    expect(await caller.profile.setVaccinationCountry({ accountId: 1, country: 'RU' })).toEqual({ ok: true });
+    expect(await caller.profile.setVaccinationCountry({ accountId: 1, country: 'RU' })).toEqual(snapshot);
     expect(snapshot.vaccinationState.country).toBe('RU');
 
     expect(await caller.profile.submitVaccinationRecord({
       accountId: 1,
       ...nextRecord,
-    })).toEqual({
-      ok: true,
-      updatedAt: '2025-01-10T00:00:00.000Z',
-    });
+    })).toEqual(snapshot);
     expect(snapshot.vaccinationState.records).toEqual([persistedRecord]);
 
-    expect(await caller.profile.removeVaccinationRecord({ accountId: 1, diseaseId: 'measles' })).toEqual({ ok: true });
+    expect(await caller.profile.removeVaccinationRecord({ accountId: 1, diseaseId: 'measles' })).toEqual(snapshot);
     expect(snapshot.vaccinationState.records).toEqual([]);
   });
 

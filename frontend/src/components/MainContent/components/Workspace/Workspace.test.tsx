@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from 'src/i18n';
 import { useAccountsStore } from 'src/state/accounts';
 import { useLanguageStore } from 'src/state/language';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
 import { useVaccinationStore } from 'src/state/vaccination';
 
 import { Workspace } from './Workspace';
@@ -41,7 +40,6 @@ const createVaccinationRecord = () => ({
 });
 
 const resetStores = () => {
-  useMainPageUiStore.getState().resetUi();
   useLanguageStore.setState({ language: 'ru' });
   useAccountsStore.setState({
     accounts: [{
@@ -55,12 +53,20 @@ const resetStores = () => {
   });
   useVaccinationStore.setState({
     activeAccountId: 1,
-    categoryFilter: 'all',
     country: 'RU',
-    editingDiseaseId: null,
     records: [],
-    searchQuery: '',
   });
+};
+
+const workspaceUi = {
+  openCompleteDoseModal: vi.fn(),
+  openFormModal: vi.fn(),
+};
+
+const workspaceVaccinationUi = {
+  cancelEdit: vi.fn(),
+  editingDiseaseId: null,
+  startEditRecord: vi.fn(),
 };
 
 describe('Workspace export actions', () => {
@@ -71,7 +77,7 @@ describe('Workspace export actions', () => {
   });
 
   it('renders export buttons and disables them when there are no completed doses', () => {
-    const { getByRole } = render(<Workspace />);
+    const { getByRole } = render(<Workspace ui={workspaceUi} vaccinationUi={workspaceVaccinationUi} />);
 
     expect(getByRole('button', { name: 'Экспорт CSV' })).toBeDisabled();
     expect(getByRole('button', { name: 'Экспорт PDF' })).toBeDisabled();
@@ -79,7 +85,7 @@ describe('Workspace export actions', () => {
 
   it('enables export buttons after completed records appear and triggers CSV export', async () => {
     const user = userEvent.setup();
-    const { getByRole } = render(<Workspace />);
+    const { getByRole } = render(<Workspace ui={workspaceUi} vaccinationUi={workspaceVaccinationUi} />);
 
     act(() => {
       useVaccinationStore.setState({
@@ -114,7 +120,9 @@ describe('Workspace export actions', () => {
       });
     });
 
-    const { findByRole, getByRole, queryByRole } = render(<Workspace />);
+    const { findByRole, getByRole, queryByRole } = render(
+      <Workspace ui={workspaceUi} vaccinationUi={workspaceVaccinationUi} />,
+    );
 
     await user.click(getByRole('button', { name: 'Экспорт PDF' }));
     expect(exportVaccinationCompletedPdf).toHaveBeenCalledTimes(1);

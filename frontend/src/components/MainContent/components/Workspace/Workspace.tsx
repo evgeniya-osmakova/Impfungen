@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { useMainPageUiStore } from 'src/state/mainPageUi';
+import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
+import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
 import { useShallow } from 'zustand/react/shallow';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../constants/ui';
 import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
 import { useDoseModalActions } from '../../../../hooks/useDoseModalActions';
+import { useVaccinationCommands } from '../../../../state/vaccination/commands';
 import { useVaccinationStore } from '../../../../state/vaccination';
 import { selectWorkspaceViewData } from '../../../../state/vaccination/selectors';
 import { Button, Error } from '../../../../ui';
@@ -14,25 +16,31 @@ import { useWorkspaceExportController } from './useWorkspaceExportController';
 
 import styles from './Workspace.module.css';
 
-export const Workspace = () => {
+interface WorkspaceProps {
+  ui: Pick<MainPageUi, 'openCompleteDoseModal' | 'openFormModal'>;
+  vaccinationUi: Pick<VaccinationPageUi, 'cancelEdit' | 'editingDiseaseId' | 'startEditRecord'>;
+}
+
+export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
   const { t } = useTranslation();
   const { resolveDiseaseLabelById } = useDiseaseLabels();
-  const { country, recordsForView } = useVaccinationStore(
-    useShallow(selectWorkspaceViewData),
-  );
-  const {
-    cancelEdit,
-    removeRecord,
-    startEditRecord,
-  } = useVaccinationStore(
+  const { country, records } = useVaccinationStore(
     useShallow((state) => ({
-      cancelEdit: state.cancelEdit,
-      removeRecord: state.removeRecord,
-      startEditRecord: state.startEditRecord,
+      country: state.country,
+      records: state.records,
     })),
   );
-  const openFormModal = useMainPageUiStore((state) => state.openFormModal);
-  const { openAddDoseModal, openMarkPlannedDoneModal } = useDoseModalActions();
+  const { recordsForView } = selectWorkspaceViewData({
+    country,
+    editingDiseaseId: vaccinationUi.editingDiseaseId,
+    records,
+  });
+  const { openFormModal, openCompleteDoseModal } = ui;
+  const { cancelEdit, startEditRecord } = vaccinationUi;
+  const { removeRecord } = useVaccinationCommands();
+  const { openAddDoseModal, openMarkPlannedDoneModal } = useDoseModalActions({
+    openCompleteDoseModal,
+  });
   const {
     exportError,
     handleExportCsv,
@@ -56,6 +64,14 @@ export const Workspace = () => {
   const handleEditRecord = (diseaseId: string) => {
     startEditRecord(diseaseId);
     openFormModal();
+  };
+
+  const handleDeleteRecord = async (diseaseId: string) => {
+    if (vaccinationUi.editingDiseaseId === diseaseId) {
+      cancelEdit();
+    }
+
+    await removeRecord(diseaseId);
   };
 
   return (
@@ -96,7 +112,7 @@ export const Workspace = () => {
       <div className={styles.workspace__recordsPane}>
         <VaccinationRecords
           onAddDose={openAddDoseModal}
-          onDeleteRecord={removeRecord}
+          onDeleteRecord={handleDeleteRecord}
           onEditRecord={handleEditRecord}
           onMarkPlannedDone={openMarkPlannedDoneModal}
           records={recordsForView}
