@@ -37,7 +37,7 @@ interface VaccinationCompleteDoseFormProps {
   isInModal?: boolean;
   isMarkPlannedFlow: boolean;
   onCancel: () => void;
-  onSubmit: (record: ImmunizationDoseInput) => void;
+  onSubmit: (record: ImmunizationDoseInput) => Promise<void>;
 }
 
 const resolveDoseKindTextKey = (kind: DoseKind): string => `internal.doseKind.${kind}`;
@@ -70,7 +70,7 @@ export const VaccinationCompleteDoseForm = ({
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    onSubmit({
+    void onSubmit({
       batchNumber: normalizeOptionalText(batchNumber),
       completedAt,
       diseaseId,

@@ -37,12 +37,12 @@ interface AccountsStore {
     birthYear: number;
     country: CountryCode | null;
     name: string;
-  }) => Promise<void>;
-  deleteFamilyAccount: (accountId: number) => Promise<void>;
+  }) => Promise<boolean>;
+  deleteFamilyAccount: (accountId: number) => Promise<boolean>;
   getPrimaryAccount: () => ProfileAccountSummary | null;
   getSelectedAccount: () => ProfileAccountSummary | null;
   replaceFromProfileSnapshot: (snapshot: ProfileSnapshot) => void;
-  selectAccount: (accountId: number) => Promise<void>;
+  selectAccount: (accountId: number) => Promise<boolean>;
   selectedAccountId: number | null;
   setAccountsState: (accountsState: ProfileAccountsState) => void;
   updateAccount: (input: {
@@ -50,12 +50,12 @@ interface AccountsStore {
     birthYear: number;
     country: CountryCode | null;
     name: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   updateSelectedAccount: (input: {
     birthYear: number;
     country: CountryCode | null;
     name: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 }
 
 const applySnapshot = (
@@ -76,22 +76,37 @@ export const useAccountsStore = create<AccountsStore>((set, get) => ({
     const api = getProfileApi();
 
     if (!api) {
-      return;
+      return false;
     }
 
-    const snapshot = await api.createFamilyAccount(input);
-    applySnapshot(set, snapshot);
+    try {
+      const snapshot = await api.createFamilyAccount(input);
+      applySnapshot(set, snapshot);
+
+      return true;
+    } catch (error) {
+      console.error('Unable to create family account.', error);
+
+      return false;
+    }
   },
   deleteFamilyAccount: async (accountId) => {
     const api = getProfileApi();
 
     if (!api) {
-      return;
+      return false;
     }
 
-    const snapshot = await api.deleteFamilyAccount(accountId);
+    try {
+      const snapshot = await api.deleteFamilyAccount(accountId);
+      applySnapshot(set, snapshot);
 
-    applySnapshot(set, snapshot);
+      return true;
+    } catch (error) {
+      console.error('Unable to delete family account.', error);
+
+      return false;
+    }
   },
   getPrimaryAccount: () => resolvePrimaryAccount(get().accounts),
   getSelectedAccount: () => resolveSelectedAccount(get().accounts, get().selectedAccountId),
@@ -102,12 +117,19 @@ export const useAccountsStore = create<AccountsStore>((set, get) => ({
     const api = getProfileApi();
 
     if (!api) {
-      return;
+      return false;
     }
 
-    const snapshot = await api.selectAccount(accountId);
+    try {
+      const snapshot = await api.selectAccount(accountId);
+      applySnapshot(set, snapshot);
 
-    applySnapshot(set, snapshot);
+      return true;
+    } catch (error) {
+      console.error('Unable to switch account.', error);
+
+      return false;
+    }
   },
   selectedAccountId: null,
   setAccountsState: ({ accounts, selectedAccountId }) => {
@@ -117,21 +139,28 @@ export const useAccountsStore = create<AccountsStore>((set, get) => ({
     const api = getProfileApi();
 
     if (!api) {
-      return;
+      return false;
     }
 
-    const snapshot = await api.updateAccount(input);
+    try {
+      const snapshot = await api.updateAccount(input);
+      applySnapshot(set, snapshot);
 
-    applySnapshot(set, snapshot);
+      return true;
+    } catch (error) {
+      console.error('Unable to save account.', error);
+
+      return false;
+    }
   },
   updateSelectedAccount: async ({ birthYear, country, name }) => {
     const selectedAccountId = get().selectedAccountId;
 
     if (selectedAccountId === null) {
-      return;
+      return false;
     }
 
-    await get().updateAccount({
+    return get().updateAccount({
       accountId: selectedAccountId,
       birthYear,
       country,

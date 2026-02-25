@@ -187,6 +187,7 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to save vaccination country.',
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
       )),
   submitVaccinationRecord: publicProcedure
     .input(submitVaccinationRecordSchema.extend({
@@ -200,7 +201,10 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to save vaccination record.',
-        [VACCINATION_SYNC_CONFLICT_ERROR_MAPPING],
+        [
+          PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING,
+          VACCINATION_SYNC_CONFLICT_ERROR_MAPPING,
+        ],
       )),
   completeVaccinationDose: publicProcedure
     .input(completeVaccinationDoseSchema.extend({
@@ -214,7 +218,10 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to save completed dose.',
-        [VACCINATION_SYNC_CONFLICT_ERROR_MAPPING],
+        [
+          PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING,
+          VACCINATION_SYNC_CONFLICT_ERROR_MAPPING,
+        ],
       )),
   removeVaccinationRecord: publicProcedure
     .input(z.object({
@@ -228,6 +235,7 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to remove vaccination record.',
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
       )),
   setLanguage: publicProcedure
     .input(z.object({ language: z.enum(APP_LANGUAGE_VALUES) }))

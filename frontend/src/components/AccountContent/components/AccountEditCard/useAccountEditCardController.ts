@@ -92,31 +92,28 @@ export const useAccountEditCardController = (
     setIsSaving(true);
     setEditRequestError(null);
 
-    try {
-      if (editingAccount.id === selectedAccountId) {
-        await updateSelectedAccount({
-          birthYear: validation.birthYear,
-          country,
-          name: validation.trimmedName,
-        });
-      } else {
-        await updateAccount({
-          accountId: editingAccount.id,
-          birthYear: validation.birthYear,
-          country,
-          name: validation.trimmedName,
-        });
-      }
-    } catch (error) {
-      console.error('Unable to save account.', error);
-      setEditRequestError(t('account.errors.saveFailed'));
-    } finally {
-      setIsSaving(false);
+    const isSaved = editingAccount.id === selectedAccountId
+      ? await updateSelectedAccount({
+        birthYear: validation.birthYear,
+        country,
+        name: validation.trimmedName,
+      })
+      : await updateAccount({
+        accountId: editingAccount.id,
+        birthYear: validation.birthYear,
+        country,
+        name: validation.trimmedName,
+      });
 
-      if (pendingEditAutoSaveRef.current) {
-        pendingEditAutoSaveRef.current = false;
-        void saveEditingAccountIfNeeded();
-      }
+    if (!isSaved) {
+      setEditRequestError(t('account.errors.saveFailed'));
+    }
+
+    setIsSaving(false);
+
+    if (pendingEditAutoSaveRef.current) {
+      pendingEditAutoSaveRef.current = false;
+      void saveEditingAccountIfNeeded();
     }
   };
 

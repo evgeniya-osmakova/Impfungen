@@ -14,9 +14,9 @@ interface LanguageStore {
 export const useLanguageStore = create<LanguageStore>((set, get) => ({
   language: resolveAppLanguage(i18n?.resolvedLanguage),
   changeLanguage: (nextLanguage) => {
-    const selectedLanguage = get().language;
+    const previousLanguage = get().language;
 
-    if (nextLanguage === selectedLanguage) {
+    if (nextLanguage === previousLanguage) {
       return;
     }
 
@@ -27,6 +27,13 @@ export const useLanguageStore = create<LanguageStore>((set, get) => ({
     if (profileApi) {
       void profileApi.setLanguage(nextLanguage).catch((error) => {
         console.error('Unable to persist language on backend.', error);
+
+        if (get().language !== nextLanguage) {
+          return;
+        }
+
+        set({ language: previousLanguage });
+        syncLanguage(previousLanguage);
       });
     }
 

@@ -40,13 +40,8 @@ export const AccountToolbar = ({ ui }: AccountToolbarProps) => {
 
     setIsSwitchingAccountId(accountId);
 
-    try {
-      await selectAccount(accountId);
-    } catch (error) {
-      console.error('Unable to switch account.', error);
-    } finally {
-      setIsSwitchingAccountId(null);
-    }
+    await selectAccount(accountId);
+    setIsSwitchingAccountId(null);
   };
 
   return (

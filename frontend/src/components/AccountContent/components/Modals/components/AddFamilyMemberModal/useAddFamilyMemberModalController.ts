@@ -89,19 +89,19 @@ export const useAddFamilyMemberModalController = (
 
     setIsAddingMember(true);
 
-    try {
-      await createFamilyAccount({
-        birthYear: validation.birthYear,
-        country: newMemberCountry,
-        name: validation.trimmedName,
-      });
+    const isCreated = await createFamilyAccount({
+      birthYear: validation.birthYear,
+      country: newMemberCountry,
+      name: validation.trimmedName,
+    });
+
+    if (isCreated) {
       closeAddMemberModal();
-    } catch (error) {
-      console.error('Unable to create family account.', error);
+    } else {
       setNewMemberRequestError(t('account.errors.createFailed'));
-    } finally {
-      setIsAddingMember(false);
     }
+
+    setIsAddingMember(false);
   };
 
   return {

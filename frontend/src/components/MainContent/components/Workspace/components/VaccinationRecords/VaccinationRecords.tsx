@@ -11,7 +11,7 @@ import styles from './VaccinationRecords.module.css';
 
 interface VaccinationRecordsProps {
   onAddDose: (diseaseId: string) => void;
-  onDeleteRecord: (diseaseId: string) => Promise<void>;
+  onDeleteRecord: (diseaseId: string) => Promise<boolean>;
   onEditRecord: (diseaseId: string) => void;
   onMarkPlannedDone: (payload: {
     diseaseId: string;
@@ -33,10 +33,12 @@ export const VaccinationRecords = ({
 }: VaccinationRecordsProps) => {
   const { t } = useTranslation();
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
+  const [deleteRequestError, setDeleteRequestError] = useState<string | null>(null);
   const [expandedHistoryByDiseaseId, setExpandedHistoryByDiseaseId] = useState<Record<string, boolean>>({});
 
   const handleCancelDelete = () => {
     setDeleteCandidateId(null);
+    setDeleteRequestError(null);
   };
 
   const handleConfirmDelete = async () => {
@@ -44,8 +46,17 @@ export const VaccinationRecords = ({
       return;
     }
 
-    await onDeleteRecord(deleteCandidateId);
-    setDeleteCandidateId(null);
+    setDeleteRequestError(null);
+
+    const isDeleted = await onDeleteRecord(deleteCandidateId);
+
+    if (isDeleted) {
+      setDeleteCandidateId(null);
+
+      return;
+    }
+
+    setDeleteRequestError(t('internal.records.deleteConfirm.requestFailed'));
   };
 
   const toggleHistory = (diseaseId: string) => {
@@ -85,6 +96,7 @@ export const VaccinationRecords = ({
         deleteCandidateId={deleteCandidateId}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
+        requestError={deleteRequestError}
         resolveDiseaseLabelById={resolveDiseaseLabelById}
       />
     </section>

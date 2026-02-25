@@ -38,7 +38,7 @@ interface VaccinationFormProps {
   errorKey: string | null;
   isInModal?: boolean;
   onCancelEdit: () => void;
-  onSubmitRecord: (record: ImmunizationSeriesInput) => void;
+  onSubmitRecord: (record: ImmunizationSeriesInput) => Promise<void>;
   prefilledDiseaseId: string | null;
   recordForEdit: ImmunizationSeries | null;
   resolveDiseaseLabel: (disease: Disease) => string;
@@ -170,7 +170,7 @@ export const VaccinationForm = ({
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    onSubmitRecord(buildVaccinationRecordInput({
+    void onSubmitRecord(buildVaccinationRecordInput({
       batchNumber,
       completedAt,
       completedDoseKind,

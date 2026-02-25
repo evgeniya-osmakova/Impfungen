@@ -1,4 +1,3 @@
-import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import PlusIcon from 'src/assets/icons/plus.svg';
 
@@ -15,7 +14,7 @@ import type {
   CountryCode,
 } from '../../../../../../interfaces/base';
 import type { Disease } from '../../../../../../interfaces/disease';
-import { Input } from '../../../../../../ui';
+import { Input, RadioPillGroup } from '../../../../../../ui';
 
 import styles from './VaccinationCatalog.module.css';
 
@@ -108,27 +107,26 @@ export const VaccinationCatalog = ({
       />
 
       {!isUniversalCatalog && (
-        <div
-          aria-label={t('internal.catalog.countLabel', { count: diseases.length })}
-          className={styles.vaccinationCatalog__filters}
-        >
-          {VACCINATION_CATEGORY_FILTER_OPTIONS.map((filter) => (
-            <button
-              className={classNames(
-                styles.vaccinationCatalog__filter,
-                filter === categoryFilter && styles.vaccinationCatalog__filterActive,
-              )}
-              key={filter}
-              onClick={() => onChangeCategoryFilter(filter)}
-              type={HTML_BUTTON_TYPE.button}
-            >
-              {t(resolveFilterTextKey(filter))}
-              <span className={styles.vaccinationCatalog__filterCount}>
-                {getFilterCount(filter, categoryCounts)}
-              </span>
-            </button>
-          ))}
-        </div>
+        <RadioPillGroup
+          controlActiveClassName={styles.vaccinationCatalog__filterActive}
+          controlClassName={styles.vaccinationCatalog__filter}
+          controlsClassName={styles.vaccinationCatalog__filters}
+          legend={t('internal.catalog.countLabel', { count: diseases.length })}
+          onChange={onChangeCategoryFilter}
+          options={VACCINATION_CATEGORY_FILTER_OPTIONS.map((filter) => ({
+            label: (
+              <>
+                {t(resolveFilterTextKey(filter))}
+                <span className={styles.vaccinationCatalog__filterCount}>
+                  {getFilterCount(filter, categoryCounts)}
+                </span>
+              </>
+            ),
+            value: filter,
+          }))}
+          unstyled
+          value={categoryFilter}
+        />
       )}
 
       <p className={styles.vaccinationCatalog__countLabel}>

@@ -55,15 +55,15 @@ export const useDeleteFamilyMemberModalController = (
     setRequestError(null);
     setIsDeleting(true);
 
-    try {
-      await deleteFamilyAccount(deleteCandidateAccount.id);
+    const isDeleted = await deleteFamilyAccount(deleteCandidateAccount.id);
+
+    if (isDeleted) {
       closeDeleteFamilyMemberModal();
-    } catch (error) {
-      console.error('Unable to delete family account.', error);
+    } else {
       setRequestError(t('account.errors.deleteFailed'));
-    } finally {
-      setIsDeleting(false);
     }
+
+    setIsDeleting(false);
   };
 
   return {

@@ -60,7 +60,7 @@ const resolveSubmitRecordCompletedDoseId = (
 };
 
 interface VaccinationCommands {
-  removeRecord: (diseaseId: string) => Promise<void>;
+  removeRecord: (diseaseId: string) => Promise<boolean>;
   setCountry: (country: CountryCode) => Promise<void>;
   submitCompletedDose: (record: ImmunizationDoseInput) => Promise<VaccinationValidationErrorCode | null>;
   submitRecord: (record: ImmunizationSeriesInput) => Promise<VaccinationValidationErrorCode | null>;
@@ -74,21 +74,29 @@ export const useVaccinationCommands = (): VaccinationCommands => {
 
   const removeRecord: VaccinationCommands['removeRecord'] = async (diseaseId) => {
     if (activeAccountId === null) {
-      return;
+      return false;
     }
 
-    const snapshot = await persistRemovedRecord({
-      accountId: activeAccountId,
-      diseaseId,
-    });
+    try {
+      const snapshot = await persistRemovedRecord({
+        accountId: activeAccountId,
+        diseaseId,
+      });
 
-    if (snapshot) {
-      useAccountsStore.getState().replaceFromProfileSnapshot(snapshot);
+      if (snapshot) {
+        useAccountsStore.getState().replaceFromProfileSnapshot(snapshot);
 
-      return;
+        return true;
+      }
+
+      replaceRecords(records.filter((record) => record.diseaseId !== diseaseId));
+
+      return true;
+    } catch (error) {
+      console.error('Unable to delete vaccination record.', error);
+
+      return false;
     }
-
-    replaceRecords(records.filter((record) => record.diseaseId !== diseaseId));
   };
 
   const setCountry: VaccinationCommands['setCountry'] = async (country) => {
@@ -144,7 +152,9 @@ export const useVaccinationCommands = (): VaccinationCommands => {
         return VACCINATION_VALIDATION_ERROR_CODE.sync_conflict;
       }
 
-      throw error;
+      console.error('Unable to save completed dose.', error);
+
+      return VACCINATION_VALIDATION_ERROR_CODE.save_failed;
     }
 
     return null;
@@ -179,7 +189,9 @@ export const useVaccinationCommands = (): VaccinationCommands => {
         return VACCINATION_VALIDATION_ERROR_CODE.sync_conflict;
       }
 
-      throw error;
+      console.error('Unable to save vaccination record.', error);
+
+      return VACCINATION_VALIDATION_ERROR_CODE.save_failed;
     }
 
     return null;

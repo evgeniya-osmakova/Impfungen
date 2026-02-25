@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import DownloadIcon from 'src/assets/icons/download.svg';
+import UploadIcon from 'src/assets/icons/upload.svg';
 import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
 import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
 import { useShallow } from 'zustand/react/shallow';
@@ -9,9 +12,11 @@ import { useDoseModalActions } from '../../../../hooks/useDoseModalActions';
 import { useVaccinationCommands } from '../../../../state/vaccination/commands';
 import { useVaccinationStore } from '../../../../state/vaccination';
 import { selectWorkspaceViewData } from '../../../../state/vaccination/selectors';
-import { Button, Error } from '../../../../ui';
+import { Button, Error, Input } from '../../../../ui';
 
+import { WorkspaceImportReport } from './components/WorkspaceImportReport/WorkspaceImportReport';
 import { VaccinationRecords } from './components/VaccinationRecords/VaccinationRecords';
+import { useWorkspaceCsvImportController } from './useWorkspaceCsvImportController';
 import { useWorkspaceExportController } from './useWorkspaceExportController';
 
 import styles from './Workspace.module.css';
@@ -23,6 +28,7 @@ interface WorkspaceProps {
 
 export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
   const { t } = useTranslation();
+  const [isImportReportModalOpen, setIsImportReportModalOpen] = useState(false);
   const { resolveDiseaseLabelById } = useDiseaseLabels();
   const { country, records } = useVaccinationStore(
     useShallow((state) => ({
@@ -51,6 +57,23 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
     recordsForView,
     resolveDiseaseLabelById,
   });
+  const {
+    fileInputRef,
+    handleImportFileChange,
+    handleOpenImportDialog,
+    importFatalError,
+    importReport,
+    isImporting,
+  } = useWorkspaceCsvImportController();
+  const isTransferBusy = isExporting || isImporting;
+
+  useEffect(() => {
+    if (!importReport) {
+      return;
+    }
+
+    setIsImportReportModalOpen(true);
+  }, [importReport]);
 
   if (!country) {
     return null;
@@ -71,7 +94,7 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
       cancelEdit();
     }
 
-    await removeRecord(diseaseId);
+    return removeRecord(diseaseId);
   };
 
   return (
@@ -86,29 +109,61 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
           {t('internal.form.actions.openModal')}
         </Button>
         <div className={styles.workspace__exportActions}>
+          <Input
+            accept=".csv,text/csv"
+            aria-label={t('internal.records.import.inputLabel')}
+            className={styles.workspace__visuallyHiddenFileInput}
+            onChange={handleImportFileChange}
+            ref={fileInputRef}
+            type="file"
+          />
           <Button
-            className={styles.workspace__exportButton}
-            disabled={!hasCompletedDoses || isExporting}
-            onClick={handleExportCsv}
+            className={`${styles.workspace__exportButton} ${styles.workspace__importButton}`}
+            disabled={isTransferBusy}
+            onClick={handleOpenImportDialog}
             type={HTML_BUTTON_TYPE.button}
             variant={BUTTON_VARIANT.secondary}
           >
-            {t('internal.records.export.actions.csv')}
+            <UploadIcon aria-hidden="true" className={styles.workspace__actionIcon} />
+            {isImporting
+              ? t('internal.records.import.actions.csvLoading')
+              : t('internal.records.import.actions.csv')}
           </Button>
-          <Button
-            className={styles.workspace__exportButton}
-            disabled={!hasCompletedDoses || isExporting}
-            onClick={handleExportPdf}
-            type={HTML_BUTTON_TYPE.button}
-            variant={BUTTON_VARIANT.secondary}
-          >
-            {isExporting
-              ? t('internal.records.export.actions.pdfLoading')
-              : t('internal.records.export.actions.pdf')}
-          </Button>
+          <div className={styles.workspace__exportCluster}>
+            <Button
+              className={`${styles.workspace__exportButton} ${styles.workspace__exportClusterButton}`}
+              disabled={!hasCompletedDoses || isTransferBusy}
+              onClick={handleExportCsv}
+              type={HTML_BUTTON_TYPE.button}
+              variant={BUTTON_VARIANT.secondary}
+            >
+              <DownloadIcon aria-hidden="true" className={styles.workspace__actionIcon} />
+              {t('internal.records.export.actions.csv')}
+            </Button>
+            <Button
+              className={`${styles.workspace__exportButton} ${styles.workspace__exportClusterButton}`}
+              disabled={!hasCompletedDoses || isTransferBusy}
+              onClick={handleExportPdf}
+              type={HTML_BUTTON_TYPE.button}
+              variant={BUTTON_VARIANT.secondary}
+            >
+              <DownloadIcon aria-hidden="true" className={styles.workspace__actionIcon} />
+              {isExporting
+                ? t('internal.records.export.actions.pdfLoading')
+                : t('internal.records.export.actions.pdf')}
+            </Button>
+          </div>
         </div>
       </div>
       <Error className={styles.workspace__exportError} message={exportError} />
+      <Error className={styles.workspace__exportError} message={importFatalError} />
+      {importReport && (
+        <WorkspaceImportReport
+          isOpen={isImportReportModalOpen}
+          onClose={() => setIsImportReportModalOpen(false)}
+          report={importReport}
+        />
+      )}
       <div className={styles.workspace__recordsPane}>
         <VaccinationRecords
           onAddDose={openAddDoseModal}

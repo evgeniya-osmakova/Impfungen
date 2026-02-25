@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 
 import { APP_ROUTE } from '../constants/app-route';
-import { HTML_BUTTON_TYPE, HTML_ROLE } from '../constants/ui';
 import { supportedLanguages } from '../i18n/resources';
 import { isProfileAccountComplete, resolvePrimaryAccount, useAccountsStore } from '../state/accounts';
 import { useLanguageStore } from '../state/language';
+import { RadioPillGroup } from '../ui';
 
 import styles from './InternalLayout.module.css';
 
@@ -53,26 +53,19 @@ export const InternalLayout = ({ children }: PropsWithChildren) => {
               </nav>
             ) : null}
           </div>
-          <div
-            aria-label={t('language.label')}
-            className={styles.layout__language}
-            role={HTML_ROLE.group}
-          >
-            {supportedLanguages.map((language) => (
-              <button
-                aria-pressed={selectedLanguage === language}
-                className={classNames(
-                  styles.layout__languageButton,
-                  selectedLanguage === language && styles.layout__languageButtonActive,
-                )}
-                key={language}
-                onClick={() => changeLanguage(language)}
-                type={HTML_BUTTON_TYPE.button}
-              >
-                {t(`language.${language}`)}
-              </button>
-            ))}
-          </div>
+          <RadioPillGroup
+            controlActiveClassName={styles.layout__languageButtonActive}
+            controlClassName={styles.layout__languageButton}
+            controlsClassName={styles.layout__language}
+            legend={t('language.label')}
+            onChange={changeLanguage}
+            options={supportedLanguages.map((language) => ({
+              label: t(`language.${language}`),
+              value: language,
+            }))}
+            unstyled
+            value={selectedLanguage}
+          />
         </div>
       </header>
 

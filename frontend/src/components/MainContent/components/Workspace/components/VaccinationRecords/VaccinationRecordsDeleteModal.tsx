@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
-import { Button, Modal } from '../../../../../../ui';
+import { Button, Error, Modal } from '../../../../../../ui';
 
 import styles from './VaccinationRecords.module.css';
 
@@ -9,6 +9,7 @@ interface VaccinationRecordsDeleteModalProps {
   deleteCandidateId: string | null;
   onCancel: () => void;
   onConfirm: () => Promise<void>;
+  requestError: string | null;
   resolveDiseaseLabelById: (diseaseId: string) => string;
 }
 
@@ -16,6 +17,7 @@ export const VaccinationRecordsDeleteModal = ({
   deleteCandidateId,
   onCancel,
   onConfirm,
+  requestError,
   resolveDiseaseLabelById,
 }: VaccinationRecordsDeleteModalProps) => {
   const { t } = useTranslation();
@@ -38,6 +40,7 @@ export const VaccinationRecordsDeleteModal = ({
         <p className={styles.vaccinationRecords__deleteModalWarning}>
           {t('internal.records.deleteConfirm.warning')}
         </p>
+        <Error className={styles.vaccinationRecords__deleteModalWarning} message={requestError} />
         <div className={styles.vaccinationRecords__deleteModalActions}>
           <Button
             className={styles.vaccinationRecords__deleteModalButton}

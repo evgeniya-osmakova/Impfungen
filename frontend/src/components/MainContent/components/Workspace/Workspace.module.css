@@ -20,11 +20,59 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  align-items: center;
 }
 
 .workspace__exportButton {
   min-height: 44px;
   padding-inline: 16px;
+}
+
+.workspace__importButton {
+  border-color: color-mix(in oklab, var(--brand-300) 52%, var(--surface-0));
+  background: color-mix(in oklab, var(--brand-50) 66%, var(--surface-0));
+  color: color-mix(in oklab, var(--brand-700) 78%, var(--text-primary));
+}
+
+.workspace__importButton:hover {
+  filter: none;
+  box-shadow: none;
+  background: color-mix(in oklab, var(--brand-100) 62%, var(--surface-0));
+}
+
+.workspace__exportCluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.workspace__exportClusterButton {
+  border-color: color-mix(in oklab, var(--surface-300) 58%, var(--surface-0));
+  background: color-mix(in oklab, var(--surface-0) 84%, transparent);
+}
+
+.workspace__exportClusterButton:hover {
+  filter: none;
+  box-shadow: none;
+  background: color-mix(in oklab, var(--surface-50) 88%, var(--surface-0));
+}
+
+.workspace__actionIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.workspace__visuallyHiddenFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .workspace__exportError {
@@ -54,11 +102,25 @@
     flex: 1 1 0;
     min-width: 0;
   }
+
+  .workspace__exportCluster {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .workspace__exportClusterButton {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 520px) {
   .workspace__exportButton {
     width: 100%;
     flex-basis: 100%;
+  }
+
+  .workspace__exportCluster {
+    gap: 10px;
   }
 }
