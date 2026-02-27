@@ -1,12 +1,16 @@
+import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation';
 import { describe, expect, it } from 'vitest';
 
-import { VACCINATION_VALIDATION_ERROR_CODE } from '../constants/vaccinationValidation';
-
 import { getTodayIsoDate } from './date';
-import { validateVaccinationCompleteDoseInput, validateVaccinationRecordInput } from './vaccinationValidation';
+import {
+  validateVaccinationCompleteDoseInput,
+  validateVaccinationRecordInput,
+} from './vaccinationValidation';
 
 const toTomorrowIsoDate = () => {
-  const [year, month, day] = getTodayIsoDate().split('-').map((part) => Number.parseInt(part, 10));
+  const [year, month, day] = getTodayIsoDate()
+    .split('-')
+    .map((part) => Number.parseInt(part, 10));
   const tomorrowDate = new Date(Date.UTC(year, month - 1, day + 1));
 
   return tomorrowDate.toISOString().slice(0, 10);

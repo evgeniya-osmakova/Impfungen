@@ -31,19 +31,17 @@ type CompleteVaccinationDoseInput = RouterInputs['profile']['completeVaccination
 type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
-  completeVaccinationDose: (
-    input: CompleteVaccinationDoseInput,
-  ) => Promise<ProfileSnapshot>;
+  completeVaccinationDose: (input: CompleteVaccinationDoseInput) => Promise<ProfileSnapshot>;
   createFamilyAccount: (input: CreateFamilyAccountInput) => Promise<ProfileSnapshot>;
-  deleteFamilyAccount: (accountId: DeleteFamilyAccountInput['accountId']) => Promise<ProfileSnapshot>;
+  deleteFamilyAccount: (
+    accountId: DeleteFamilyAccountInput['accountId'],
+  ) => Promise<ProfileSnapshot>;
   getProfile: () => Promise<ProfileSnapshot>;
   removeVaccinationRecord: (input: RemoveVaccinationRecordInput) => Promise<ProfileSnapshot>;
   selectAccount: (accountId: SelectAccountInput['accountId']) => Promise<ProfileSnapshot>;
   setLanguage: (language: SetLanguageInput['language']) => Promise<ProfileSnapshot>;
   setVaccinationCountry: (input: SetVaccinationCountryInput) => Promise<ProfileSnapshot>;
-  submitVaccinationRecord: (
-    input: SubmitVaccinationRecordInput,
-  ) => Promise<ProfileSnapshot>;
+  submitVaccinationRecord: (input: SubmitVaccinationRecordInput) => Promise<ProfileSnapshot>;
   updateAccount: (input: UpdateAccountInput) => Promise<ProfileSnapshot>;
 }
 

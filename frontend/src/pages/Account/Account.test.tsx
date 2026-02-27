@@ -2,12 +2,11 @@
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { type ProfileSnapshot, setProfileApi } from 'src/api/profileApi';
+import i18n from 'src/i18n';
+import { useAccountsStore } from 'src/state/accounts';
+import { useVaccinationStore } from 'src/state/vaccination';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { type ProfileSnapshot, setProfileApi } from '../../api/profileApi';
-import i18n from '../../i18n';
-import { useAccountsStore } from '../../state/accounts';
-import { useVaccinationStore } from '../../state/vaccination';
 
 import { Account } from './Account';
 
@@ -46,16 +45,20 @@ const createApiMock = (responses?: {
   selectAccount?: ProfileSnapshot;
   updateAccount?: ProfileSnapshot;
 }) => ({
-  completeVaccinationDose: vi.fn(async () => createSnapshot()),
-  createFamilyAccount: vi.fn(async () => responses?.createFamilyAccount ?? createSnapshot()),
-  deleteFamilyAccount: vi.fn(async () => responses?.deleteFamilyAccount ?? createSnapshot()),
-  getProfile: vi.fn(async () => createSnapshot()),
-  removeVaccinationRecord: vi.fn(async () => createSnapshot()),
-  selectAccount: vi.fn(async () => responses?.selectAccount ?? createSnapshot()),
-  setLanguage: vi.fn(async () => createSnapshot()),
-  setVaccinationCountry: vi.fn(async () => createSnapshot()),
-  submitVaccinationRecord: vi.fn(async () => createSnapshot()),
-  updateAccount: vi.fn(async () => responses?.updateAccount ?? createSnapshot()),
+  completeVaccinationDose: vi.fn(() => Promise.resolve(createSnapshot())),
+  createFamilyAccount: vi.fn(() =>
+    Promise.resolve(responses?.createFamilyAccount ?? createSnapshot()),
+  ),
+  deleteFamilyAccount: vi.fn(() =>
+    Promise.resolve(responses?.deleteFamilyAccount ?? createSnapshot()),
+  ),
+  getProfile: vi.fn(() => Promise.resolve(createSnapshot())),
+  removeVaccinationRecord: vi.fn(() => Promise.resolve(createSnapshot())),
+  selectAccount: vi.fn(() => Promise.resolve(responses?.selectAccount ?? createSnapshot())),
+  setLanguage: vi.fn(() => Promise.resolve(createSnapshot())),
+  setVaccinationCountry: vi.fn(() => Promise.resolve(createSnapshot())),
+  submitVaccinationRecord: vi.fn(() => Promise.resolve(createSnapshot())),
+  updateAccount: vi.fn(() => Promise.resolve(responses?.updateAccount ?? createSnapshot())),
 });
 
 describe('Account page', () => {
@@ -154,7 +157,9 @@ describe('Account page', () => {
     const addQueries = within(addDialog);
     const nameInput = addQueries.getByLabelText('Имя');
     const birthYearInput = addQueries.getByLabelText('Год рождения');
-    const countrySelect = addQueries.getByRole('combobox', { name: 'Страна прививочного календаря' });
+    const countrySelect = addQueries.getByRole('combobox', {
+      name: 'Страна прививочного календаря',
+    });
 
     await user.clear(nameInput);
     await user.type(nameInput, 'Анна');
@@ -163,13 +168,14 @@ describe('Account page', () => {
     await user.selectOptions(countrySelect, 'DE');
     await user.click(addQueries.getByRole('button', { name: 'Добавить члена семьи' }));
 
-    expect(api.createFamilyAccount).toHaveBeenCalledWith({ birthYear: 2018, country: 'DE', name: 'Анна' });
+    expect(api.createFamilyAccount).toHaveBeenCalledWith({
+      birthYear: 2018,
+      country: 'DE',
+      name: 'Анна',
+    });
     expect(await screen.findByRole('option', { name: /Анна/i })).toBeInTheDocument();
 
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Выбранный аккаунт' }),
-      '2',
-    );
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Выбранный аккаунт' }), '2');
 
     expect(api.selectAccount).toHaveBeenCalledWith(2);
     expect(useAccountsStore.getState().selectedAccountId).toBe(2);

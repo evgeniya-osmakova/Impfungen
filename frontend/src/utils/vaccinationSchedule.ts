@@ -1,10 +1,8 @@
-import {
-  VACCINATION_REPEAT_UNIT,
-} from '../constants/vaccination';
-import type { PlannedDose, RepeatRule } from '../interfaces/dose';
-import type { ImmunizationSeries } from '../interfaces/immunizationRecord';
-import type { NextDue } from '../interfaces/nextDue';
-import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
+import { VACCINATION_REPEAT_UNIT } from 'src/constants/vaccination';
+import type { PlannedDose, RepeatRule } from 'src/interfaces/dose';
+import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord';
+import type { NextDue } from 'src/interfaces/nextDue';
+import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue';
 
 import { addMonthsToIsoDate, getTodayIsoDate, isIsoDateValue } from './date';
 
@@ -16,10 +14,7 @@ const normalizeInterval = (value: number): number | null => {
   return value;
 };
 
-const addRepeatInterval = (
-  value: string,
-  repeatRule: RepeatRule,
-): string | null => {
+const addRepeatInterval = (value: string, repeatRule: RepeatRule): string | null => {
   const interval = normalizeInterval(repeatRule.interval);
 
   if (!interval) {
@@ -79,12 +74,14 @@ const resolveLatestCompletedAt = (
     return null;
   }
 
-  return [...validCompletedDates].sort((leftDate, rightDate) => leftDate.localeCompare(rightDate))[validCompletedDates.length - 1] ?? null;
+  return (
+    [...validCompletedDates].sort((leftDate, rightDate) => leftDate.localeCompare(rightDate))[
+      validCompletedDates.length - 1
+    ] ?? null
+  );
 };
 
-export const normalizeFutureDueDoses = (
-  value: readonly PlannedDose[],
-): PlannedDose[] =>
+export const normalizeFutureDueDoses = (value: readonly PlannedDose[]): PlannedDose[] =>
   value
     .filter((entry) => isIsoDateValue(entry.dueAt))
     .sort((leftDose, rightDose) => leftDose.dueAt.localeCompare(rightDose.dueAt))

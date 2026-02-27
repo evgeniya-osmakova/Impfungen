@@ -1,9 +1,6 @@
 import { type SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DEFAULT_FIELD_ERRORS,
-  EMPTY_COUNTRY_VALUE,
-} from 'src/constants/account';
+import { DEFAULT_FIELD_ERRORS, EMPTY_COUNTRY_VALUE } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, FieldErrors } from 'src/interfaces/accountForm';
 import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
@@ -20,12 +17,7 @@ export const useAccountEditCardController = (
 ) => {
   const { t } = useTranslation();
   const pendingEditAutoSaveRef = useRef(false);
-  const {
-    accounts,
-    selectedAccountId,
-    updateAccount,
-    updateSelectedAccount,
-  } = useAccountsStore(
+  const { accounts, selectedAccountId, updateAccount, updateSelectedAccount } = useAccountsStore(
     useShallow((state) => ({
       accounts: state.accounts,
       selectedAccountId: state.selectedAccountId,
@@ -66,9 +58,11 @@ export const useAccountEditCardController = (
     }
 
     const sourceName = editingAccount.name ?? '';
-    const sourceBirthYear = editingAccount.birthYear === null ? '' : String(editingAccount.birthYear);
+    const sourceBirthYear =
+      editingAccount.birthYear === null ? '' : String(editingAccount.birthYear);
     const sourceCountry = editingAccount.country ?? EMPTY_COUNTRY_VALUE;
-    const hasChanges = editName !== sourceName || editBirthYear !== sourceBirthYear || editCountry !== sourceCountry;
+    const hasChanges =
+      editName !== sourceName || editBirthYear !== sourceBirthYear || editCountry !== sourceCountry;
 
     const validation = validateAccountFields(t, {
       birthYear: editBirthYear,
@@ -92,18 +86,19 @@ export const useAccountEditCardController = (
     setIsSaving(true);
     setEditRequestError(null);
 
-    const isSaved = editingAccount.id === selectedAccountId
-      ? await updateSelectedAccount({
-        birthYear: validation.birthYear,
-        country,
-        name: validation.trimmedName,
-      })
-      : await updateAccount({
-        accountId: editingAccount.id,
-        birthYear: validation.birthYear,
-        country,
-        name: validation.trimmedName,
-      });
+    const isSaved =
+      editingAccount.id === selectedAccountId
+        ? await updateSelectedAccount({
+            birthYear: validation.birthYear,
+            country,
+            name: validation.trimmedName,
+          })
+        : await updateAccount({
+            accountId: editingAccount.id,
+            birthYear: validation.birthYear,
+            country,
+            name: validation.trimmedName,
+          });
 
     if (!isSaved) {
       setEditRequestError(t('account.errors.saveFailed'));

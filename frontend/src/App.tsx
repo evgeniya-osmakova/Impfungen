@@ -12,34 +12,32 @@ import {
 } from './state/accounts';
 
 const App = () => {
-  const { accounts, selectedAccountId } = useAccountsStore(useShallow((state) => ({
-    accounts: state.accounts,
-    selectedAccountId: state.selectedAccountId,
-  })));
+  const { accounts, selectedAccountId } = useAccountsStore(
+    useShallow((state) => ({
+      accounts: state.accounts,
+      selectedAccountId: state.selectedAccountId,
+    })),
+  );
   const primaryAccount = resolvePrimaryAccount(accounts);
   const selectedAccount = resolveSelectedAccount(accounts, selectedAccountId);
   const isPrimaryIncomplete = primaryAccount !== null && !isProfileAccountComplete(primaryAccount);
-  const isSelectedCountryMissing = (
-    !isPrimaryIncomplete
-    && selectedAccount !== null
-    && selectedAccount.country === null
-  );
+  const isSelectedCountryMissing =
+    !isPrimaryIncomplete && selectedAccount !== null && selectedAccount.country === null;
 
   return (
     <Routes>
       <Route
         path={APP_ROUTE.home}
-        element={(
-          isPrimaryIncomplete || isSelectedCountryMissing
-            ? <Navigate replace to={APP_ROUTE.account} />
-            : <Main />
-        )}
+        element={
+          isPrimaryIncomplete || isSelectedCountryMissing ? (
+            <Navigate replace to={APP_ROUTE.account} />
+          ) : (
+            <Main />
+          )
+        }
       />
       <Route path={APP_ROUTE.account} element={<Account />} />
-      <Route
-        path="*"
-        element={<Navigate replace to={APP_ROUTE.home} />}
-      />
+      <Route path="*" element={<Navigate replace to={APP_ROUTE.home} />} />
     </Routes>
   );
 };

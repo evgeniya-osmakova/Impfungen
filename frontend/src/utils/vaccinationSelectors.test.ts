@@ -1,11 +1,7 @@
+import { VACCINATION_DISEASE_CATALOG } from 'src/constants/vaccinationCatalog';
+import type { ImmunizationSeries, ImmunizationSeriesView } from 'src/interfaces/immunizationRecord';
+import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue';
 import { describe, expect, it } from 'vitest';
-
-import { VACCINATION_DISEASE_CATALOG } from '../constants/vaccinationCatalog';
-import type {
-  ImmunizationSeries,
-  ImmunizationSeriesView,
-} from '../interfaces/immunizationRecord';
-import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
 
 import {
   filterDiseases,
@@ -29,13 +25,15 @@ const createRecord = (
   diseaseId: string,
   options: Partial<ImmunizationSeries> = {},
 ): ImmunizationSeries => ({
-  completedDoses: options.completedDoses ?? [{
-    batchNumber: null,
-    completedAt: '2024-01-01',
-    id: `done-${diseaseId}`,
-    kind: 'nextDose',
-    tradeName: null,
-  }],
+  completedDoses: options.completedDoses ?? [
+    {
+      batchNumber: null,
+      completedAt: '2024-01-01',
+      id: `done-${diseaseId}`,
+      kind: 'nextDose',
+      tradeName: null,
+    },
+  ],
   diseaseId,
   futureDueDoses: options.futureDueDoses ?? [],
   repeatEvery: options.repeatEvery ?? null,
@@ -68,9 +66,7 @@ describe('vaccinationSelectors', () => {
     });
 
     expect(filtered.map((disease) => disease.id)).toContain('tetanus');
-    expect(
-      filtered.every((disease) => disease.countryCategory.DE === 'recommended'),
-    ).toBe(true);
+    expect(filtered.every((disease) => disease.countryCategory.DE === 'recommended')).toBe(true);
   });
 
   it('returns category counts for available diseases', () => {
@@ -110,7 +106,11 @@ describe('vaccinationSelectors', () => {
 
     const sorted = sortRecordsByNextDueDate(records);
 
-    expect(sorted.map((record) => record.diseaseId)).toEqual(['measles', 'hepatitisB', 'influenza']);
+    expect(sorted.map((record) => record.diseaseId)).toEqual([
+      'measles',
+      'hepatitisB',
+      'influenza',
+    ]);
     expect(sorted[0].nextDue?.dueAt).toBe('2027-01-01');
   });
 

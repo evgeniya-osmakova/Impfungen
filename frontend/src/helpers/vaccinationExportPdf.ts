@@ -127,7 +127,7 @@ export const buildVaccinationCompletedPdfDocument = ({
   pdfLabels,
 }: Omit<ExportVaccinationCompletedPdfParams, 'filename'>) => {
   const totalDoseCount = groups.reduce((sum, group) => sum + group.doses.length, 0);
-  const groupedContent = groups.flatMap((group, index) => ([
+  const groupedContent = groups.flatMap((group, index) => [
     {
       margin: [0, index === 0 ? 0 : 8, 0, 4],
       style: 'groupTitle',
@@ -144,18 +144,18 @@ export const buildVaccinationCompletedPdfDocument = ({
             { style: 'tableHeader', text: columnLabels.tradeName },
             { style: 'tableHeader', text: columnLabels.batchNumber },
           ],
-          ...group.doses.map((dose) => ([
+          ...group.doses.map((dose) => [
             dose.formattedCompletedAt,
             dose.doseKindLabel,
             dose.tradeName ?? '',
             dose.batchNumber ?? '',
-          ])),
+          ]),
         ],
         headerRows: 1,
         widths: [90, 120, '*', 90],
       },
     },
-  ]));
+  ]);
 
   return {
     content: [
@@ -163,7 +163,10 @@ export const buildVaccinationCompletedPdfDocument = ({
       {
         columns: [
           { text: `${pdfLabels.profileLabel}: ${meta.profileName}` },
-          { alignment: 'right', text: `${pdfLabels.exportedAtLabel}: ${formatExportedAt(meta.exportedAt)}` },
+          {
+            alignment: 'right',
+            text: `${pdfLabels.exportedAtLabel}: ${formatExportedAt(meta.exportedAt)}`,
+          },
         ],
         margin: [0, 0, 0, 6],
       },

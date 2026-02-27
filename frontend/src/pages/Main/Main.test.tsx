@@ -2,12 +2,11 @@
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import i18n from 'src/i18n';
+import { useLanguageStore } from 'src/state/language';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { formatDateByLanguage } from 'src/utils/date';
 import { beforeEach, describe, expect, it } from 'vitest';
-
-import i18n from '../../i18n';
-import { useLanguageStore } from '../../state/language';
-import { useVaccinationStore } from '../../state/vaccination';
-import { formatDateByLanguage } from '../../utils/date';
 
 import { Main } from './Main';
 
@@ -57,7 +56,9 @@ describe('Main', () => {
       </MemoryRouter>,
     );
 
-    expect(await findByRole('heading', { name: 'Вакцинации на ближайший год' })).toBeInTheDocument();
+    expect(
+      await findByRole('heading', { name: 'Вакцинации на ближайший год' }),
+    ).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Добавить выполненную вакцинацию' }));
 
@@ -108,13 +109,17 @@ describe('Main', () => {
 
     const measlesCardQueries = within(measlesCard);
 
-    expect(measlesCardQueries.getByRole('button', { name: 'Показать историю (3)' })).toBeInTheDocument();
+    expect(
+      measlesCardQueries.getByRole('button', { name: 'Показать историю (3)' }),
+    ).toBeInTheDocument();
     expect(measlesCardQueries.queryAllByRole('listitem')).toHaveLength(0);
     expect(measlesCardQueries.queryByText(/^Сделана$/i)).not.toBeInTheDocument();
     expect(measlesCardQueries.queryByText(/^Следующая$/i)).not.toBeInTheDocument();
 
     await user.click(measlesCardQueries.getByRole('button', { name: 'Показать историю (3)' }));
-    expect(measlesCardQueries.getByRole('button', { name: 'Скрыть историю (3)' })).toBeInTheDocument();
+    expect(
+      measlesCardQueries.getByRole('button', { name: 'Скрыть историю (3)' }),
+    ).toBeInTheDocument();
     expect(measlesCardQueries.queryAllByRole('listitem')).toHaveLength(3);
 
     await user.clear(getByLabelText('Поиск по заболеванию'));
@@ -157,7 +162,10 @@ describe('Main', () => {
     await user.selectOptions(getByLabelText('Тип запланированной вакцинации'), 'nextDose');
     await user.click(getByRole('button', { name: 'Добавить дату' }));
     await user.type(getByLabelText('Будущая дата 2'), futureDueDate);
-    await user.selectOptions(getAllByLabelText('Тип запланированной вакцинации')[1], 'revaccination');
+    await user.selectOptions(
+      getAllByLabelText('Тип запланированной вакцинации')[1],
+      'revaccination',
+    );
     await user.click(getByRole('button', { name: 'Сохранить запись' }));
 
     const recordsSectionHeading = await findByRole('heading', { name: 'Записи вакцинации' });
@@ -183,9 +191,15 @@ describe('Main', () => {
 
     expect(tetanusCardQueries.getByText('Дата вакцинации')).toBeInTheDocument();
     expect(tetanusCardQueries.getByText('Дата следующей вакцинации')).toBeInTheDocument();
-    expect(tetanusCardQueries.queryByRole('button', { name: /Показать историю/i })).not.toBeInTheDocument();
-    expect(within(futureDatesBlock).getByText(formatDateByLanguage(futureDueDate, 'ru'))).toBeInTheDocument();
-    expect(within(futureDatesBlock).queryByText(formatDateByLanguage(nextDueDate, 'ru'))).not.toBeInTheDocument();
+    expect(
+      tetanusCardQueries.queryByRole('button', { name: /Показать историю/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(futureDatesBlock).getByText(formatDateByLanguage(futureDueDate, 'ru')),
+    ).toBeInTheDocument();
+    expect(
+      within(futureDatesBlock).queryByText(formatDateByLanguage(nextDueDate, 'ru')),
+    ).not.toBeInTheDocument();
   });
 
   it('shows disease names in selected language', async () => {

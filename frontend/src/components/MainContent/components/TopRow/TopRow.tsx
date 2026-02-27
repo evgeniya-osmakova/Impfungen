@@ -1,11 +1,10 @@
+import { useDiseaseLabels } from 'src/hooks/useDiseaseLabels';
+import { useDoseModalActions } from 'src/hooks/useDoseModalActions';
 import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
-import { useLanguageStore } from 'src/state/language'
+import { useLanguageStore } from 'src/state/language';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { selectTopRowViewData } from 'src/state/vaccination/selectors';
 import { useShallow } from 'zustand/react/shallow';
-
-import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
-import { useDoseModalActions } from '../../../../hooks/useDoseModalActions';
-import { useVaccinationStore } from '../../../../state/vaccination';
-import { selectTopRowViewData } from '../../../../state/vaccination/selectors';
 
 import { VaccinationUpcoming } from './components/VaccinationUpcoming/VaccinationUpcoming';
 

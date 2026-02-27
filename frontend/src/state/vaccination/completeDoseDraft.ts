@@ -1,9 +1,8 @@
+import type { DoseKind } from '@backend/contracts';
+import { VACCINATION_DOSE_KIND } from 'src/constants/vaccination';
 import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
-
-import { VACCINATION_DOSE_KIND } from '../../constants/vaccination';
-import type { DoseKind } from '../../interfaces/base';
-import type { CompleteDoseDraft } from '../../interfaces/completeDoseDraft';
-import type { ImmunizationSeries } from '../../interfaces/immunizationRecord';
+import type { CompleteDoseDraft } from 'src/interfaces/completeDoseDraft';
+import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord';
 
 interface MarkPlannedDonePayload {
   diseaseId: string;

@@ -1,7 +1,6 @@
+import { type ProfileSnapshot, setProfileApi } from 'src/api/profileApi';
+import { useVaccinationStore } from 'src/state/vaccination';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { type ProfileSnapshot, setProfileApi } from '../../api/profileApi';
-import { useVaccinationStore } from '../vaccination';
 
 import { useAccountsStore } from './index';
 
@@ -35,16 +34,16 @@ const resetVaccinationState = () => {
 };
 
 const createApiMock = (snapshot: ProfileSnapshot) => ({
-  completeVaccinationDose: vi.fn(() => snapshot),
-  createFamilyAccount: vi.fn(() => snapshot),
-  deleteFamilyAccount: vi.fn(() => snapshot),
-  getProfile: vi.fn(() => snapshot),
-  removeVaccinationRecord: vi.fn(() => snapshot),
-  selectAccount: vi.fn(() => snapshot),
-  setLanguage: vi.fn(() => snapshot),
-  setVaccinationCountry: vi.fn(() => snapshot),
-  submitVaccinationRecord: vi.fn(() => snapshot),
-  updateAccount: vi.fn(() => snapshot),
+  completeVaccinationDose: vi.fn(() => Promise.resolve(snapshot)),
+  createFamilyAccount: vi.fn(() => Promise.resolve(snapshot)),
+  deleteFamilyAccount: vi.fn(() => Promise.resolve(snapshot)),
+  getProfile: vi.fn(() => Promise.resolve(snapshot)),
+  removeVaccinationRecord: vi.fn(() => Promise.resolve(snapshot)),
+  selectAccount: vi.fn(() => Promise.resolve(snapshot)),
+  setLanguage: vi.fn(() => Promise.resolve(snapshot)),
+  setVaccinationCountry: vi.fn(() => Promise.resolve(snapshot)),
+  submitVaccinationRecord: vi.fn(() => Promise.resolve(snapshot)),
+  updateAccount: vi.fn(() => Promise.resolve(snapshot)),
 });
 
 describe('accountsStore', () => {

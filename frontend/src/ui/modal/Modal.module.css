@@ -18,9 +18,7 @@
   border-radius: 20px;
   border: 1px solid color-mix(in oklab, var(--surface-300) 75%, var(--surface-0));
   background: var(--surface-0);
-  box-shadow:
-    0 22px 48px rgb(15 23 42 / 0.2),
-    0 2px 6px rgb(15 23 42 / 0.12);
+  box-shadow: 0 22px 48px rgb(15 23 42 / 0.2), 0 2px 6px rgb(15 23 42 / 0.12);
   outline: 0;
 }
 

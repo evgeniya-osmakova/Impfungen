@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
-
-import { isProfileAccountComplete, resolvePrimaryAccount, useAccountsStore } from '../../../../state/accounts';
+import {
+  isProfileAccountComplete,
+  resolvePrimaryAccount,
+  useAccountsStore,
+} from 'src/state/accounts';
 
 import styles from './AccountMandatoryNotice.module.css';
 

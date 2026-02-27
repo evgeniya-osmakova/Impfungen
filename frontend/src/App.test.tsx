@@ -41,7 +41,9 @@ describe('App', () => {
     );
     await user.click(getByRole('radio', { name: 'English' }));
 
-    expect(await findByRole('heading', { name: 'My vaccinations and upcoming dates' })).toBeInTheDocument();
+    expect(
+      await findByRole('heading', { name: 'My vaccinations and upcoming dates' }),
+    ).toBeInTheDocument();
   });
 
   it('redirects unknown routes to home route', () => {

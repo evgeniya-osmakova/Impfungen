@@ -1,13 +1,6 @@
-import {
-  and,
-  asc,
-  eq,
-  inArray,
-  sql,
-  type InferSelectModel,
-} from 'drizzle-orm';
+import { and, asc, eq, inArray, sql, type InferSelectModel } from 'drizzle-orm';
 
-import { db } from '../../db/client.js';
+import type { db } from '../../db/client.js';
 import {
   appProfile,
   completedDose,
@@ -16,10 +9,7 @@ import {
   vaccinationSeries,
 } from '../../db/schema.js';
 
-import {
-  toAccountsState,
-  toVaccinationState,
-} from './profileRepositoryMappers.js';
+import { toAccountsState, toVaccinationState } from './profileRepositoryMappers.js';
 import { ProfileAccountNotFoundError } from './profileRepositoryErrors.js';
 import type {
   AppLanguage,
@@ -36,9 +26,7 @@ type AppProfileRow = InferSelectModel<typeof appProfile>;
 export type ProfileMemberRow = InferSelectModel<typeof profileMember>;
 type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
 
-export const loadProfileRowUsingDb = async (
-  database: DatabaseClient,
-): Promise<AppProfileRow> => {
+export const loadProfileRowUsingDb = async (database: DatabaseClient): Promise<AppProfileRow> => {
   const [profile] = await database
     .select()
     .from(appProfile)
@@ -54,17 +42,14 @@ export const loadProfileRowUsingDb = async (
 
 export const loadProfileMembersUsingDb = async (
   database: DatabaseClient,
-): Promise<ProfileMemberRow[]> => (
+): Promise<ProfileMemberRow[]> =>
   database
     .select()
     .from(profileMember)
     .where(eq(profileMember.appProfileId, APP_PROFILE_ID))
-    .orderBy(asc(profileMember.sortOrder), asc(profileMember.id))
-);
+    .orderBy(asc(profileMember.sortOrder), asc(profileMember.id));
 
-export const ensureDefaultProfileUsingDb = async (
-  database: DatabaseClient,
-): Promise<void> => {
+export const ensureDefaultProfileUsingDb = async (database: DatabaseClient): Promise<void> => {
   await database
     .insert(appProfile)
     .values({
@@ -145,10 +130,7 @@ export const getProfileMemberByIdUsingDb = async (
   const [member] = await database
     .select()
     .from(profileMember)
-    .where(and(
-      eq(profileMember.id, accountId),
-      eq(profileMember.appProfileId, APP_PROFILE_ID),
-    ))
+    .where(and(eq(profileMember.id, accountId), eq(profileMember.appProfileId, APP_PROFILE_ID)))
     .limit(1);
 
   if (!member) {
@@ -190,11 +172,7 @@ const loadVaccinationStateForMemberUsingDb = async (
       .select()
       .from(plannedDose)
       .where(inArray(plannedDose.seriesId, seriesIds))
-      .orderBy(
-        asc(plannedDose.seriesId),
-        asc(plannedDose.dueAt),
-        asc(plannedDose.externalId),
-      ),
+      .orderBy(asc(plannedDose.seriesId), asc(plannedDose.dueAt), asc(plannedDose.externalId)),
   ]);
 
   return toVaccinationState({

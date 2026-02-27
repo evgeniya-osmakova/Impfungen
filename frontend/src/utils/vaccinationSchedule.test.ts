@@ -1,6 +1,5 @@
+import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue';
 import { describe, expect, it } from 'vitest';
-
-import { NEXT_DUE_SOURCE } from '../interfaces/nextDue';
 
 import { resolveVaccinationRecordNextDue } from './vaccinationSchedule';
 
@@ -8,13 +7,15 @@ describe('vaccinationSchedule', () => {
   it('returns nearest future manual dose', () => {
     const nextDue = resolveVaccinationRecordNextDue(
       {
-        completedDoses: [{
-          batchNumber: null,
-          completedAt: '2024-01-01',
-          id: 'done-1',
-          kind: 'nextDose',
-          tradeName: null,
-        }],
+        completedDoses: [
+          {
+            batchNumber: null,
+            completedAt: '2024-01-01',
+            id: 'done-1',
+            kind: 'nextDose',
+            tradeName: null,
+          },
+        ],
         futureDueDoses: [
           { dueAt: '2025-06-01', id: 'planned-2', kind: 'revaccination' },
           { dueAt: '2025-04-01', id: 'planned-1', kind: 'nextDose' },
@@ -69,13 +70,15 @@ describe('vaccinationSchedule', () => {
   it('returns null when no schedule is configured', () => {
     const nextDue = resolveVaccinationRecordNextDue(
       {
-        completedDoses: [{
-          batchNumber: null,
-          completedAt: '2024-01-01',
-          id: 'done-1',
-          kind: 'nextDose',
-          tradeName: null,
-        }],
+        completedDoses: [
+          {
+            batchNumber: null,
+            completedAt: '2024-01-01',
+            id: 'done-1',
+            kind: 'nextDose',
+            tradeName: null,
+          },
+        ],
         futureDueDoses: [],
         repeatEvery: null,
       },

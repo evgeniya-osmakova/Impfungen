@@ -1,11 +1,10 @@
+import { setProfileApi } from 'src/api/profileApi';
+import { useAccountsStore } from 'src/state/accounts';
+import { useVaccinationStore } from 'src/state/vaccination';
 import { afterEach } from 'vitest';
 
-import { setProfileApi } from '../api/profileApi';
-import { useAccountsStore } from '../state/accounts';
-import { useVaccinationStore } from '../state/vaccination';
-
 import '@testing-library/jest-dom';
-import '../i18n';
+import 'src/i18n';
 
 afterEach(() => {
   setProfileApi(null);

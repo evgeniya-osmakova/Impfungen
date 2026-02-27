@@ -112,6 +112,7 @@ yarn start
 cd backend
 npm test
 npm run build
+npm run check
 ```
 
 ### Frontend
@@ -121,6 +122,17 @@ cd frontend
 yarn test
 yarn lint
 yarn build
+yarn check
+```
+
+## Pre-commit Formatting
+
+Repository uses a native Git hook in `.githooks/pre-commit` to run Biome formatting only for staged files in `frontend` and `backend`.
+
+Enable it once per machine:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 ## Project Structure

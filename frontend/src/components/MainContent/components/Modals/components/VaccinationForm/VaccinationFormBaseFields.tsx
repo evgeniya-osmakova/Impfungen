@@ -1,15 +1,14 @@
+import type { DoseKind } from '@backend/contracts';
 import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import {
   INTERNAL_HOME_EMPTY_FIELD_VALUE,
   INTERNAL_HOME_FORM_FIELD_ID,
-} from '../../../../../../constants/internalHomeUi';
-import { HTML_INPUT_TYPE } from '../../../../../../constants/ui';
-import { VACCINATION_DOSE_KIND_OPTIONS } from '../../../../../../constants/vaccination';
-import type { DoseKind } from '../../../../../../interfaces/base';
-import type { Disease } from '../../../../../../interfaces/disease';
-import { Input, Select } from '../../../../../../ui';
+} from 'src/constants/internalHomeUi';
+import { HTML_INPUT_TYPE } from 'src/constants/ui';
+import { VACCINATION_DOSE_KIND_OPTIONS } from 'src/constants/vaccination';
+import type { Disease } from 'src/interfaces/disease';
+import { Input, Select } from 'src/ui';
 
 import styles from './VaccinationForm.module.css';
 

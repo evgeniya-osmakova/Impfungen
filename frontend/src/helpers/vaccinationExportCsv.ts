@@ -45,13 +45,15 @@ export const createVaccinationCompletedCsv = ({
       columnLabels.tradeName,
       columnLabels.batchNumber,
     ]),
-    ...rows.map((row) => toCsvLine([
-      row.formattedCompletedAt,
-      row.diseaseLabel,
-      row.doseKindLabel,
-      row.tradeName,
-      row.batchNumber,
-    ])),
+    ...rows.map((row) =>
+      toCsvLine([
+        row.formattedCompletedAt,
+        row.diseaseLabel,
+        row.doseKindLabel,
+        row.tradeName,
+        row.batchNumber,
+      ]),
+    ),
   ];
 
   return `${CSV_BOM}${lines.join(CSV_LINE_BREAK)}`;

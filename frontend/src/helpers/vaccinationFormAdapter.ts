@@ -1,9 +1,10 @@
-import {
-  VACCINATION_DOSE_KIND, VACCINATION_SCHEDULE_MODE,
-} from 'src/constants/vaccination.ts'
+import { VACCINATION_DOSE_KIND, VACCINATION_SCHEDULE_MODE } from 'src/constants/vaccination.ts';
 import type { DoseKind, RepeatUnit } from 'src/interfaces/base.ts';
 import type { PlannedDose } from 'src/interfaces/dose.ts';
-import type { ImmunizationSeriesInput, VaccinationScheduleMode } from 'src/interfaces/immunizationRecord.ts'
+import type {
+  ImmunizationSeriesInput,
+  VaccinationScheduleMode,
+} from 'src/interfaces/immunizationRecord.ts';
 import { normalizeDateInputValue } from 'src/utils/date.ts';
 import { normalizeOptionalText } from 'src/utils/string.ts';
 
@@ -46,8 +47,7 @@ export const buildVaccinationRecordInput = ({
     completedAt,
     completedDoseKind,
     diseaseId,
-    futureDueDoses:
-      scheduleMode === VACCINATION_SCHEDULE_MODE.manual ? normalizedFutureDoses : [],
+    futureDueDoses: scheduleMode === VACCINATION_SCHEDULE_MODE.manual ? normalizedFutureDoses : [],
     repeatEvery:
       scheduleMode === VACCINATION_SCHEDULE_MODE.repeat && hasRepeatInterval
         ? { interval: repeatIntervalValue, kind: repeatKind, unit: repeatUnit }
@@ -56,9 +56,7 @@ export const buildVaccinationRecordInput = ({
   };
 };
 
-export const createEmptyPlannedDose = (
-  createId: () => string,
-): PlannedDose => ({
+export const createEmptyPlannedDose = (createId: () => string): PlannedDose => ({
   dueAt: '',
   id: createId(),
   kind: VACCINATION_DOSE_KIND.nextDose,

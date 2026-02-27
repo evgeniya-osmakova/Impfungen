@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+run_biome_format_staged() {
+  dir="$1"
+
+  if [ ! -f "$dir/package.json" ] || [ ! -f "$dir/biome.json" ]; then
+    return 0
+  fi
+
+  if [ -z "$(git diff --cached --name-only --diff-filter=ACMR -- "$dir")" ]; then
+    return 0
+  fi
+
+  (
+    cd "$dir"
+    npx --no-install biome format --write --staged --no-errors-on-unmatched
+  )
+}
+
+run_biome_format_staged frontend
+run_biome_format_staged backend
+
+git update-index --again

@@ -1,5 +1,3 @@
-import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue.ts'
-
 import {
   type CategoryFilter,
   type CountryCode,
@@ -7,14 +5,18 @@ import {
   type DoseKind,
   REPEAT_UNIT_VALUES,
   type RepeatUnit,
-} from '../interfaces/base';
+} from 'src/interfaces/base';
+import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue.ts';
 
 const toSelfRecord = <T extends string>(values: readonly T[]): Record<T, T> =>
-  values.reduce<Record<T, T>>((accumulator, value) => {
-    accumulator[value] = value;
+  values.reduce<Record<T, T>>(
+    (accumulator, value) => {
+      accumulator[value] = value;
 
-    return accumulator;
-  }, {} as Record<T, T>);
+      return accumulator;
+    },
+    {} as Record<T, T>,
+  );
 
 export const VACCINATION_COUNTRY = {
   RU: 'RU',
@@ -22,10 +24,7 @@ export const VACCINATION_COUNTRY = {
   NONE: 'NONE',
 } as const;
 
-export const VACCINATION_CATEGORY_FILTER: Record<
-  CategoryFilter,
-  CategoryFilter
-> = {
+export const VACCINATION_CATEGORY_FILTER: Record<CategoryFilter, CategoryFilter> = {
   all: 'all',
   recommended: 'recommended',
   optional: 'optional',
@@ -48,13 +47,11 @@ export const VACCINATION_REPEAT_UNIT: Record<RepeatUnit, RepeatUnit> =
 
 export const VACCINATION_REPEAT_UNIT_OPTIONS: readonly RepeatUnit[] = [...REPEAT_UNIT_VALUES];
 
-export const VACCINATION_DOSE_KIND: Record<DoseKind, DoseKind> =
-  toSelfRecord(DOSE_KIND_VALUES);
+export const VACCINATION_DOSE_KIND: Record<DoseKind, DoseKind> = toSelfRecord(DOSE_KIND_VALUES);
 
 export const VACCINATION_DOSE_KIND_OPTIONS: readonly DoseKind[] = [...DOSE_KIND_VALUES];
 
-export const VACCINATION_DEFAULT_CATEGORY_FILTER: CategoryFilter =
-  VACCINATION_CATEGORY_FILTER.all;
+export const VACCINATION_DEFAULT_CATEGORY_FILTER: CategoryFilter = VACCINATION_CATEGORY_FILTER.all;
 export const VACCINATION_DEFAULT_SEARCH_QUERY = '';
 export const VACCINATION_ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

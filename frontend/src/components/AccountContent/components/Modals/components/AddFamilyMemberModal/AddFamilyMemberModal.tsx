@@ -1,16 +1,11 @@
+import type { CountryCode } from '@backend/contracts';
 import { useTranslation } from 'react-i18next';
-import {
-  CURRENT_YEAR,
-  EMPTY_COUNTRY_VALUE,
-  MIN_BIRTH_YEAR,
-} from 'src/constants/account';
+import { CURRENT_YEAR, EMPTY_COUNTRY_VALUE, MIN_BIRTH_YEAR } from 'src/constants/account';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from 'src/constants/ui';
+import { VACCINATION_COUNTRY_OPTIONS } from 'src/constants/vaccination';
 import { resolveCountryLabel } from 'src/helpers/resolveLabel.ts';
 import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../../../../../constants/ui';
-import { VACCINATION_COUNTRY_OPTIONS } from '../../../../../../constants/vaccination';
-import type { CountryCode } from '../../../../../../interfaces/base';
-import { Button, Input, Modal, Select } from '../../../../../../ui';
+import { Button, Input, Modal, Select } from 'src/ui';
 
 import { useAddFamilyMemberModalController } from './useAddFamilyMemberModalController';
 
@@ -50,7 +45,10 @@ export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
       <section className={styles.addFamilyMemberModal}>
         <h3 className={styles.addFamilyMemberModal__title}>{t('account.add.title')}</h3>
 
-        <form className={styles.addFamilyMemberModal__form} onSubmit={(event) => void handleCreateFamilyMember(event)}>
+        <form
+          className={styles.addFamilyMemberModal__form}
+          onSubmit={(event) => void handleCreateFamilyMember(event)}
+        >
           <label className={styles.addFamilyMemberModal__field}>
             <span className={styles.addFamilyMemberModal__label}>{t('account.fields.name')}</span>
             <Input
@@ -60,14 +58,18 @@ export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
               value={newMemberName}
             />
             {newMemberErrors.name ? (
-              <span className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}>
+              <span
+                className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}
+              >
                 {newMemberErrors.name}
               </span>
             ) : null}
           </label>
 
           <label className={styles.addFamilyMemberModal__field}>
-            <span className={styles.addFamilyMemberModal__label}>{t('account.fields.birthYear')}</span>
+            <span className={styles.addFamilyMemberModal__label}>
+              {t('account.fields.birthYear')}
+            </span>
             <Input
               className={styles.addFamilyMemberModal__input}
               inputMode="numeric"
@@ -78,14 +80,18 @@ export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
               value={newMemberBirthYear}
             />
             {newMemberErrors.birthYear ? (
-              <span className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}>
+              <span
+                className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}
+              >
                 {newMemberErrors.birthYear}
               </span>
             ) : null}
           </label>
 
           <label className={styles.addFamilyMemberModal__field}>
-            <span className={styles.addFamilyMemberModal__label}>{t('account.fields.country')}</span>
+            <span className={styles.addFamilyMemberModal__label}>
+              {t('account.fields.country')}
+            </span>
             <div className={styles.addFamilyMemberModal__selectWrap}>
               <Select
                 className={styles.addFamilyMemberModal__input}
@@ -93,7 +99,9 @@ export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
                   const nextValue = event.target.value;
 
                   handleNewMemberCountryChange(
-                    nextValue === EMPTY_COUNTRY_VALUE ? EMPTY_COUNTRY_VALUE : (nextValue as CountryCode),
+                    nextValue === EMPTY_COUNTRY_VALUE
+                      ? EMPTY_COUNTRY_VALUE
+                      : (nextValue as CountryCode),
                   );
                 }}
                 value={newMemberCountry}
@@ -107,7 +115,9 @@ export const AddFamilyMemberModal = ({ ui }: AddFamilyMemberModalProps) => {
               </Select>
             </div>
             {newMemberErrors.country ? (
-              <span className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}>
+              <span
+                className={`${styles.addFamilyMemberModal__error} ${styles.addFamilyMemberModal__fieldError}`}
+              >
                 {newMemberErrors.country}
               </span>
             ) : null}

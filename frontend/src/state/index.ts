@@ -1,16 +1,15 @@
-import { createProfileApi, setProfileApi } from 'src/api/profileApi.ts'
+import { createProfileApi, setProfileApi } from 'src/api/profileApi.ts';
 import { useAccountsStore } from 'src/state/accounts';
-import { useLanguageStore } from 'src/state/language'
-import { useVaccinationStore } from 'src/state/vaccination'
-import { create } from 'zustand'
+import { useLanguageStore } from 'src/state/language';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { create } from 'zustand';
 
 interface Store {
   isLoaded: boolean;
   isLoading: boolean;
   isError: boolean;
-  loadStore: () => Promise<void>
+  loadStore: () => Promise<void>;
 }
-
 
 export const useStore = create<Store>((set, get) => ({
   isError: false,

@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { MainContent } from 'src/components/MainContent/MainContent.tsx';
-import { useVaccinationStore } from 'src/state/vaccination'
-
-import { InternalLayout } from '../../layouts/InternalLayout';
-import { PageHero } from '../../ui';
+import { InternalLayout } from 'src/layouts/InternalLayout';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { PageHero } from 'src/ui';
 
 import styles from './Main.module.css';
 
@@ -14,10 +13,7 @@ export const Main = () => {
   return (
     <InternalLayout>
       <section className={styles.internalHomePage}>
-        <PageHero
-          description={t('internal.page.description')}
-          title={t('internal.page.title')}
-        />
+        <PageHero description={t('internal.page.description')} title={t('internal.page.title')} />
 
         {country ? <MainContent /> : null}
       </section>

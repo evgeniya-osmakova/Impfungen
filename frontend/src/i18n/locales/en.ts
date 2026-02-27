@@ -358,7 +358,7 @@ export const en = {
       },
       deleteConfirm: {
         title: 'Delete family member?',
-        message: 'Are you sure you want to delete the profile \"{{name}}\"?',
+        message: 'Are you sure you want to delete the profile "{{name}}"?',
         warning: 'This action cannot be undone.',
         cancel: 'Cancel',
         confirm: 'Delete',

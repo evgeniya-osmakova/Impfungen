@@ -61,7 +61,8 @@ export const de = {
       country: {
         label: 'Empfehlungsland',
         description: 'Katalog und Kategorien unten beziehen sich auf das ausgewaehlte Land.',
-        descriptionNoRecommendations: 'Es wird ein universeller Katalog ohne Empfehlungsmarkierungen gezeigt.',
+        descriptionNoRecommendations:
+          'Es wird ein universeller Katalog ohne Empfehlungsmarkierungen gezeigt.',
         ru: 'Russland',
         de: 'Deutschland',
         none: 'Ohne Empfehlungen',
@@ -130,13 +131,16 @@ export const de = {
           diseaseRequired: 'Waehle eine Erkrankung aus.',
           completedRequired: 'Bitte ein gueltiges Datum der erledigten Impfung angeben.',
           doseKindInvalid: 'Bitte einen gueltigen Impfungs-Typ auswaehlen.',
-          futureDateBeforeCompleted: 'Ein zukuenftiges Datum darf nicht vor dem erledigten Datum liegen.',
+          futureDateBeforeCompleted:
+            'Ein zukuenftiges Datum darf nicht vor dem erledigten Datum liegen.',
           futureDatesDuplicate: 'Zukuenftige Daten duerfen sich nicht wiederholen.',
           futureDatesInvalid: 'Bitte pruefe die eingegebenen zukuenftigen Daten.',
-          repeatIntervalInvalid: 'Bitte ein gueltiges Wiederholungsintervall angeben (ganze Zahl > 0).',
+          repeatIntervalInvalid:
+            'Bitte ein gueltiges Wiederholungsintervall angeben (ganze Zahl > 0).',
           saveFailed: 'Aenderungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
           scheduleConflict: 'Bitte entweder manuelle Daten oder Wiederholungsintervall auswaehlen.',
-          syncConflict: 'Der Eintrag wurde in einer anderen Sitzung geaendert. Bitte aktualisieren und erneut versuchen.',
+          syncConflict:
+            'Der Eintrag wurde in einer anderen Sitzung geaendert. Bitte aktualisieren und erneut versuchen.',
         },
       },
       records: {
@@ -174,10 +178,12 @@ export const de = {
           },
           error: {
             invalidFile: 'CSV konnte nicht gelesen werden. Bitte Dateiformat pruefen.',
-            processFailed: 'Import wegen eines internen Fehlers fehlgeschlagen. Bitte erneut versuchen.',
+            processFailed:
+              'Import wegen eines internen Fehlers fehlgeschlagen. Bitte erneut versuchen.',
             readFailed: 'Die ausgewaehlte Datei konnte nicht gelesen werden.',
             targetUnavailable: 'Aktuelles Zielprofil fuer den Import konnte nicht bestimmt werden.',
-            unsupportedHeader: 'Diese CSV sieht nicht wie ein App-Export aus (ungueltige Kopfzeile).',
+            unsupportedHeader:
+              'Diese CSV sieht nicht wie ein App-Export aus (ungueltige Kopfzeile).',
           },
           report: {
             summary: 'Ergebnis des CSV-Imports',
@@ -358,7 +364,7 @@ export const de = {
       },
       deleteConfirm: {
         title: 'Familienmitglied loeschen?',
-        message: 'Sind Sie sicher, dass Sie das Profil \"{{name}}\" loeschen moechten?',
+        message: 'Sind Sie sicher, dass Sie das Profil "{{name}}" loeschen moechten?',
         warning: 'Diese Aktion kann nicht rueckgaengig gemacht werden.',
         cancel: 'Abbrechen',
         confirm: 'Loeschen',

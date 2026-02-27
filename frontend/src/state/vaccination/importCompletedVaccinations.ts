@@ -7,25 +7,18 @@ import type {
   VaccinationCompletedImportRowError,
 } from 'src/interfaces/vaccinationImport.ts';
 import type { VaccinationState } from 'src/interfaces/vaccinationState.ts';
+import { useAccountsStore } from 'src/state/accounts';
 import { normalizeOptionalText } from 'src/utils/string.ts';
-
-import { useAccountsStore } from '../accounts';
 
 import { isTrpcConflictError } from './errors.ts';
 import { useVaccinationStore } from './index.ts';
-import {
-  persistCompletedDose,
-  persistSubmittedRecord,
-} from './persistence.ts';
+import { persistCompletedDose, persistSubmittedRecord } from './persistence.ts';
 import {
   resolveNewCompletedDoseId,
   resolveSubmitRecordCompletedDoseId,
   resolveUpdatedRecord,
 } from './recordResolution.ts';
-import {
-  submitCompletedDoseUseCase,
-  submitRecordUseCase,
-} from './vaccinationRecordUseCases.ts';
+import { submitCompletedDoseUseCase, submitRecordUseCase } from './vaccinationRecordUseCases.ts';
 
 const compareRowsForImport = (
   leftRow: VaccinationCompletedImportRow,
@@ -92,9 +85,10 @@ const toRowError = (
   code: VaccinationCompletedImportRowError['code'],
 ): VaccinationCompletedImportRowError => {
   if (code in INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE) {
-    const messageKey = INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE[
-      code as keyof typeof INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE
-    ];
+    const messageKey =
+      INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE[
+        code as keyof typeof INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE
+      ];
 
     return {
       code,
@@ -160,10 +154,12 @@ export const importCompletedVaccinations = async ({
 
       if (submissionResult.errorCode || !submissionResult.records) {
         report.invalidRows += 1;
-        report.errors.push(toRowError(
-          row.rowNumber,
-          submissionResult.errorCode ?? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
-        ));
+        report.errors.push(
+          toRowError(
+            row.rowNumber,
+            submissionResult.errorCode ?? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
+          ),
+        );
         continue;
       }
 
@@ -172,7 +168,9 @@ export const importCompletedVaccinations = async ({
         const completedDoseId = resolveSubmitRecordCompletedDoseId(undefined, nextRecord);
 
         if (!completedDoseId) {
-          throw new Error(`Unable to resolve imported completed dose id for disease ${row.diseaseId}.`);
+          report.invalidRows += 1;
+          report.errors.push(toRowError(row.rowNumber, 'persist_failed'));
+          continue;
         }
 
         const snapshot = await persistSubmittedRecord({
@@ -192,10 +190,14 @@ export const importCompletedVaccinations = async ({
         report.importedRows += 1;
       } catch (error) {
         report.invalidRows += 1;
-        report.errors.push(toRowError(
-          row.rowNumber,
-          isTrpcConflictError(error) ? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict : 'persist_failed',
-        ));
+        report.errors.push(
+          toRowError(
+            row.rowNumber,
+            isTrpcConflictError(error)
+              ? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict
+              : 'persist_failed',
+          ),
+        );
       }
 
       continue;
@@ -213,10 +215,12 @@ export const importCompletedVaccinations = async ({
 
     if (submissionResult.errorCode || !submissionResult.records) {
       report.invalidRows += 1;
-      report.errors.push(toRowError(
-        row.rowNumber,
-        submissionResult.errorCode ?? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
-      ));
+      report.errors.push(
+        toRowError(
+          row.rowNumber,
+          submissionResult.errorCode ?? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
+        ),
+      );
       continue;
     }
 
@@ -225,7 +229,9 @@ export const importCompletedVaccinations = async ({
       const newDoseId = resolveNewCompletedDoseId(existingRecord, nextRecord);
 
       if (!newDoseId) {
-        throw new Error(`Unable to resolve imported completed dose id for disease ${row.diseaseId}.`);
+        report.invalidRows += 1;
+        report.errors.push(toRowError(row.rowNumber, 'persist_failed'));
+        continue;
       }
 
       const snapshot = await persistCompletedDose({
@@ -245,10 +251,14 @@ export const importCompletedVaccinations = async ({
       report.importedRows += 1;
     } catch (error) {
       report.invalidRows += 1;
-      report.errors.push(toRowError(
-        row.rowNumber,
-        isTrpcConflictError(error) ? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict : 'persist_failed',
-      ));
+      report.errors.push(
+        toRowError(
+          row.rowNumber,
+          isTrpcConflictError(error)
+            ? VACCINATION_VALIDATION_ERROR_CODE.sync_conflict
+            : 'persist_failed',
+        ),
+      );
     }
   }
 

@@ -1,5 +1,5 @@
-import { VACCINATION_ISO_DATE_PATTERN } from '../constants/vaccination';
-import type { AppLanguage } from '../interfaces/language';
+import type { AppLanguage } from '@backend/contracts';
+import { VACCINATION_ISO_DATE_PATTERN } from 'src/constants/vaccination';
 
 const DATE_LOCALE_BY_LANGUAGE: Record<AppLanguage, string> = {
   de: 'de-DE',
@@ -83,7 +83,9 @@ export const formatDateByLanguage = (value: string, language: AppLanguage): stri
     return value;
   }
 
-  return new Intl.DateTimeFormat(DATE_LOCALE_BY_LANGUAGE[language], DATE_FORMAT_OPTIONS).format(parsedDate);
+  return new Intl.DateTimeFormat(DATE_LOCALE_BY_LANGUAGE[language], DATE_FORMAT_OPTIONS).format(
+    parsedDate,
+  );
 };
 
 export const normalizeDateInputValue = (value: string): string | null => {

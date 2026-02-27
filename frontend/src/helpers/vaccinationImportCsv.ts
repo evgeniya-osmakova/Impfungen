@@ -1,5 +1,6 @@
 import { VACCINATION_DISEASE_CATALOG } from 'src/constants/vaccinationCatalog.ts';
 import { resources } from 'src/i18n/resources.ts';
+import { DOSE_KIND_VALUES, type DoseKind } from 'src/interfaces/base';
 import type {
   VaccinationCompletedImportParseResult,
   VaccinationCompletedImportRow,
@@ -7,8 +8,6 @@ import type {
 } from 'src/interfaces/vaccinationImport.ts';
 import { parseIsoDateToUtc } from 'src/utils/date.ts';
 import { normalizeOptionalText } from 'src/utils/string.ts';
-
-import { DOSE_KIND_VALUES, type DoseKind } from '../interfaces/base';
 
 const CSV_DELIMITER = ';';
 const CSV_BOM = '\uFEFF';
@@ -63,8 +62,9 @@ const buildSupportedHeaderSignatures = (): Set<string> => {
   const signatures = new Set<string>();
 
   for (const locale of Object.values(resources)) {
-    const headerValues = HEADER_COLUMN_KEYS.map((key) =>
-      getTranslationByPath(locale.translation, `internal.records.export.columns.${key}`) ?? '',
+    const headerValues = HEADER_COLUMN_KEYS.map(
+      (key) =>
+        getTranslationByPath(locale.translation, `internal.records.export.columns.${key}`) ?? '',
     );
 
     signatures.add(serializeHeader(headerValues));
@@ -258,7 +258,7 @@ const createRowError = (
 export const parseVaccinationCompletedImportCsv = (
   csvText: string,
 ): VaccinationCompletedImportParseResult => {
-  if (typeof csvText !== 'string' || csvText.trim() === '') {
+  if (csvText.trim() === '') {
     return {
       fileError: {
         code: 'invalid_file',
@@ -282,9 +282,10 @@ export const parseVaccinationCompletedImportCsv = (
   }
 
   const rowsWithoutEmptyLines = parsedCsv.rows.filter((row) => !isEmptyDataRow(row));
-  const rowsWithoutSeparatorHint = rowsWithoutEmptyLines[0] && isSeparatorHintRow(rowsWithoutEmptyLines[0])
-    ? rowsWithoutEmptyLines.slice(1)
-    : rowsWithoutEmptyLines;
+  const rowsWithoutSeparatorHint =
+    rowsWithoutEmptyLines[0] && isSeparatorHintRow(rowsWithoutEmptyLines[0])
+      ? rowsWithoutEmptyLines.slice(1)
+      : rowsWithoutEmptyLines;
   const [headerRow, ...dataRows] = rowsWithoutSeparatorHint;
 
   if (!headerRow) {
@@ -320,7 +321,8 @@ export const parseVaccinationCompletedImportCsv = (
       continue;
     }
 
-    const [completedAtValue, diseaseLabel, doseKindLabel, tradeNameValue, batchNumberValue] = row.cells;
+    const [completedAtValue, diseaseLabel, doseKindLabel, tradeNameValue, batchNumberValue] =
+      row.cells;
     const completedAt = toIsoDateFromImportValue(completedAtValue);
 
     if (!completedAt) {

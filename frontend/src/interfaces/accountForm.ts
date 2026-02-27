@@ -1,4 +1,4 @@
-import type { CountryCode } from '@backend/contracts'
+import type { CountryCode } from '@backend/contracts';
 
 export type AccountCountryValue = CountryCode | '';
 

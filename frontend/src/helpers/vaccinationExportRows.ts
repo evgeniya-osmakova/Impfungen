@@ -115,7 +115,9 @@ export const buildVaccinationCompletedExportGroups = ({
   }
 
   return [...groupedDoseRowsByDiseaseLabel.entries()]
-    .sort(([leftDiseaseLabel], [rightDiseaseLabel]) => leftDiseaseLabel.localeCompare(rightDiseaseLabel))
+    .sort(([leftDiseaseLabel], [rightDiseaseLabel]) =>
+      leftDiseaseLabel.localeCompare(rightDiseaseLabel),
+    )
     .map(([diseaseLabel, doses]) => ({
       diseaseLabel,
       doses: [...doses].sort(compareDoseRowsByDateAsc),

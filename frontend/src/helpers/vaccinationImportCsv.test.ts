@@ -1,5 +1,8 @@
 import { resources } from 'src/i18n/resources.ts';
-import type { VaccinationCompletedExportColumnLabels, VaccinationCompletedExportRow } from 'src/interfaces/vaccinationExport.ts';
+import type {
+  VaccinationCompletedExportColumnLabels,
+  VaccinationCompletedExportRow,
+} from 'src/interfaces/vaccinationExport.ts';
 import { describe, expect, it } from 'vitest';
 
 import { createVaccinationCompletedCsv } from './vaccinationExportCsv';
@@ -29,7 +32,10 @@ const createColumnLabels = (translation: unknown): VaccinationCompletedExportCol
   tradeName: getTranslationByPath(translation, 'internal.records.export.columns.tradeName'),
 });
 
-const createRow = (translation: unknown, overrides?: Partial<VaccinationCompletedExportRow>): VaccinationCompletedExportRow => ({
+const createRow = (
+  translation: unknown,
+  overrides?: Partial<VaccinationCompletedExportRow>,
+): VaccinationCompletedExportRow => ({
   batchNumber: 'A-1',
   completedAt: '2024-06-01',
   diseaseLabel: getTranslationByPath(translation, 'internal.diseases.measles'),
@@ -53,14 +59,16 @@ describe('vaccinationImportCsv', () => {
     expect(parsed.fileError).toBeNull();
     expect(parsed.totalDataRows).toBe(1);
     expect(parsed.rowErrors).toEqual([]);
-    expect(parsed.rows).toEqual([{
-      batchNumber: 'A-1',
-      completedAt: '2024-06-01',
-      diseaseId: 'measles',
-      kind: 'nextDose',
-      rowNumber: 3,
-      tradeName: 'MMR',
-    }]);
+    expect(parsed.rows).toEqual([
+      {
+        batchNumber: 'A-1',
+        completedAt: '2024-06-01',
+        diseaseId: 'measles',
+        kind: 'nextDose',
+        rowNumber: 3,
+        tradeName: 'MMR',
+      },
+    ]);
   });
 
   it.each([
@@ -70,11 +78,13 @@ describe('vaccinationImportCsv', () => {
   ] as const)('accepts localized headers and dose labels for %s', (_language, translation) => {
     const csv = createVaccinationCompletedCsv({
       columnLabels: createColumnLabels(translation),
-      rows: [createRow(translation, {
-        diseaseLabel: getTranslationByPath(translation, 'internal.diseases.tetanus'),
-        doseKind: 'revaccination',
-        doseKindLabel: getTranslationByPath(translation, 'internal.doseKind.revaccination'),
-      })],
+      rows: [
+        createRow(translation, {
+          diseaseLabel: getTranslationByPath(translation, 'internal.diseases.tetanus'),
+          doseKind: 'revaccination',
+          doseKindLabel: getTranslationByPath(translation, 'internal.doseKind.revaccination'),
+        }),
+      ],
     });
 
     const parsed = parseVaccinationCompletedImportCsv(csv);
@@ -92,11 +102,13 @@ describe('vaccinationImportCsv', () => {
     const translation = resources.en.translation;
     const csv = createVaccinationCompletedCsv({
       columnLabels: createColumnLabels(translation),
-      rows: [createRow(translation, {
-        batchNumber: null,
-        formattedCompletedAt: '2024-06-01',
-        tradeName: null,
-      })],
+      rows: [
+        createRow(translation, {
+          batchNumber: null,
+          formattedCompletedAt: '2024-06-01',
+          tradeName: null,
+        }),
+      ],
     });
 
     const parsed = parseVaccinationCompletedImportCsv(csv);
@@ -114,10 +126,12 @@ describe('vaccinationImportCsv', () => {
     const translation = resources.en.translation;
     const csv = createVaccinationCompletedCsv({
       columnLabels: createColumnLabels(translation),
-      rows: [createRow(translation, {
-        batchNumber: '-BATCH',
-        tradeName: '@Risk "MMR"',
-      })],
+      rows: [
+        createRow(translation, {
+          batchNumber: '-BATCH',
+          tradeName: '@Risk "MMR"',
+        }),
+      ],
     });
 
     const parsed = parseVaccinationCompletedImportCsv(csv);

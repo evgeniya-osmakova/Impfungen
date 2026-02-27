@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef,forwardRef } from 'react';
+import { type ComponentPropsWithoutRef, forwardRef } from 'react';
 
 export type SelectProps = ComponentPropsWithoutRef<'select'>;
 

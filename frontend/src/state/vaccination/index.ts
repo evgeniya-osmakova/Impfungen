@@ -1,7 +1,6 @@
+import type { CountryCode } from '@backend/contracts';
+import type { VaccinationState } from 'src/interfaces/vaccinationState';
 import { create } from 'zustand';
-
-import type { CountryCode } from '../../interfaces/base';
-import type { VaccinationState } from '../../interfaces/vaccinationState';
 
 interface VaccinationStore extends VaccinationState {
   activeAccountId: number | null;

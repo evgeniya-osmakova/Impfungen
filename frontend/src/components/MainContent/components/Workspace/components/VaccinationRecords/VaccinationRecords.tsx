@@ -1,8 +1,7 @@
+import type { DoseKind } from '@backend/contracts';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
-
-import type { DoseKind } from '../../../../../../interfaces/base';
 
 import { VaccinationRecordCard } from './VaccinationRecordCard';
 import { VaccinationRecordsDeleteModal } from './VaccinationRecordsDeleteModal';
@@ -34,7 +33,9 @@ export const VaccinationRecords = ({
   const { t } = useTranslation();
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
   const [deleteRequestError, setDeleteRequestError] = useState<string | null>(null);
-  const [expandedHistoryByDiseaseId, setExpandedHistoryByDiseaseId] = useState<Record<string, boolean>>({});
+  const [expandedHistoryByDiseaseId, setExpandedHistoryByDiseaseId] = useState<
+    Record<string, boolean>
+  >({});
 
   const handleCancelDelete = () => {
     setDeleteCandidateId(null);

@@ -1,19 +1,13 @@
-import {
-  VACCINATION_CATEGORY_FILTER,
-  VACCINATION_COUNTRY,
-} from '../constants/vaccination';
+import type { AppLanguage } from '@backend/contracts';
+import { VACCINATION_CATEGORY_FILTER, VACCINATION_COUNTRY } from 'src/constants/vaccination';
 import type {
   Category,
   CategoryFilter,
   CountryCode,
   RecommendationCountryCode,
-} from '../interfaces/base';
-import type { Disease } from '../interfaces/disease';
-import type {
-  ImmunizationSeries,
-  ImmunizationSeriesView,
-} from '../interfaces/immunizationRecord';
-import type { AppLanguage } from '../interfaces/language';
+} from 'src/interfaces/base';
+import type { Disease } from 'src/interfaces/disease';
+import type { ImmunizationSeries, ImmunizationSeriesView } from 'src/interfaces/immunizationRecord';
 
 import { getTodayIsoDate, parseIsoDateToUtc } from './date';
 import { resolveVaccinationRecordNextDue } from './vaccinationSchedule';
@@ -27,9 +21,7 @@ interface FilterDiseasesOptions {
 }
 
 const sanitizeSearchValue = (value: string): string => value.trim().toLowerCase();
-const isRecommendationCountryCode = (
-  country: CountryCode,
-): country is RecommendationCountryCode =>
+const isRecommendationCountryCode = (country: CountryCode): country is RecommendationCountryCode =>
   country === VACCINATION_COUNTRY.RU || country === VACCINATION_COUNTRY.DE;
 
 const toSearchAliases = (disease: Disease, language: AppLanguage): string[] => [
@@ -78,8 +70,8 @@ export const filterDiseases = (
       }
 
       if (
-        categoryFilter !== VACCINATION_CATEGORY_FILTER.all
-        && diseaseCategory !== categoryFilter
+        categoryFilter !== VACCINATION_CATEGORY_FILTER.all &&
+        diseaseCategory !== categoryFilter
       ) {
         return false;
       }
@@ -89,9 +81,10 @@ export const filterDiseases = (
       return true;
     }
 
-    const searchableParts = [resolveDiseaseLabel(disease), ...toSearchAliases(disease, language)].map(
-      (value) => sanitizeSearchValue(value),
-    );
+    const searchableParts = [
+      resolveDiseaseLabel(disease),
+      ...toSearchAliases(disease, language),
+    ].map((value) => sanitizeSearchValue(value));
 
     return searchableParts.some((part) => part.includes(normalizedQuery));
   });
@@ -161,11 +154,7 @@ export const getRecordsDueInNextYear = (
   }
 
   const nextYearDate = new Date(
-    Date.UTC(
-      todayDate.getUTCFullYear() + 1,
-      todayDate.getUTCMonth(),
-      todayDate.getUTCDate(),
-    ),
+    Date.UTC(todayDate.getUTCFullYear() + 1, todayDate.getUTCMonth(), todayDate.getUTCDate()),
   );
 
   return records.filter((record) => {

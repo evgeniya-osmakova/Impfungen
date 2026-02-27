@@ -9,8 +9,7 @@
   isolation: isolate;
   overflow: hidden;
   border-bottom: 1px solid color-mix(in oklab, var(--surface-200) 88%, var(--surface-0));
-  background:
-    radial-gradient(
+  background: radial-gradient(
       circle at 10% -35%,
       color-mix(in oklab, var(--brand-100) 88%, transparent),
       transparent 58%
@@ -19,41 +18,38 @@
       circle at 92% -15%,
       color-mix(in oklab, var(--accent-100) 86%, transparent),
       transparent 54%
-    ),
-    color-mix(in oklab, var(--surface-0) 92%, var(--accent-50));
+    ), color-mix(in oklab, var(--surface-0) 92%, var(--accent-50));
   box-shadow: 0 10px 24px rgb(15 23 42 / 0.05);
 }
 
 .layout__header::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      rgb(59 130 246 / 0),
-      rgb(59 130 246 / 0.08),
-      rgb(31 154 128 / 0.09),
-      rgb(31 154 128 / 0)
-    );
+  background: linear-gradient(
+    90deg,
+    rgb(59 130 246 / 0),
+    rgb(59 130 246 / 0.08),
+    rgb(31 154 128 / 0.09),
+    rgb(31 154 128 / 0)
+  );
   pointer-events: none;
 }
 
 .layout__header::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 1px;
-  background:
-    linear-gradient(
-      90deg,
-      rgb(59 130 246 / 0),
-      rgb(59 130 246 / 0.35),
-      rgb(31 154 128 / 0.3),
-      rgb(31 154 128 / 0)
-    );
+  background: linear-gradient(
+    90deg,
+    rgb(59 130 246 / 0),
+    rgb(59 130 246 / 0.35),
+    rgb(31 154 128 / 0.3),
+    rgb(31 154 128 / 0)
+  );
   pointer-events: none;
 }
 
@@ -85,15 +81,12 @@
   padding: 6px 10px 6px 6px;
   border-radius: 14px;
   border: 1px solid color-mix(in oklab, var(--surface-200) 68%, var(--surface-0));
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--surface-0) 88%, var(--brand-50)),
-      color-mix(in oklab, var(--surface-0) 84%, var(--accent-50))
-    );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.75),
-    0 8px 20px rgb(15 23 42 / 0.05);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--surface-0) 88%, var(--brand-50)),
+    color-mix(in oklab, var(--surface-0) 84%, var(--accent-50))
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.75), 0 8px 20px rgb(15 23 42 / 0.05);
 }
 
 .layout__brandMark {
@@ -102,22 +95,19 @@
   height: 28px;
   flex: 0 0 28px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.55), transparent 44%),
+  background: radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.55), transparent 44%),
     conic-gradient(
       from 210deg,
       color-mix(in oklab, var(--brand-400) 74%, var(--surface-0)),
       color-mix(in oklab, var(--accent-400) 82%, var(--surface-0)),
       color-mix(in oklab, var(--brand-400) 76%, var(--surface-0))
     );
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.6),
-    inset 0 0 0 1px rgb(255 255 255 / 0.35),
-    0 6px 14px rgb(59 130 246 / 0.16);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 6px
+    14px rgb(59 130 246 / 0.16);
 }
 
 .layout__brandMark::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 5px;
   border-radius: 50%;
@@ -127,7 +117,7 @@
 }
 
 .layout__brandMark::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 6px;
   right: 4px;
@@ -162,9 +152,7 @@
   border-radius: 999px;
   background: color-mix(in oklab, var(--surface-100) 74%, var(--surface-0));
   border: 1px solid color-mix(in oklab, var(--surface-200) 65%, var(--surface-0));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    0 8px 18px rgb(15 23 42 / 0.04);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65), 0 8px 18px rgb(15 23 42 / 0.04);
 }
 
 .layout__navLink {
@@ -178,11 +166,8 @@
   text-decoration: none;
   font-size: 0.86rem;
   font-weight: 600;
-  transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease, transform 120ms
+    ease;
 }
 
 .layout__navLink:hover {
@@ -203,9 +188,7 @@
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--surface-200) 65%, var(--surface-0));
   background: color-mix(in oklab, var(--surface-100) 76%, var(--surface-0));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    0 8px 18px rgb(15 23 42 / 0.04);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65), 0 8px 18px rgb(15 23 42 / 0.04);
 }
 
 .layout__languageButton {
@@ -219,10 +202,7 @@
   font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    box-shadow 120ms ease;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
 }
 
 .layout__languageButton:hover {
@@ -252,8 +232,7 @@
   isolation: isolate;
   overflow: hidden;
   border-top: 1px solid color-mix(in oklab, var(--surface-200) 88%, var(--surface-0));
-  background:
-    radial-gradient(
+  background: radial-gradient(
       circle at 18% 120%,
       color-mix(in oklab, var(--brand-100) 75%, transparent),
       transparent 60%
@@ -271,20 +250,19 @@
 }
 
 .layout__footer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 1px;
-  background:
-    linear-gradient(
-      90deg,
-      rgb(31 154 128 / 0),
-      rgb(31 154 128 / 0.25),
-      rgb(59 130 246 / 0.22),
-      rgb(59 130 246 / 0)
-    );
+  background: linear-gradient(
+    90deg,
+    rgb(31 154 128 / 0),
+    rgb(31 154 128 / 0.25),
+    rgb(59 130 246 / 0.22),
+    rgb(59 130 246 / 0)
+  );
   pointer-events: none;
 }
 

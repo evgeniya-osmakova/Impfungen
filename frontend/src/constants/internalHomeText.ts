@@ -11,7 +11,8 @@ export const INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE = {
     'internal.form.errors.futureDateBeforeCompleted',
   [VACCINATION_VALIDATION_ERROR_CODE.future_dates_duplicate]:
     'internal.form.errors.futureDatesDuplicate',
-  [VACCINATION_VALIDATION_ERROR_CODE.future_dates_invalid]: 'internal.form.errors.futureDatesInvalid',
+  [VACCINATION_VALIDATION_ERROR_CODE.future_dates_invalid]:
+    'internal.form.errors.futureDatesInvalid',
   [VACCINATION_VALIDATION_ERROR_CODE.repeat_interval_invalid]:
     'internal.form.errors.repeatIntervalInvalid',
   [VACCINATION_VALIDATION_ERROR_CODE.save_failed]: 'internal.form.errors.saveFailed',

@@ -1,11 +1,10 @@
+import type { DoseKind } from '@backend/contracts';
+import type { AppLanguage } from '@backend/contracts';
 import { useTranslation } from 'react-i18next';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
-import type { DoseKind } from '../../../../../../interfaces/base';
-import type { ImmunizationSeriesView } from '../../../../../../interfaces/immunizationRecord';
-import type { AppLanguage } from '../../../../../../interfaces/language';
-import { Button } from '../../../../../../ui';
-import { formatDateByLanguage } from '../../../../../../utils/date';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from 'src/constants/ui';
+import type { ImmunizationSeriesView } from 'src/interfaces/immunizationRecord';
+import { Button } from 'src/ui';
+import { formatDateByLanguage } from 'src/utils/date';
 
 import styles from './VaccinationUpcoming.module.css';
 
@@ -58,12 +57,14 @@ export const VaccinationUpcoming = ({
                   </p>
                   <Button
                     className={styles.vaccinationUpcoming__actionButton}
-                    onClick={() => onMarkPlannedDone({
-                      diseaseId: record.diseaseId,
-                      dueAt: nextDue.dueAt,
-                      kind: nextDue.kind,
-                      plannedDoseId: nextDue.plannedDoseId,
-                    })}
+                    onClick={() =>
+                      onMarkPlannedDone({
+                        diseaseId: record.diseaseId,
+                        dueAt: nextDue.dueAt,
+                        kind: nextDue.kind,
+                        plannedDoseId: nextDue.plannedDoseId,
+                      })
+                    }
                     type={HTML_BUTTON_TYPE.button}
                     variant={BUTTON_VARIANT.secondary}
                   >

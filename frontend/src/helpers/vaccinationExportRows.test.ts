@@ -55,14 +55,16 @@ describe('vaccinationExportRows', () => {
 
     const rows = buildVaccinationCompletedExportRows({
       records,
-      resolveDiseaseLabelById: (diseaseId) => ({
-        measles: 'Measles',
-        tetanus: 'Tetanus',
-      }[diseaseId] ?? diseaseId),
-      resolveDoseKindLabel: (kind) => ({
-        nextDose: 'Next dose',
-        revaccination: 'Revaccination',
-      }[kind]),
+      resolveDiseaseLabelById: (diseaseId) =>
+        ({
+          measles: 'Measles',
+          tetanus: 'Tetanus',
+        })[diseaseId] ?? diseaseId,
+      resolveDoseKindLabel: (kind) =>
+        ({
+          nextDose: 'Next dose',
+          revaccination: 'Revaccination',
+        })[kind],
     });
 
     expect(rows).toHaveLength(3);
@@ -100,21 +102,24 @@ describe('vaccinationExportRows', () => {
           tradeName: null,
         },
       ]),
-      createRecordCardView('anthrax', [{
-        batchNumber: null,
-        completedAt: '2024-05-01',
-        id: 'dose-2',
-        kind: 'nextDose',
-        tradeName: null,
-      }]),
+      createRecordCardView('anthrax', [
+        {
+          batchNumber: null,
+          completedAt: '2024-05-01',
+          id: 'dose-2',
+          kind: 'nextDose',
+          tradeName: null,
+        },
+      ]),
     ];
 
     const rows = buildVaccinationCompletedExportRows({
       records,
-      resolveDiseaseLabelById: (diseaseId) => ({
-        anthrax: 'Anthrax',
-        hepatitisB: 'Hepatitis B',
-      }[diseaseId] ?? diseaseId),
+      resolveDiseaseLabelById: (diseaseId) =>
+        ({
+          anthrax: 'Anthrax',
+          hepatitisB: 'Hepatitis B',
+        })[diseaseId] ?? diseaseId,
       resolveDoseKindLabel: () => 'Next dose',
     });
 
@@ -153,32 +158,35 @@ describe('vaccinationExportRows', () => {
           tradeName: 'Combi',
         },
       ]),
-      createRecordCardView('anthrax', [{
-        batchNumber: null,
-        completedAt: '2024-03-05',
-        id: 'dose-3',
-        kind: 'nextDose',
-        tradeName: null,
-      }]),
+      createRecordCardView('anthrax', [
+        {
+          batchNumber: null,
+          completedAt: '2024-03-05',
+          id: 'dose-3',
+          kind: 'nextDose',
+          tradeName: null,
+        },
+      ]),
     ];
 
     const groups = buildVaccinationCompletedExportGroups({
       records,
-      resolveDiseaseLabelById: (diseaseId) => ({
-        anthrax: 'Anthrax',
-        hepatitisB: 'Hepatitis B',
-      }[diseaseId] ?? diseaseId),
-      resolveDoseKindLabel: (kind) => ({
-        nextDose: 'Next dose',
-        revaccination: 'Revaccination',
-      }[kind]),
+      resolveDiseaseLabelById: (diseaseId) =>
+        ({
+          anthrax: 'Anthrax',
+          hepatitisB: 'Hepatitis B',
+        })[diseaseId] ?? diseaseId,
+      resolveDoseKindLabel: (kind) =>
+        ({
+          nextDose: 'Next dose',
+          revaccination: 'Revaccination',
+        })[kind],
     });
 
     expect(groups.map((group) => group.diseaseLabel)).toEqual(['Anthrax', 'Hepatitis B']);
     expect(groups[0]?.doses).toHaveLength(1);
-    expect(groups[1]?.doses.map((dose) => `${dose.completedAt}|${dose.formattedCompletedAt}`)).toEqual([
-      '2024-01-01|01.01.2024',
-      '2024-05-01|01.05.2024',
-    ]);
+    expect(
+      groups[1]?.doses.map((dose) => `${dose.completedAt}|${dose.formattedCompletedAt}`),
+    ).toEqual(['2024-01-01|01.01.2024', '2024-05-01|01.05.2024']);
   });
 });

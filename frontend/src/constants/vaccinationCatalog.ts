@@ -1,4 +1,4 @@
-import type { Disease } from '../interfaces/disease';
+import type { Disease } from 'src/interfaces/disease';
 
 import { getDiseaseLabelKey } from './internalHomeText';
 

@@ -1,10 +1,9 @@
-import type { ProfileAccountsState,ProfileAccountSummary } from '@backend/contracts';
+import type { ProfileAccountsState, ProfileAccountSummary } from '@backend/contracts';
+import type { CountryCode } from '@backend/contracts';
+import type { ProfileSnapshot } from 'src/api/profileApi';
+import { getProfileApi } from 'src/api/profileApi';
+import { useVaccinationStore } from 'src/state/vaccination';
 import { create } from 'zustand';
-
-import type { ProfileSnapshot } from '../../api/profileApi';
-import { getProfileApi } from '../../api/profileApi';
-import type { CountryCode } from '../../interfaces/base';
-import { useVaccinationStore } from '../vaccination';
 
 export const resolvePrimaryAccount = (
   accounts: readonly ProfileAccountSummary[],

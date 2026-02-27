@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { AppInitializer } from 'src/components/AppInitializer/AppInitializer.tsx'
+import { AppInitializer } from 'src/components/AppInitializer/AppInitializer.tsx';
 import { RootErrorBoundary } from 'src/components/RootErrorBoundary/RootErrorBoundary.tsx';
 
 import App from './App.tsx';
@@ -19,5 +19,5 @@ root.render(
         </BrowserRouter>
       </AppInitializer>
     </RootErrorBoundary>
-  </StrictMode>
+  </StrictMode>,
 );

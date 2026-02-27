@@ -1,9 +1,8 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import type { PropsWithChildren } from 'react';
 import CloseIcon from 'src/assets/icons/close.svg';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../constants/ui';
-import { Button } from '../button/Button';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from 'src/constants/ui';
+import { Button } from 'src/ui/button/Button';
 
 import styles from './Modal.module.css';
 
@@ -14,13 +13,7 @@ interface ModalProps extends PropsWithChildren {
   onClose: () => void;
 }
 
-export const Modal = ({
-  ariaLabel,
-  children,
-  closeAriaLabel,
-  isOpen,
-  onClose,
-}: ModalProps) => {
+export const Modal = ({ ariaLabel, children, closeAriaLabel, isOpen, onClose }: ModalProps) => {
   return (
     <Dialog.Root
       onOpenChange={(nextOpen) => {

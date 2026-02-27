@@ -1,27 +1,29 @@
 import { useMemo } from 'react';
 import { sortDiseasesByLabel } from 'src/helpers/vaccinationListAdapter.ts';
+import { useDiseaseLabels } from 'src/hooks/useDiseaseLabels';
 import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
 import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
-import { useLanguageStore } from 'src/state/language'
+import { useLanguageStore } from 'src/state/language';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { selectCatalogViewData } from 'src/state/vaccination/selectors';
+import { filterDiseases } from 'src/utils/vaccinationSelectors';
 import { useShallow } from 'zustand/react/shallow';
-
-import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
-import { useVaccinationStore } from '../../../../state/vaccination';
-import { selectCatalogViewData } from '../../../../state/vaccination/selectors';
-import { filterDiseases } from '../../../../utils/vaccinationSelectors';
 
 import { VaccinationCatalog } from './components/VaccinationCatalog/VaccinationCatalog';
 
 import styles from './CatalogPane.module.css';
 
 interface CatalogPaneProps {
-  ui: Pick<
-    MainPageUi,
-    'openFormModalWithPrefilledDisease'
-  > & Pick<
-    VaccinationPageUi,
-    'cancelEdit' | 'categoryFilter' | 'editingDiseaseId' | 'searchQuery' | 'setCategoryFilter' | 'setSearchQuery'
-  >;
+  ui: Pick<MainPageUi, 'openFormModalWithPrefilledDisease'> &
+    Pick<
+      VaccinationPageUi,
+      | 'cancelEdit'
+      | 'categoryFilter'
+      | 'editingDiseaseId'
+      | 'searchQuery'
+      | 'setCategoryFilter'
+      | 'setSearchQuery'
+    >;
 }
 
 export const CatalogPane = ({ ui }: CatalogPaneProps) => {
@@ -61,14 +63,7 @@ export const CatalogPane = ({ ui }: CatalogPaneProps) => {
     });
 
     return sortDiseasesByLabel(filteredDiseases, resolveDiseaseLabel);
-  }, [
-    availableDiseases,
-    categoryFilter,
-    country,
-    language,
-    resolveDiseaseLabel,
-    searchQuery,
-  ]);
+  }, [availableDiseases, categoryFilter, country, language, resolveDiseaseLabel, searchQuery]);
 
   if (!country) {
     return null;

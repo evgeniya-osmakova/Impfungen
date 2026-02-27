@@ -1,6 +1,6 @@
-import type { TFunction } from 'i18next'
-import { CURRENT_YEAR, MIN_BIRTH_YEAR } from 'src/constants/account.ts'
-import type { FieldErrors } from 'src/interfaces/accountForm.ts'
+import type { TFunction } from 'i18next';
+import { CURRENT_YEAR, MIN_BIRTH_YEAR } from 'src/constants/account.ts';
+import type { FieldErrors } from 'src/interfaces/accountForm.ts';
 
 export const validateAccountFields = (
   t: TFunction,
@@ -25,9 +25,15 @@ export const validateAccountFields = (
   const isBirthYearInteger = Number.isInteger(parsedBirthYear);
 
   if (!isBirthYearInteger || String(parsedBirthYear) !== input.birthYear.trim()) {
-    nextErrors.birthYear = t('account.validation.birthYearInvalid', { max: CURRENT_YEAR, min: MIN_BIRTH_YEAR });
+    nextErrors.birthYear = t('account.validation.birthYearInvalid', {
+      max: CURRENT_YEAR,
+      min: MIN_BIRTH_YEAR,
+    });
   } else if (parsedBirthYear < MIN_BIRTH_YEAR || parsedBirthYear > CURRENT_YEAR) {
-    nextErrors.birthYear = t('account.validation.birthYearInvalid', { max: CURRENT_YEAR, min: MIN_BIRTH_YEAR });
+    nextErrors.birthYear = t('account.validation.birthYearInvalid', {
+      max: CURRENT_YEAR,
+      min: MIN_BIRTH_YEAR,
+    });
   }
 
   return {

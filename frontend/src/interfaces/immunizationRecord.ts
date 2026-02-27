@@ -1,5 +1,5 @@
 import type { VaccinationStorageRecord } from '@backend/contracts';
-import { VACCINATION_SCHEDULE_MODE } from 'src/constants/vaccination.ts'
+import type { VACCINATION_SCHEDULE_MODE } from 'src/constants/vaccination.ts';
 
 import type { DoseKind } from './base';
 import type { PlannedDose, RepeatRule } from './dose';

@@ -1,6 +1,5 @@
-import i18n from 'src/i18n/index.ts'
-
-import type { AppLanguage } from '../interfaces/language';
+import type { AppLanguage } from '@backend/contracts';
+import i18n from 'src/i18n/index.ts';
 
 import { de } from './locales/de';
 import { en } from './locales/en';

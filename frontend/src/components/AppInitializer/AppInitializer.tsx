@@ -1,5 +1,5 @@
-import { type PropsWithChildren,useEffect } from 'react'
-import { useStore } from 'src/state'
+import { type PropsWithChildren, useEffect } from 'react';
+import { useStore } from 'src/state';
 
 export const AppInitializer = ({ children }: PropsWithChildren) => {
   const isError = useStore((state) => state.isError);
@@ -18,9 +18,5 @@ export const AppInitializer = ({ children }: PropsWithChildren) => {
     return <div>Loading...</div>;
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };

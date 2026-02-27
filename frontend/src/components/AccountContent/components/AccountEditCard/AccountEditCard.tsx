@@ -1,17 +1,12 @@
+import type { CountryCode } from '@backend/contracts';
 import { useTranslation } from 'react-i18next';
 import TrashIcon from 'src/assets/icons/trash.svg';
-import {
-  CURRENT_YEAR,
-  EMPTY_COUNTRY_VALUE,
-  MIN_BIRTH_YEAR,
-} from 'src/constants/account';
+import { CURRENT_YEAR, EMPTY_COUNTRY_VALUE, MIN_BIRTH_YEAR } from 'src/constants/account';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from 'src/constants/ui';
+import { VACCINATION_COUNTRY_OPTIONS } from 'src/constants/vaccination';
 import { resolveCountryLabel } from 'src/helpers/resolveLabel.ts';
 import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../../../constants/ui';
-import { VACCINATION_COUNTRY_OPTIONS } from '../../../../constants/vaccination';
-import type { CountryCode } from '../../../../interfaces/base';
-import { Button, Input, Select, SurfacePanel } from '../../../../ui';
+import { Button, Input, Select, SurfacePanel } from 'src/ui';
 
 import { useAccountEditCardController } from './useAccountEditCardController';
 
@@ -48,13 +43,17 @@ export const AccountEditCard = ({ ui }: AccountEditCardProps) => {
           <div className={styles.accountEditCard__headerText}>
             <h2 className={styles.accountEditCard__title}>{t('account.edit.title')}</h2>
             <p className={styles.accountEditCard__description}>
-              {!isPrimaryComplete ? t('account.edit.primaryDescription') : t('account.edit.description')}
+              {!isPrimaryComplete
+                ? t('account.edit.primaryDescription')
+                : t('account.edit.description')}
             </p>
           </div>
           <div className={styles.accountEditCard__headerActionSlot}>
             {editingAccount?.kind === 'family' ? (
               <Button
-                aria-label={isDeleting ? t('account.actions.deleting') : t('account.actions.deleteMember')}
+                aria-label={
+                  isDeleting ? t('account.actions.deleting') : t('account.actions.deleteMember')
+                }
                 className={`${styles.accountEditCard__iconButton} ${styles.accountEditCard__iconButton_danger}`}
                 disabled={isSaving || isDeleting}
                 onClick={handleOpenDeleteFamilyMemberModal}
@@ -79,7 +78,9 @@ export const AccountEditCard = ({ ui }: AccountEditCardProps) => {
               type={HTML_INPUT_TYPE.text}
               value={editName}
             />
-            {editErrors.name ? <span className={styles.accountEditCard__error}>{editErrors.name}</span> : null}
+            {editErrors.name ? (
+              <span className={styles.accountEditCard__error}>{editErrors.name}</span>
+            ) : null}
           </label>
 
           <label className={styles.accountEditCard__field}>
@@ -109,7 +110,9 @@ export const AccountEditCard = ({ ui }: AccountEditCardProps) => {
                   const nextValue = event.target.value;
 
                   handleEditCountryChange(
-                    nextValue === EMPTY_COUNTRY_VALUE ? EMPTY_COUNTRY_VALUE : (nextValue as CountryCode),
+                    nextValue === EMPTY_COUNTRY_VALUE
+                      ? EMPTY_COUNTRY_VALUE
+                      : (nextValue as CountryCode),
                   );
                 }}
                 value={editCountry}
@@ -124,7 +127,9 @@ export const AccountEditCard = ({ ui }: AccountEditCardProps) => {
             </div>
           </label>
 
-          {isSaving ? <p className={styles.accountEditCard__meta}>{t('account.actions.saving')}</p> : null}
+          {isSaving ? (
+            <p className={styles.accountEditCard__meta}>{t('account.actions.saving')}</p>
+          ) : null}
           {editRequestError ? (
             <p className={styles.accountEditCard__requestError} role="alert">
               {editRequestError}

@@ -1,16 +1,10 @@
-import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts'
-
-import {
-  VACCINATION_DOSE_KIND,
-  VACCINATION_REPEAT_UNIT,
-} from '../constants/vaccination';
-import {
-  VACCINATION_VALIDATION_ERROR_CODE,
-} from '../constants/vaccinationValidation';
+import { VACCINATION_DOSE_KIND, VACCINATION_REPEAT_UNIT } from 'src/constants/vaccination';
+import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation';
 import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
-} from '../interfaces/immunizationRecord';
+} from 'src/interfaces/immunizationRecord';
+import type { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
 
 import { getTodayIsoDate, isIsoDateValue } from './date';
 
@@ -49,8 +43,8 @@ export const validateVaccinationRecordInput = (
   }
 
   if (
-    input.completedDoseKind !== VACCINATION_DOSE_KIND.nextDose
-    && input.completedDoseKind !== VACCINATION_DOSE_KIND.revaccination
+    input.completedDoseKind !== VACCINATION_DOSE_KIND.nextDose &&
+    input.completedDoseKind !== VACCINATION_DOSE_KIND.revaccination
   ) {
     return {
       errorCode: VACCINATION_VALIDATION_ERROR_CODE.dose_kind_invalid,
@@ -68,8 +62,8 @@ export const validateVaccinationRecordInput = (
   if (
     input.futureDueDoses.some(
       (dose) =>
-        dose.kind !== VACCINATION_DOSE_KIND.nextDose
-        && dose.kind !== VACCINATION_DOSE_KIND.revaccination,
+        dose.kind !== VACCINATION_DOSE_KIND.nextDose &&
+        dose.kind !== VACCINATION_DOSE_KIND.revaccination,
     )
   ) {
     return {
@@ -109,8 +103,8 @@ export const validateVaccinationRecordInput = (
   }
 
   if (
-    input.repeatEvery.kind !== VACCINATION_DOSE_KIND.nextDose
-    && input.repeatEvery.kind !== VACCINATION_DOSE_KIND.revaccination
+    input.repeatEvery.kind !== VACCINATION_DOSE_KIND.nextDose &&
+    input.repeatEvery.kind !== VACCINATION_DOSE_KIND.revaccination
   ) {
     return {
       errorCode: VACCINATION_VALIDATION_ERROR_CODE.dose_kind_invalid,
@@ -119,12 +113,10 @@ export const validateVaccinationRecordInput = (
   }
 
   if (
-    !Number.isInteger(input.repeatEvery.interval)
-    || input.repeatEvery.interval <= 0
-    || (
-      input.repeatEvery.unit !== VACCINATION_REPEAT_UNIT.months
-      && input.repeatEvery.unit !== VACCINATION_REPEAT_UNIT.years
-    )
+    !Number.isInteger(input.repeatEvery.interval) ||
+    input.repeatEvery.interval <= 0 ||
+    (input.repeatEvery.unit !== VACCINATION_REPEAT_UNIT.months &&
+      input.repeatEvery.unit !== VACCINATION_REPEAT_UNIT.years)
   ) {
     return {
       errorCode: VACCINATION_VALIDATION_ERROR_CODE.repeat_interval_invalid,
@@ -165,8 +157,8 @@ export const validateVaccinationCompleteDoseInput = (
   }
 
   if (
-    input.kind !== VACCINATION_DOSE_KIND.nextDose
-    && input.kind !== VACCINATION_DOSE_KIND.revaccination
+    input.kind !== VACCINATION_DOSE_KIND.nextDose &&
+    input.kind !== VACCINATION_DOSE_KIND.revaccination
   ) {
     return {
       errorCode: VACCINATION_VALIDATION_ERROR_CODE.dose_kind_invalid,

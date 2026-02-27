@@ -1,10 +1,9 @@
 import { useState } from 'react';
-
 import {
   VACCINATION_DEFAULT_CATEGORY_FILTER,
   VACCINATION_DEFAULT_SEARCH_QUERY,
-} from '../../constants/vaccination';
-import type { VaccinationPageUi } from '../../interfaces/vaccinationPageUi';
+} from 'src/constants/vaccination';
+import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi';
 
 export const useVaccinationPageUi = (): VaccinationPageUi => {
   const [categoryFilter, setCategoryFilter] = useState(VACCINATION_DEFAULT_CATEGORY_FILTER);

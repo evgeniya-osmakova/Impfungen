@@ -1,7 +1,6 @@
+import { type ProfileSnapshot, setProfileApi } from 'src/api/profileApi';
+import i18n from 'src/i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { type ProfileSnapshot,setProfileApi } from '../../api/profileApi';
-import i18n from '../../i18n';
 
 import { useLanguageStore } from './index';
 

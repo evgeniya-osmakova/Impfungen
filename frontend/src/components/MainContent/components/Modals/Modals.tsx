@@ -1,20 +1,19 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE } from 'src/constants/internalHomeText';
 import { sortDiseasesByLabel } from 'src/helpers/vaccinationListAdapter.ts';
-import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
-import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
-import { useShallow } from 'zustand/react/shallow';
-
-import { INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE } from '../../../../constants/internalHomeText';
-import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
+import { useDiseaseLabels } from 'src/hooks/useDiseaseLabels';
 import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
-} from '../../../../interfaces/immunizationRecord';
-import { useVaccinationStore } from '../../../../state/vaccination';
-import { useVaccinationCommands } from '../../../../state/vaccination/commands';
-import { selectModalsViewData } from '../../../../state/vaccination/selectors';
-import { Modal } from '../../../../ui';
+} from 'src/interfaces/immunizationRecord';
+import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
+import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { useVaccinationCommands } from 'src/state/vaccination/commands';
+import { selectModalsViewData } from 'src/state/vaccination/selectors';
+import { Modal } from 'src/ui';
+import { useShallow } from 'zustand/react/shallow';
 
 import { VaccinationCompleteDoseForm } from './components/VaccinationCompleteDoseForm/VaccinationCompleteDoseForm';
 import { VaccinationForm } from './components/VaccinationForm/VaccinationForm';

@@ -1,21 +1,16 @@
-import {
-  toVaccinationRecordCardViews,
-} from 'src/helpers/vaccinationViewModel.ts';
-import type {
-  VaccinationStoreViewData,
-} from 'src/interfaces/vaccinationViewData.ts';
-
-import { VACCINATION_DISEASE_CATALOG } from '../../constants/vaccinationCatalog';
-import type { Category, CountryCode } from '../../interfaces/base';
-import type { Disease } from '../../interfaces/disease';
-import type { ImmunizationSeries } from '../../interfaces/immunizationRecord';
+import { VACCINATION_DISEASE_CATALOG } from 'src/constants/vaccinationCatalog';
+import { toVaccinationRecordCardViews } from 'src/helpers/vaccinationViewModel.ts';
+import type { Category, CountryCode } from 'src/interfaces/base';
+import type { Disease } from 'src/interfaces/disease';
+import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord';
+import type { VaccinationStoreViewData } from 'src/interfaces/vaccinationViewData.ts';
 import {
   getAvailableDiseases,
   getCategoryCounts,
   getRecordsDueInNextYear,
   getRecordsWithNextDateCount,
   sortRecordsByNextDueDate,
-} from '../../utils/vaccinationSelectors';
+} from 'src/utils/vaccinationSelectors';
 
 interface VaccinationStoreViewSource {
   country: CountryCode | null;
@@ -56,7 +51,8 @@ const EMPTY_CATEGORY_COUNTS: Record<Category, number> = {
 const resolveRecordForEdit = (
   records: readonly ImmunizationSeries[],
   editingDiseaseId: string | null,
-): ImmunizationSeries | null => records.find((record) => record.diseaseId === editingDiseaseId) ?? null;
+): ImmunizationSeries | null =>
+  records.find((record) => record.diseaseId === editingDiseaseId) ?? null;
 
 export const getVaccinationDiseaseById = (diseaseId: string): Disease | undefined =>
   VACCINATION_DISEASES_BY_ID.get(diseaseId);
@@ -72,7 +68,9 @@ export const selectVaccinationViewData = ({
   const availableDiseases = country
     ? getAvailableDiseases(VACCINATION_DISEASE_CATALOG, records, country)
     : [];
-  const diseaseForEdit = recordForEdit ? getVaccinationDiseaseById(recordForEdit.diseaseId) : undefined;
+  const diseaseForEdit = recordForEdit
+    ? getVaccinationDiseaseById(recordForEdit.diseaseId)
+    : undefined;
 
   return {
     availableDiseases,
@@ -99,10 +97,10 @@ export const createMemoizedVaccinationViewDataProjector = (
 
   return (source) => {
     if (
-      cachedValue
-      && cachedCountry === source.country
-      && cachedEditingDiseaseId === source.editingDiseaseId
-      && cachedRecords === source.records
+      cachedValue &&
+      cachedCountry === source.country &&
+      cachedEditingDiseaseId === source.editingDiseaseId &&
+      cachedRecords === source.records
     ) {
       return cachedValue;
     }

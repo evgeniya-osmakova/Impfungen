@@ -1,8 +1,10 @@
-import { CompletedDose, PlannedDose } from 'src/interfaces/dose.ts'
-import { NEXT_DUE_SOURCE, NextDue } from 'src/interfaces/nextDue.ts'
+import type { CompletedDose, PlannedDose } from 'src/interfaces/dose.ts';
+import { NEXT_DUE_SOURCE, type NextDue } from 'src/interfaces/nextDue.ts';
 
 export const sortCompletedDoses = (completedDoses: readonly CompletedDose[]): CompletedDose[] =>
-  [...completedDoses].sort((leftDose, rightDose) => leftDose.completedAt.localeCompare(rightDose.completedAt));
+  [...completedDoses].sort((leftDose, rightDose) =>
+    leftDose.completedAt.localeCompare(rightDose.completedAt),
+  );
 
 export const resolveLatestCompletedDose = (
   completedDoses: readonly CompletedDose[],

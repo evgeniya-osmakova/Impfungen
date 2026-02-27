@@ -4,9 +4,8 @@ import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
-import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
-
-import { useAccountsStore } from '../accounts';
+import type { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
+import { useAccountsStore } from 'src/state/accounts';
 
 import { isTrpcConflictError } from './errors.ts';
 import { useVaccinationStore } from './index';
@@ -21,15 +20,14 @@ import {
   resolveSubmitRecordCompletedDoseId,
   resolveUpdatedRecord,
 } from './recordResolution.ts';
-import {
-  submitCompletedDoseUseCase,
-  submitRecordUseCase,
-} from './vaccinationRecordUseCases.ts';
+import { submitCompletedDoseUseCase, submitRecordUseCase } from './vaccinationRecordUseCases.ts';
 
 interface VaccinationCommands {
   removeRecord: (diseaseId: string) => Promise<boolean>;
   setCountry: (country: CountryCode) => Promise<void>;
-  submitCompletedDose: (record: ImmunizationDoseInput) => Promise<VaccinationValidationErrorCode | null>;
+  submitCompletedDose: (
+    record: ImmunizationDoseInput,
+  ) => Promise<VaccinationValidationErrorCode | null>;
   submitRecord: (record: ImmunizationSeriesInput) => Promise<VaccinationValidationErrorCode | null>;
 }
 
@@ -87,7 +85,9 @@ export const useVaccinationCommands = (): VaccinationCommands => {
 
   const submitCompletedDose: VaccinationCommands['submitCompletedDose'] = async (recordInput) => {
     const currentRecords = records;
-    const currentRecord = currentRecords.find((record) => record.diseaseId === recordInput.diseaseId);
+    const currentRecord = currentRecords.find(
+      (record) => record.diseaseId === recordInput.diseaseId,
+    );
     const submissionResult = submitCompletedDoseUseCase(currentRecords, recordInput);
 
     if (submissionResult.errorCode || !submissionResult.records) {
@@ -99,7 +99,11 @@ export const useVaccinationCommands = (): VaccinationCommands => {
       const newDoseId = resolveNewCompletedDoseId(currentRecord, nextRecord);
 
       if (!newDoseId) {
-        throw new Error(`Unable to resolve new completed dose id for disease ${recordInput.diseaseId}.`);
+        console.error(
+          `Unable to resolve new completed dose id for disease ${recordInput.diseaseId}.`,
+        );
+
+        return VACCINATION_VALIDATION_ERROR_CODE.save_failed;
       }
 
       const snapshot = await persistCompletedDose({
@@ -129,7 +133,9 @@ export const useVaccinationCommands = (): VaccinationCommands => {
 
   const submitRecord: VaccinationCommands['submitRecord'] = async (recordInput) => {
     const currentRecords = records;
-    const currentRecord = currentRecords.find((record) => record.diseaseId === recordInput.diseaseId);
+    const currentRecord = currentRecords.find(
+      (record) => record.diseaseId === recordInput.diseaseId,
+    );
     const submissionResult = submitRecordUseCase(currentRecords, recordInput);
 
     if (submissionResult.errorCode || !submissionResult.records) {

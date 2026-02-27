@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import type { VaccinationCompletedImportReport, VaccinationCompletedImportRowError } from 'src/interfaces/vaccinationImport.ts';
+import type {
+  VaccinationCompletedImportReport,
+  VaccinationCompletedImportRowError,
+} from 'src/interfaces/vaccinationImport.ts';
 import { Modal } from 'src/ui';
 
 import styles from './WorkspaceImportReport.module.css';
@@ -10,17 +13,10 @@ interface WorkspaceImportReportProps {
   report: VaccinationCompletedImportReport;
 }
 
-export const WorkspaceImportReport = ({
-  isOpen,
-  onClose,
-  report,
-}: WorkspaceImportReportProps) => {
+export const WorkspaceImportReport = ({ isOpen, onClose, report }: WorkspaceImportReportProps) => {
   const { t } = useTranslation();
 
-  const renderImportRowError = (
-    rowError: VaccinationCompletedImportRowError,
-    index: number,
-  ) => {
+  const renderImportRowError = (rowError: VaccinationCompletedImportRowError, index: number) => {
     const reason = t(rowError.messageKey, rowError.messageValues);
 
     return (
@@ -51,10 +47,26 @@ export const WorkspaceImportReport = ({
         ) : (
           <>
             <ul className={styles.workspaceImportReportCounts}>
-              <li>{t('internal.records.import.report.counts.totalRows', { count: report.totalDataRows })}</li>
-              <li>{t('internal.records.import.report.counts.importedRows', { count: report.importedRows })}</li>
-              <li>{t('internal.records.import.report.counts.duplicateRows', { count: report.duplicateRows })}</li>
-              <li>{t('internal.records.import.report.counts.invalidRows', { count: report.invalidRows })}</li>
+              <li>
+                {t('internal.records.import.report.counts.totalRows', {
+                  count: report.totalDataRows,
+                })}
+              </li>
+              <li>
+                {t('internal.records.import.report.counts.importedRows', {
+                  count: report.importedRows,
+                })}
+              </li>
+              <li>
+                {t('internal.records.import.report.counts.duplicateRows', {
+                  count: report.duplicateRows,
+                })}
+              </li>
+              <li>
+                {t('internal.records.import.report.counts.invalidRows', {
+                  count: report.invalidRows,
+                })}
+              </li>
             </ul>
             {report.errors.length > 0 && (
               <ul className={styles.workspaceImportReportErrors}>

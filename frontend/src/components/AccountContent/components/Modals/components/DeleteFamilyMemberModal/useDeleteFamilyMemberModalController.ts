@@ -20,7 +20,8 @@ export const useDeleteFamilyMemberModalController = (
   const { closeDeleteFamilyMemberModal, deleteCandidateAccountId, isDeleting, setIsDeleting } = ui;
   const [requestError, setRequestError] = useState<string | null>(null);
 
-  const deleteCandidateAccount = accounts.find((account) => account.id === deleteCandidateAccountId) ?? null;
+  const deleteCandidateAccount =
+    accounts.find((account) => account.id === deleteCandidateAccountId) ?? null;
 
   useEffect(() => {
     if (deleteCandidateAccountId === null) {

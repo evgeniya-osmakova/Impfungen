@@ -1,15 +1,14 @@
+import type { DoseKind, RepeatUnit } from '@backend/contracts';
 import { useTranslation } from 'react-i18next';
 import EditIcon from 'src/assets/icons/edit.svg';
 import PlusIcon from 'src/assets/icons/plus.svg';
 import TrashIcon from 'src/assets/icons/trash.svg';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from 'src/constants/ui';
+import { VACCINATION_REPEAT_UNIT } from 'src/constants/vaccination';
 import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
 import { useLanguageStore } from 'src/state/language';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
-import { VACCINATION_REPEAT_UNIT } from '../../../../../../constants/vaccination';
-import type { DoseKind, RepeatUnit } from '../../../../../../interfaces/base';
-import { Button, SurfacePanel } from '../../../../../../ui';
-import { formatDateByLanguage } from '../../../../../../utils/date';
+import { Button, SurfacePanel } from 'src/ui';
+import { formatDateByLanguage } from 'src/utils/date';
 
 import styles from './VaccinationRecords.module.css';
 
@@ -61,18 +60,17 @@ export const VaccinationRecordCard = ({
   const historyDoseCount = sortedCompletedDoses.length;
   const shouldShowHistoryToggle = historyDoseCount > 1;
   const visibleCompletedDoses = isHistoryExpanded ? sortedCompletedDoses : [];
-  const completedDateLabelKey = historyDoseCount > 1
-    ? 'internal.records.latestDoseLabel'
-    : 'internal.records.vaccinationDateLabel';
+  const completedDateLabelKey =
+    historyDoseCount > 1
+      ? 'internal.records.latestDoseLabel'
+      : 'internal.records.vaccinationDateLabel';
   const nextDue = record.nextDue;
   const remainingFutureDueDoses = record.remainingFutureDueDoses;
 
   return (
     <SurfacePanel as="article" className={styles.vaccinationRecords__card} topAccent>
       <div className={styles.vaccinationRecords__cardHead}>
-        <h3 className={styles.vaccinationRecords__cardTitle}>
-          {diseaseLabel}
-        </h3>
+        <h3 className={styles.vaccinationRecords__cardTitle}>{diseaseLabel}</h3>
         <div className={styles.vaccinationRecords__actions}>
           <Button
             aria-label={t('internal.form.actions.addDose')}
@@ -130,12 +128,14 @@ export const VaccinationRecordCard = ({
                 </strong>
                 <Button
                   className={styles.vaccinationRecords__markDoneButton}
-                  onClick={() => onMarkPlannedDone({
-                    diseaseId: record.diseaseId,
-                    dueAt: nextDue.dueAt,
-                    kind: nextDue.kind,
-                    plannedDoseId: nextDue.plannedDoseId,
-                  })}
+                  onClick={() =>
+                    onMarkPlannedDone({
+                      diseaseId: record.diseaseId,
+                      dueAt: nextDue.dueAt,
+                      kind: nextDue.kind,
+                      plannedDoseId: nextDue.plannedDoseId,
+                    })
+                  }
                   type={HTML_BUTTON_TYPE.button}
                   variant={BUTTON_VARIANT.secondary}
                 >

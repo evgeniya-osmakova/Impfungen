@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from 'src/constants/ui';
 import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../../../constants/ui';
-import { Button, Modal } from '../../../../../../ui';
+import { Button, Modal } from 'src/ui';
 
 import { useDeleteFamilyMemberModalController } from './useDeleteFamilyMemberModalController';
 
@@ -33,13 +32,17 @@ export const DeleteFamilyMemberModal = ({ ui }: DeleteFamilyMemberModalProps) =>
       onClose={handleCloseDeleteFamilyMemberModal}
     >
       <section className={styles.deleteFamilyMemberModal}>
-        <h3 className={styles.deleteFamilyMemberModal__title}>{t('account.deleteConfirm.title')}</h3>
+        <h3 className={styles.deleteFamilyMemberModal__title}>
+          {t('account.deleteConfirm.title')}
+        </h3>
         <p className={styles.deleteFamilyMemberModal__text}>
           {t('account.deleteConfirm.message', {
             name: deleteCandidateAccount?.name ?? t('account.placeholders.noName'),
           })}
         </p>
-        <p className={styles.deleteFamilyMemberModal__warning}>{t('account.deleteConfirm.warning')}</p>
+        <p className={styles.deleteFamilyMemberModal__warning}>
+          {t('account.deleteConfirm.warning')}
+        </p>
         {requestError ? (
           <p className={styles.deleteFamilyMemberModal__requestError} role="alert">
             {requestError}

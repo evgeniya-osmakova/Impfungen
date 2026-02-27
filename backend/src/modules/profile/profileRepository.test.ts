@@ -1,7 +1,12 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { completedDose, plannedDose, profileMember, vaccinationSeries } from '../../db/schema.js';
+import type {
+  completedDose,
+  plannedDose,
+  profileMember,
+  vaccinationSeries,
+} from '../../db/schema.js';
 
 import { toVaccinationState } from './profileRepository.js';
 

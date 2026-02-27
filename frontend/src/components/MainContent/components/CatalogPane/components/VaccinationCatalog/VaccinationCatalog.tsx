@@ -1,20 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import PlusIcon from 'src/assets/icons/plus.svg';
-
-import { INTERNAL_HOME_CATALOG_FIELD_ID } from '../../../../../../constants/internalHomeUi';
-import { HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from '../../../../../../constants/ui';
+import { INTERNAL_HOME_CATALOG_FIELD_ID } from 'src/constants/internalHomeUi';
+import { HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from 'src/constants/ui';
 import {
   VACCINATION_CATEGORY_FILTER,
   VACCINATION_CATEGORY_FILTER_OPTIONS,
   VACCINATION_COUNTRY,
-} from '../../../../../../constants/vaccination';
-import type {
-  Category,
-  CategoryFilter,
-  CountryCode,
-} from '../../../../../../interfaces/base';
-import type { Disease } from '../../../../../../interfaces/disease';
-import { Input, RadioPillGroup } from '../../../../../../ui';
+} from 'src/constants/vaccination';
+import type { Category, CategoryFilter, CountryCode } from 'src/interfaces/base';
+import type { Disease } from 'src/interfaces/disease';
+import { Input, RadioPillGroup } from 'src/ui';
 
 import styles from './VaccinationCatalog.module.css';
 
@@ -152,7 +147,9 @@ export const VaccinationCatalog = ({
                 type={HTML_BUTTON_TYPE.button}
               >
                 <div className={styles.vaccinationCatalog__cardHead}>
-                  <p className={styles.vaccinationCatalog__cardTitle}>{resolveDiseaseLabel(disease)}</p>
+                  <p className={styles.vaccinationCatalog__cardTitle}>
+                    {resolveDiseaseLabel(disease)}
+                  </p>
                   <span aria-hidden className={styles.vaccinationCatalog__cardAction}>
                     <PlusIcon className={styles.vaccinationCatalog__cardActionIcon} />
                   </span>

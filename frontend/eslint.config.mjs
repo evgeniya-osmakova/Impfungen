@@ -35,11 +35,14 @@ export default tseslint.config(
         { blankLine: 'always', prev: controlFlowStatements, next: '*' },
         { blankLine: 'any', prev: controlFlowStatements, next: controlFlowStatements },
       ],
-      "@typescript-eslint/no-misused-promises": [2, {
-        "checksVoidReturn": {
-          "attributes": false
-        }
-      }],
+      '@typescript-eslint/no-misused-promises': [
+        2,
+        {
+          checksVoidReturn: {
+            attributes: false,
+          },
+        },
+      ],
       'simple-import-sort/imports': [
         'error',
         {

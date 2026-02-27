@@ -1,4 +1,7 @@
-import type { VaccinationCompletedExportColumnLabels, VaccinationCompletedExportRow } from 'src/interfaces/vaccinationExport.ts';
+import type {
+  VaccinationCompletedExportColumnLabels,
+  VaccinationCompletedExportRow,
+} from 'src/interfaces/vaccinationExport.ts';
 import { describe, expect, it } from 'vitest';
 
 import { createVaccinationCompletedCsv } from './vaccinationExportCsv';
@@ -13,15 +16,17 @@ const columnLabels: VaccinationCompletedExportColumnLabels = {
 
 describe('vaccinationExportCsv', () => {
   it('creates Excel-friendly CSV with BOM, separator hint and CRLF', () => {
-    const rows: VaccinationCompletedExportRow[] = [{
-      batchNumber: 'B-7',
-      completedAt: '2024-06-01',
-      diseaseLabel: 'Tetanus',
-      formattedCompletedAt: '01.06.2024',
-      doseKind: 'nextDose',
-      doseKindLabel: 'Next dose',
-      tradeName: 'Tdap',
-    }];
+    const rows: VaccinationCompletedExportRow[] = [
+      {
+        batchNumber: 'B-7',
+        completedAt: '2024-06-01',
+        diseaseLabel: 'Tetanus',
+        formattedCompletedAt: '01.06.2024',
+        doseKind: 'nextDose',
+        doseKindLabel: 'Next dose',
+        tradeName: 'Tdap',
+      },
+    ];
 
     const csv = createVaccinationCompletedCsv({ columnLabels, rows });
 
@@ -32,15 +37,17 @@ describe('vaccinationExportCsv', () => {
   });
 
   it('escapes quotes, preserves empty optional values, and mitigates formula injection', () => {
-    const rows: VaccinationCompletedExportRow[] = [{
-      batchNumber: null,
-      completedAt: '2024-06-01',
-      diseaseLabel: '="Injected"',
-      formattedCompletedAt: '01.06.2024',
-      doseKind: 'revaccination',
-      doseKindLabel: '+Dose',
-      tradeName: 'ACME "Ultra"',
-    }];
+    const rows: VaccinationCompletedExportRow[] = [
+      {
+        batchNumber: null,
+        completedAt: '2024-06-01',
+        diseaseLabel: '="Injected"',
+        formattedCompletedAt: '01.06.2024',
+        doseKind: 'revaccination',
+        doseKindLabel: '+Dose',
+        tradeName: 'ACME "Ultra"',
+      },
+    ];
 
     const csv = createVaccinationCompletedCsv({ columnLabels, rows });
 

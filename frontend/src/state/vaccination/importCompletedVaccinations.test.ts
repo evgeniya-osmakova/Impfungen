@@ -1,25 +1,26 @@
 import { type ProfileSnapshot, setProfileApi } from 'src/api/profileApi.ts';
 import type { VaccinationCompletedImportRow } from 'src/interfaces/vaccinationImport.ts';
+import { useAccountsStore } from 'src/state/accounts';
 import { getTodayIsoDate } from 'src/utils/date.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { useAccountsStore } from '../accounts';
 
 import { importCompletedVaccinations } from './importCompletedVaccinations';
 import { useVaccinationStore } from './index';
 
-type ProfileApi = ReturnType<(typeof import('src/api/profileApi.ts'))['createProfileApi']>;
+type ProfileApi = ReturnType<typeof import('src/api/profileApi.ts')['createProfileApi']>;
 type SubmitVaccinationRecordInput = Parameters<ProfileApi['submitVaccinationRecord']>[0];
 
 const createSnapshot = (overrides?: Partial<ProfileSnapshot>): ProfileSnapshot => ({
   accountsState: {
-    accounts: [{
-      birthYear: 1990,
-      country: 'RU',
-      id: 1,
-      kind: 'primary',
-      name: 'Ivan',
-    }],
+    accounts: [
+      {
+        birthYear: 1990,
+        country: 'RU',
+        id: 1,
+        kind: 'primary',
+        name: 'Ivan',
+      },
+    ],
     selectedAccountId: 1,
   },
   language: 'ru',
@@ -30,7 +31,9 @@ const createSnapshot = (overrides?: Partial<ProfileSnapshot>): ProfileSnapshot =
   ...overrides,
 });
 
-const createImportRow = (overrides?: Partial<VaccinationCompletedImportRow>): VaccinationCompletedImportRow => ({
+const createImportRow = (
+  overrides?: Partial<VaccinationCompletedImportRow>,
+): VaccinationCompletedImportRow => ({
   batchNumber: 'A-1',
   completedAt: '2024-05-01',
   diseaseId: 'measles',
@@ -42,13 +45,15 @@ const createImportRow = (overrides?: Partial<VaccinationCompletedImportRow>): Va
 
 const setBaseStores = () => {
   useAccountsStore.setState({
-    accounts: [{
-      birthYear: 1990,
-      country: 'RU',
-      id: 1,
-      kind: 'primary',
-      name: 'Ivan',
-    }],
+    accounts: [
+      {
+        birthYear: 1990,
+        country: 'RU',
+        id: 1,
+        kind: 'primary',
+        name: 'Ivan',
+      },
+    ],
     selectedAccountId: 1,
   });
   useVaccinationStore.setState({
@@ -59,16 +64,20 @@ const setBaseStores = () => {
 };
 
 const createApiMock = (snapshot: ProfileSnapshot) => ({
-  completeVaccinationDose: vi.fn(async () => snapshot),
-  createFamilyAccount: vi.fn(async () => snapshot),
-  deleteFamilyAccount: vi.fn(async () => snapshot),
-  getProfile: vi.fn(async () => snapshot),
-  removeVaccinationRecord: vi.fn(async () => snapshot),
-  selectAccount: vi.fn(async () => snapshot),
-  setLanguage: vi.fn(async () => snapshot),
-  setVaccinationCountry: vi.fn(async () => snapshot),
-  submitVaccinationRecord: vi.fn(async (_input: SubmitVaccinationRecordInput) => snapshot),
-  updateAccount: vi.fn(async () => snapshot),
+  completeVaccinationDose: vi.fn(() => Promise.resolve(snapshot)),
+  createFamilyAccount: vi.fn(() => Promise.resolve(snapshot)),
+  deleteFamilyAccount: vi.fn(() => Promise.resolve(snapshot)),
+  getProfile: vi.fn(() => Promise.resolve(snapshot)),
+  removeVaccinationRecord: vi.fn(() => Promise.resolve(snapshot)),
+  selectAccount: vi.fn(() => Promise.resolve(snapshot)),
+  setLanguage: vi.fn(() => Promise.resolve(snapshot)),
+  setVaccinationCountry: vi.fn(() => Promise.resolve(snapshot)),
+  submitVaccinationRecord: vi.fn((input: SubmitVaccinationRecordInput) => {
+    void input;
+
+    return Promise.resolve(snapshot);
+  }),
+  updateAccount: vi.fn(() => Promise.resolve(snapshot)),
 });
 
 describe('importCompletedVaccinations', () => {
@@ -119,19 +128,23 @@ describe('importCompletedVaccinations', () => {
 
   it('skips duplicates that already exist in store by exact duplicate key', async () => {
     useVaccinationStore.setState({
-      records: [{
-        completedDoses: [{
-          batchNumber: 'A-1',
-          completedAt: '2024-05-01',
-          id: 'dose-1',
-          kind: 'nextDose',
-          tradeName: 'MMR',
-        }],
-        diseaseId: 'measles',
-        futureDueDoses: [],
-        repeatEvery: null,
-        updatedAt: '2025-01-01T00:00:00.000Z',
-      }],
+      records: [
+        {
+          completedDoses: [
+            {
+              batchNumber: 'A-1',
+              completedAt: '2024-05-01',
+              id: 'dose-1',
+              kind: 'nextDose',
+              tradeName: 'MMR',
+            },
+          ],
+          diseaseId: 'measles',
+          futureDueDoses: [],
+          repeatEvery: null,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      ],
     });
 
     const report = await importCompletedVaccinations({
@@ -188,33 +201,41 @@ describe('importCompletedVaccinations', () => {
       code: 'completed_in_future',
       rowNumber: 3,
     });
-    expect(useVaccinationStore.getState().records.map((record) => record.diseaseId)).toEqual(['tetanus']);
+    expect(useVaccinationStore.getState().records.map((record) => record.diseaseId)).toEqual([
+      'tetanus',
+    ]);
   });
 
   it('reports conflict as row error and continues with next rows when api is configured', async () => {
     const snapshot = createSnapshot();
     const api = createApiMock(snapshot);
 
-    api.submitVaccinationRecord.mockImplementation(async (input: SubmitVaccinationRecordInput) => {
+    api.submitVaccinationRecord.mockImplementation((input: SubmitVaccinationRecordInput) => {
       if (input.diseaseId === 'measles') {
-        throw { data: { code: 'CONFLICT' } };
+        const conflictError = Object.assign(new Error('Conflict'), {
+          data: { code: 'CONFLICT' },
+        });
+
+        return Promise.reject(conflictError);
       }
 
       snapshot.vaccinationState.records.push({
-        completedDoses: [{
-          batchNumber: input.batchNumber,
-          completedAt: input.completedAt,
-          id: input.completedDoseId ?? 'dose-new',
-          kind: input.completedDoseKind,
-          tradeName: input.tradeName,
-        }],
+        completedDoses: [
+          {
+            batchNumber: input.batchNumber,
+            completedAt: input.completedAt,
+            id: input.completedDoseId ?? 'dose-new',
+            kind: input.completedDoseKind,
+            tradeName: input.tradeName,
+          },
+        ],
         diseaseId: input.diseaseId,
         futureDueDoses: [],
         repeatEvery: null,
         updatedAt: '2025-01-10T00:00:00.000Z',
       });
 
-      return snapshot;
+      return Promise.resolve(snapshot);
     });
 
     setProfileApi(api);
@@ -242,7 +263,9 @@ describe('importCompletedVaccinations', () => {
       code: 'sync_conflict',
       rowNumber: 3,
     });
-    expect(useVaccinationStore.getState().records.map((record) => record.diseaseId)).toEqual(['tetanus']);
+    expect(useVaccinationStore.getState().records.map((record) => record.diseaseId)).toEqual([
+      'tetanus',
+    ]);
     expect(api.submitVaccinationRecord).toHaveBeenCalledTimes(2);
   });
 });

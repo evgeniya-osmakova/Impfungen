@@ -1,7 +1,7 @@
-import type { CountryCode, ProfileAccountSummary } from '@backend/contracts'
-import type { TFunction } from 'i18next'
-import { useTranslation } from 'react-i18next'
-import { VACCINATION_COUNTRY } from 'src/constants/vaccination.ts'
+import type { CountryCode, ProfileAccountSummary } from '@backend/contracts';
+import type { TFunction } from 'i18next';
+import type { useTranslation } from 'react-i18next';
+import { VACCINATION_COUNTRY } from 'src/constants/vaccination.ts';
 
 export const resolveCountryLabel = (t: TFunction, countryCode: CountryCode) => {
   if (countryCode === VACCINATION_COUNTRY.RU) {

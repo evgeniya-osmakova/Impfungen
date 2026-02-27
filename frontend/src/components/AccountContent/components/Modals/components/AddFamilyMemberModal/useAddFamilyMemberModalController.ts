@@ -1,9 +1,6 @@
 import { type SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DEFAULT_NEW_MEMBER_FIELD_ERRORS,
-  EMPTY_COUNTRY_VALUE,
-} from 'src/constants/account';
+import { DEFAULT_NEW_MEMBER_FIELD_ERRORS, EMPTY_COUNTRY_VALUE } from 'src/constants/account';
 import { validateAccountFields } from 'src/helpers/validateAccountFields.ts';
 import type { AccountCountryValue, NewMemberFieldErrors } from 'src/interfaces/accountForm';
 import type { AccountPageUi } from 'src/interfaces/accountPageUi.ts';
@@ -21,8 +18,11 @@ export const useAddFamilyMemberModalController = (
 
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberBirthYear, setNewMemberBirthYear] = useState('');
-  const [newMemberCountry, setNewMemberCountry] = useState<AccountCountryValue>(EMPTY_COUNTRY_VALUE);
-  const [newMemberErrors, setNewMemberErrors] = useState<NewMemberFieldErrors>(DEFAULT_NEW_MEMBER_FIELD_ERRORS);
+  const [newMemberCountry, setNewMemberCountry] =
+    useState<AccountCountryValue>(EMPTY_COUNTRY_VALUE);
+  const [newMemberErrors, setNewMemberErrors] = useState<NewMemberFieldErrors>(
+    DEFAULT_NEW_MEMBER_FIELD_ERRORS,
+  );
   const [newMemberRequestError, setNewMemberRequestError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -70,7 +70,8 @@ export const useAddFamilyMemberModalController = (
       birthYear: newMemberBirthYear,
       name: newMemberName,
     });
-    const countryError = newMemberCountry === EMPTY_COUNTRY_VALUE ? t('account.validation.countryRequired') : null;
+    const countryError =
+      newMemberCountry === EMPTY_COUNTRY_VALUE ? t('account.validation.countryRequired') : null;
     const nextErrors: NewMemberFieldErrors = {
       ...validation.errors,
       country: countryError,

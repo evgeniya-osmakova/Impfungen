@@ -1,8 +1,10 @@
-import { buildAddDoseDraft, buildMarkPlannedDoneDraft } from 'src/state/vaccination/completeDoseDraft.ts'
-
-import type { DoseKind } from '../interfaces/base';
-import type { CompleteDoseDraft } from '../interfaces/completeDoseDraft';
-import { useVaccinationStore } from '../state/vaccination';
+import type { DoseKind } from '@backend/contracts';
+import type { CompleteDoseDraft } from 'src/interfaces/completeDoseDraft';
+import { useVaccinationStore } from 'src/state/vaccination';
+import {
+  buildAddDoseDraft,
+  buildMarkPlannedDoneDraft,
+} from 'src/state/vaccination/completeDoseDraft.ts';
 
 interface MarkPlannedDonePayload {
   diseaseId: string;

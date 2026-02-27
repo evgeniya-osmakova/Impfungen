@@ -1,24 +1,17 @@
+import type { DoseKind } from '@backend/contracts';
 import classNames from 'classnames';
 import { type SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import {
   INTERNAL_HOME_EMPTY_FIELD_VALUE,
   INTERNAL_HOME_FORM_FIELD_ID,
-} from '../../../../../../constants/internalHomeUi';
-import {
-  BUTTON_VARIANT,
-  HTML_BUTTON_TYPE,
-  HTML_INPUT_TYPE,
-} from '../../../../../../constants/ui';
-import {
-  VACCINATION_DOSE_KIND_OPTIONS,
-} from '../../../../../../constants/vaccination';
-import type { DoseKind } from '../../../../../../interfaces/base';
-import type { ImmunizationDoseInput } from '../../../../../../interfaces/immunizationRecord';
-import { Button, Input, Select } from '../../../../../../ui';
-import { getTodayIsoDate } from '../../../../../../utils/date';
-import { normalizeOptionalText } from '../../../../../../utils/string';
+} from 'src/constants/internalHomeUi';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from 'src/constants/ui';
+import { VACCINATION_DOSE_KIND_OPTIONS } from 'src/constants/vaccination';
+import type { ImmunizationDoseInput } from 'src/interfaces/immunizationRecord';
+import { Button, Input, Select } from 'src/ui';
+import { getTodayIsoDate } from 'src/utils/date';
+import { normalizeOptionalText } from 'src/utils/string';
 
 import styles from './VaccinationCompleteDoseForm.module.css';
 
@@ -55,8 +48,12 @@ export const VaccinationCompleteDoseForm = ({
   const todayIsoDate = getTodayIsoDate();
   const [completedAt, setCompletedAt] = useState(initialValues.completedAt);
   const [kind, setKind] = useState<DoseKind>(initialValues.kind);
-  const [tradeName, setTradeName] = useState(initialValues.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
-  const [batchNumber, setBatchNumber] = useState(initialValues.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE);
+  const [tradeName, setTradeName] = useState(
+    initialValues.tradeName ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
+  );
+  const [batchNumber, setBatchNumber] = useState(
+    initialValues.batchNumber ?? INTERNAL_HOME_EMPTY_FIELD_VALUE,
+  );
 
   useEffect(() => {
     setCompletedAt(initialValues.completedAt);
@@ -89,9 +86,13 @@ export const VaccinationCompleteDoseForm = ({
     >
       <header className={styles.vaccinationCompleteDoseForm__header}>
         <h2 className={styles.vaccinationCompleteDoseForm__title}>
-          {isMarkPlannedFlow ? t('internal.form.actions.markPlannedDone') : t('internal.form.actions.addDose')}
+          {isMarkPlannedFlow
+            ? t('internal.form.actions.markPlannedDone')
+            : t('internal.form.actions.addDose')}
         </h2>
-        <p className={styles.vaccinationCompleteDoseForm__subtitle}>{t('internal.form.markDoneSubtitle')}</p>
+        <p className={styles.vaccinationCompleteDoseForm__subtitle}>
+          {t('internal.form.markDoneSubtitle')}
+        </p>
       </header>
       <form className={styles.vaccinationCompleteDoseForm__body} onSubmit={handleSubmit}>
         <label

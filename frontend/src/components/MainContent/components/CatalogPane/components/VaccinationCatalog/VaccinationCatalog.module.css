@@ -114,26 +114,22 @@
   padding: 14px;
   border-radius: 14px;
   border: 1px solid color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
-  background:
-    linear-gradient(
-      155deg,
-      color-mix(in oklab, var(--surface-0) 90%, var(--brand-50)),
-      var(--surface-0)
-    );
+  background: linear-gradient(
+    155deg,
+    color-mix(in oklab, var(--surface-0) 90%, var(--brand-50)),
+    var(--surface-0)
+  );
   color: inherit;
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color
+    160ms ease;
   overflow: hidden;
 }
 
 .vaccinationCatalog__card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0 0 auto;
   height: 3px;

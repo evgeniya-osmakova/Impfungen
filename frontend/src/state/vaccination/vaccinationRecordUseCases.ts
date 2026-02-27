@@ -1,4 +1,4 @@
-import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts'
+import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts';
 import { sortCompletedDoses } from 'src/helpers/recordHelpers.ts';
 import type { CompletedDose } from 'src/interfaces/dose.ts';
 import type {
@@ -6,10 +6,10 @@ import type {
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
 import type { VaccinationState } from 'src/interfaces/vaccinationState.ts';
-import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts'
-import { getNowISODateTime } from 'src/utils/getNowISODateTime.ts'
+import type { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
+import { getNowISODateTime } from 'src/utils/getNowISODateTime.ts';
 import { normalizeOptionalText } from 'src/utils/string.ts';
-import { generateId } from 'src/utils/systemIdGenerator.ts'
+import { generateId } from 'src/utils/systemIdGenerator.ts';
 import { normalizeFutureDueDoses } from 'src/utils/vaccinationSchedule.ts';
 import {
   validateVaccinationCompleteDoseInput,
@@ -21,19 +21,20 @@ interface ValidationOutcome {
   records: VaccinationState['records'] | null;
 }
 
-
 const resolveEditedCompletedDoses = (
   prevCompletedDoses: readonly CompletedDose[],
   input: ImmunizationSeriesInput,
 ): CompletedDose[] => {
   if (prevCompletedDoses.length === 0) {
-    return [{
-      batchNumber: normalizeOptionalText(input.batchNumber),
-      completedAt: input.completedAt,
-      id: generateId(),
-      kind: input.completedDoseKind,
-      tradeName: normalizeOptionalText(input.tradeName),
-    }];
+    return [
+      {
+        batchNumber: normalizeOptionalText(input.batchNumber),
+        completedAt: input.completedAt,
+        id: generateId(),
+        kind: input.completedDoseKind,
+        tradeName: normalizeOptionalText(input.tradeName),
+      },
+    ];
   }
 
   const sortedCompletedDoses = sortCompletedDoses(prevCompletedDoses);
@@ -69,13 +70,15 @@ export const upsertRecordUseCase = (
 
   const nextCompletedDoses = existingRecord
     ? resolveEditedCompletedDoses(existingRecord.completedDoses, input)
-    : [{
-        batchNumber: normalizeOptionalText(input.batchNumber),
-        completedAt: input.completedAt,
-        id: generateId(),
-        kind: input.completedDoseKind,
-        tradeName: normalizeOptionalText(input.tradeName),
-      }];
+    : [
+        {
+          batchNumber: normalizeOptionalText(input.batchNumber),
+          completedAt: input.completedAt,
+          id: generateId(),
+          kind: input.completedDoseKind,
+          tradeName: normalizeOptionalText(input.tradeName),
+        },
+      ];
 
   const nextRecord = {
     completedDoses: sortCompletedDoses(nextCompletedDoses),
@@ -95,32 +98,33 @@ export const upsertRecordUseCase = (
 const resolveRecordsWithCompletedDose = (
   records: readonly VaccinationState['records'][number][],
   input: ImmunizationDoseInput,
-): VaccinationState['records'] => records.map((record) => {
-  if (record.diseaseId !== input.diseaseId) {
-    return record;
-  }
+): VaccinationState['records'] =>
+  records.map((record) => {
+    if (record.diseaseId !== input.diseaseId) {
+      return record;
+    }
 
-  const nextUpdatedAt = getNowISODateTime();
+    const nextUpdatedAt = getNowISODateTime();
 
-  const nextCompletedDose: CompletedDose = {
-    batchNumber: normalizeOptionalText(input.batchNumber),
-    completedAt: input.completedAt,
-    id: generateId(),
-    kind: input.kind,
-    tradeName: normalizeOptionalText(input.tradeName),
-  };
+    const nextCompletedDose: CompletedDose = {
+      batchNumber: normalizeOptionalText(input.batchNumber),
+      completedAt: input.completedAt,
+      id: generateId(),
+      kind: input.kind,
+      tradeName: normalizeOptionalText(input.tradeName),
+    };
 
-  const nextFutureDueDoses = input.plannedDoseId
-    ? record.futureDueDoses.filter((dose) => dose.id !== input.plannedDoseId)
-    : record.futureDueDoses;
+    const nextFutureDueDoses = input.plannedDoseId
+      ? record.futureDueDoses.filter((dose) => dose.id !== input.plannedDoseId)
+      : record.futureDueDoses;
 
-  return {
-    ...record,
-    completedDoses: sortCompletedDoses([...record.completedDoses, nextCompletedDose]),
-    futureDueDoses: nextFutureDueDoses,
-    updatedAt: nextUpdatedAt,
-  };
-});
+    return {
+      ...record,
+      completedDoses: sortCompletedDoses([...record.completedDoses, nextCompletedDose]),
+      futureDueDoses: nextFutureDueDoses,
+      updatedAt: nextUpdatedAt,
+    };
+  });
 
 export const submitRecordUseCase = (
   records: readonly VaccinationState['records'][number][],

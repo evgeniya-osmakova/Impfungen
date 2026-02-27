@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
 
-import {
+import type {
   completedDose,
   plannedDose,
   profileMember,
@@ -25,14 +25,8 @@ type VaccinationSeriesRow = InferSelectModel<typeof vaccinationSeries>;
 type CompletedDoseRow = InferSelectModel<typeof completedDose>;
 type PlannedDoseRow = InferSelectModel<typeof plannedDose>;
 
-const toRepeatEvery = (
-  row: VaccinationSeriesRow,
-): VaccinationStorageRecord['repeatEvery'] => {
-  if (
-    row.repeatInterval === null
-    || row.repeatKind === null
-    || row.repeatUnit === null
-  ) {
+const toRepeatEvery = (row: VaccinationSeriesRow): VaccinationStorageRecord['repeatEvery'] => {
+  if (row.repeatInterval === null || row.repeatKind === null || row.repeatUnit === null) {
     return null;
   }
 
@@ -43,9 +37,7 @@ const toRepeatEvery = (
   };
 };
 
-const toProfileAccountSummary = (
-  member: ProfileMemberRow,
-): ProfileAccountSummary => ({
+const toProfileAccountSummary = (member: ProfileMemberRow): ProfileAccountSummary => ({
   birthYear: member.birthYear ?? null,
   country: (member.country as CountryCode | null) ?? null,
   id: member.id,

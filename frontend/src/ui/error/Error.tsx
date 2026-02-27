@@ -1,4 +1,4 @@
-import { ARIA_LIVE, HTML_ROLE } from '../../constants/ui';
+import { ARIA_LIVE, HTML_ROLE } from 'src/constants/ui';
 
 interface ErrorProps {
   className: string;

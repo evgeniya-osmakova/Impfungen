@@ -1,9 +1,8 @@
+import type { AppLanguage } from '@backend/contracts';
+import { getProfileApi } from 'src/api/profileApi';
+import i18n from 'src/i18n';
+import { resolveAppLanguage, syncLanguage } from 'src/i18n/resources';
 import { create } from 'zustand';
-
-import { getProfileApi } from '../../api/profileApi';
-import i18n from '../../i18n';
-import { resolveAppLanguage, syncLanguage } from '../../i18n/resources'
-import type { AppLanguage } from '../../interfaces/language';
 
 interface LanguageStore {
   language: AppLanguage;

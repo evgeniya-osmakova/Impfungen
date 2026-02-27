@@ -3,12 +3,11 @@
   gap: 10px;
   padding: 18px;
   border-color: color-mix(in oklab, var(--surface-200) 74%, var(--surface-0));
-  background:
-    linear-gradient(
-      120deg,
-      color-mix(in oklab, var(--brand-50) 76%, var(--surface-0)),
-      color-mix(in oklab, var(--accent-50) 62%, var(--surface-0))
-    );
+  background: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--brand-50) 76%, var(--surface-0)),
+    color-mix(in oklab, var(--accent-50) 62%, var(--surface-0))
+  );
 }
 
 .accountToolbar__head {
@@ -62,7 +61,7 @@
 }
 
 .accountToolbar__selectWrap::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   right: 16px;

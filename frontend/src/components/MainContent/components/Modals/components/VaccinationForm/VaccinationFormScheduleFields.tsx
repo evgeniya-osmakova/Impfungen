@@ -1,21 +1,16 @@
+import type { DoseKind, RepeatUnit } from '@backend/contracts';
 import { useTranslation } from 'react-i18next';
-
-import { INTERNAL_HOME_FORM_FIELD_ID } from '../../../../../../constants/internalHomeUi';
-import {
-  BUTTON_VARIANT,
-  HTML_BUTTON_TYPE,
-  HTML_INPUT_TYPE,
-} from '../../../../../../constants/ui';
+import { INTERNAL_HOME_FORM_FIELD_ID } from 'src/constants/internalHomeUi';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE, HTML_INPUT_TYPE } from 'src/constants/ui';
 import {
   VACCINATION_DOSE_KIND_OPTIONS,
   VACCINATION_REPEAT_UNIT,
   VACCINATION_REPEAT_UNIT_OPTIONS,
   VACCINATION_SCHEDULE_MODE,
-} from '../../../../../../constants/vaccination';
-import type { DoseKind, RepeatUnit } from '../../../../../../interfaces/base';
-import type { PlannedDose } from '../../../../../../interfaces/dose';
-import type { VaccinationScheduleMode } from '../../../../../../interfaces/immunizationRecord';
-import { Button, Input, Select } from '../../../../../../ui';
+} from 'src/constants/vaccination';
+import type { PlannedDose } from 'src/interfaces/dose';
+import type { VaccinationScheduleMode } from 'src/interfaces/immunizationRecord';
+import { Button, Input, Select } from 'src/ui';
 
 import styles from './VaccinationForm.module.css';
 
@@ -75,9 +70,15 @@ export const VaccinationFormScheduleFields = ({
         onChange={(event) => onScheduleModeChange(event.target.value as VaccinationScheduleMode)}
         value={scheduleMode}
       >
-        <option value={VACCINATION_SCHEDULE_MODE.none}>{t('internal.form.schedule.modes.none')}</option>
-        <option value={VACCINATION_SCHEDULE_MODE.manual}>{t('internal.form.schedule.modes.manual')}</option>
-        <option value={VACCINATION_SCHEDULE_MODE.repeat}>{t('internal.form.schedule.modes.repeat')}</option>
+        <option value={VACCINATION_SCHEDULE_MODE.none}>
+          {t('internal.form.schedule.modes.none')}
+        </option>
+        <option value={VACCINATION_SCHEDULE_MODE.manual}>
+          {t('internal.form.schedule.modes.manual')}
+        </option>
+        <option value={VACCINATION_SCHEDULE_MODE.repeat}>
+          {t('internal.form.schedule.modes.repeat')}
+        </option>
       </Select>
 
       {scheduleMode === VACCINATION_SCHEDULE_MODE.manual ? (
@@ -117,7 +118,9 @@ export const VaccinationFormScheduleFields = ({
                 <Select
                   className={styles.vaccinationForm__fieldControl}
                   id={kindInputId}
-                  onChange={(event) => onFutureKindChange(futureDose.id, event.target.value as DoseKind)}
+                  onChange={(event) =>
+                    onFutureKindChange(futureDose.id, event.target.value as DoseKind)
+                  }
                   value={futureDose.kind}
                 >
                   {VACCINATION_DOSE_KIND_OPTIONS.map((kind) => (

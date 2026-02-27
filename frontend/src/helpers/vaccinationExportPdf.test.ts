@@ -34,14 +34,16 @@ describe('vaccinationExportPdf', () => {
     const groups: VaccinationCompletedExportGroup[] = [
       {
         diseaseLabel: 'Anthrax',
-        doses: [{
-          batchNumber: null,
-          completedAt: '2024-03-05',
-          formattedCompletedAt: '05.03.2024',
-          doseKind: 'nextDose',
-          doseKindLabel: 'Next dose',
-          tradeName: null,
-        }],
+        doses: [
+          {
+            batchNumber: null,
+            completedAt: '2024-03-05',
+            formattedCompletedAt: '05.03.2024',
+            doseKind: 'nextDose',
+            doseKindLabel: 'Next dose',
+            tradeName: null,
+          },
+        ],
       },
       {
         diseaseLabel: 'Hepatitis B',
@@ -91,4 +93,3 @@ describe('vaccinationExportPdf', () => {
     expect(hepatitisTable.table.body[2]).toEqual(['01.05.2024', 'Revaccination', '', '']);
   });
 });
-

@@ -2,12 +2,15 @@ import classNames from 'classnames';
 import type { PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
-
-import { APP_ROUTE } from '../constants/app-route';
-import { supportedLanguages } from '../i18n/resources';
-import { isProfileAccountComplete, resolvePrimaryAccount, useAccountsStore } from '../state/accounts';
-import { useLanguageStore } from '../state/language';
-import { RadioPillGroup } from '../ui';
+import { APP_ROUTE } from 'src/constants/app-route';
+import { supportedLanguages } from 'src/i18n/resources';
+import {
+  isProfileAccountComplete,
+  resolvePrimaryAccount,
+  useAccountsStore,
+} from 'src/state/accounts';
+import { useLanguageStore } from 'src/state/language';
+import { RadioPillGroup } from 'src/ui';
 
 import styles from './InternalLayout.module.css';
 
@@ -33,19 +36,17 @@ export const InternalLayout = ({ children }: PropsWithChildren) => {
             {shouldShowRouteNav ? (
               <nav className={styles.layout__nav}>
                 <NavLink
-                  className={({ isActive }) => classNames(
-                    styles.layout__navLink,
-                    isActive && styles.layout__navLinkActive,
-                  )}
+                  className={({ isActive }) =>
+                    classNames(styles.layout__navLink, isActive && styles.layout__navLinkActive)
+                  }
                   to={APP_ROUTE.home}
                 >
                   {t('internal.nav.journal')}
                 </NavLink>
                 <NavLink
-                  className={({ isActive }) => classNames(
-                    styles.layout__navLink,
-                    isActive && styles.layout__navLinkActive,
-                  )}
+                  className={({ isActive }) =>
+                    classNames(styles.layout__navLink, isActive && styles.layout__navLinkActive)
+                  }
                   to={APP_ROUTE.account}
                 >
                   {t('internal.nav.account')}
@@ -69,9 +70,7 @@ export const InternalLayout = ({ children }: PropsWithChildren) => {
         </div>
       </header>
 
-      <main className={styles.layout__main}>
-        {children}
-      </main>
+      <main className={styles.layout__main}>{children}</main>
 
       <footer className={styles.layout__footer}>
         <div className={styles.layout__footerInner}>{currentYear}</div>

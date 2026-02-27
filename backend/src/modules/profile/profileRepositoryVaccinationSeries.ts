@@ -8,12 +8,8 @@ import {
   type InferSelectModel,
 } from 'drizzle-orm';
 
-import { db } from '../../db/client.js';
-import {
-  completedDose,
-  plannedDose,
-  vaccinationSeries,
-} from '../../db/schema.js';
+import type { db } from '../../db/client.js';
+import { completedDose, plannedDose, vaccinationSeries } from '../../db/schema.js';
 
 import type {
   VaccinationStoragePlannedDose,
@@ -40,30 +36,22 @@ export interface SubmitVaccinationSeriesUpsertInput {
 export const loadCompletedDoseRowsForSeriesUsingDb = async (
   database: DatabaseClient,
   seriesId: number,
-): Promise<CompletedDoseRow[]> => (
+): Promise<CompletedDoseRow[]> =>
   database
     .select()
     .from(completedDose)
     .where(eq(completedDose.seriesId, seriesId))
-    .orderBy(
-      asc(completedDose.completedAt),
-      asc(completedDose.externalId),
-    )
-);
+    .orderBy(asc(completedDose.completedAt), asc(completedDose.externalId));
 
 const loadPlannedDoseRowsForSeriesUsingDb = async (
   database: DatabaseClient,
   seriesId: number,
-): Promise<PlannedDoseRow[]> => (
+): Promise<PlannedDoseRow[]> =>
   database
     .select()
     .from(plannedDose)
     .where(eq(plannedDose.seriesId, seriesId))
-    .orderBy(
-      asc(plannedDose.dueAt),
-      asc(plannedDose.externalId),
-    )
-);
+    .orderBy(asc(plannedDose.dueAt), asc(plannedDose.externalId));
 
 export const syncPlannedDosesForSeriesUsingDb = async (
   database: DatabaseClient,
@@ -78,9 +66,7 @@ export const syncPlannedDosesForSeriesUsingDb = async (
     .map((row) => row.id);
 
   if (plannedDoseIdsToDelete.length > 0) {
-    await database
-      .delete(plannedDose)
-      .where(inArray(plannedDose.id, plannedDoseIdsToDelete));
+    await database.delete(plannedDose).where(inArray(plannedDose.id, plannedDoseIdsToDelete));
   }
 
   for (const dose of nextDoses) {
@@ -116,10 +102,9 @@ export const loadVaccinationSeriesVersionForMemberUsingDb = async (
   const [series] = await database
     .select({ id: vaccinationSeries.id, updatedAt: vaccinationSeries.updatedAt })
     .from(vaccinationSeries)
-    .where(and(
-      eq(vaccinationSeries.memberId, memberId),
-      eq(vaccinationSeries.diseaseId, diseaseId),
-    ))
+    .where(
+      and(eq(vaccinationSeries.memberId, memberId), eq(vaccinationSeries.diseaseId, diseaseId)),
+    )
     .limit(1);
 
   return series ?? null;

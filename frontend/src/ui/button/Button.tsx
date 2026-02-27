@@ -1,8 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
 import classNames from 'classnames';
 import type { ButtonHTMLAttributes } from 'react';
-
-import { BUTTON_VARIANT, HTML_TAG } from '../../constants/ui';
+import { BUTTON_VARIANT, HTML_TAG } from 'src/constants/ui';
 
 import styles from './Button.module.css';
 

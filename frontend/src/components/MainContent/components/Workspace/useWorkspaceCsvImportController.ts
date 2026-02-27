@@ -100,11 +100,13 @@ export const useWorkspaceCsvImportController = () => {
         rows: parsedCsv.rows,
       });
 
-      setImportReport(mergeImportReports({
-        parsedRowErrors: parsedCsv.rowErrors,
-        parsedTotalDataRows: parsedCsv.totalDataRows,
-        persistedReport,
-      }));
+      setImportReport(
+        mergeImportReports({
+          parsedRowErrors: parsedCsv.rowErrors,
+          parsedTotalDataRows: parsedCsv.totalDataRows,
+          persistedReport,
+        }),
+      );
     } catch (error) {
       console.error('Failed to import completed vaccinations from CSV.', error);
       setImportFatalError(t('internal.records.import.error.processFailed'));

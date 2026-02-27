@@ -1,8 +1,7 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import classNames from 'classnames';
 import type { ReactNode } from 'react';
-
-import { RADIO_PILL_GROUP_SIZE } from '../../constants/ui';
+import { RADIO_PILL_GROUP_SIZE } from 'src/constants/ui';
 
 import styles from './RadioPillGroup.module.css';
 
@@ -13,8 +12,7 @@ interface RadioPillOption<T extends string> {
   value: T;
 }
 
-type RadioPillGroupSize =
-  (typeof RADIO_PILL_GROUP_SIZE)[keyof typeof RADIO_PILL_GROUP_SIZE];
+type RadioPillGroupSize = (typeof RADIO_PILL_GROUP_SIZE)[keyof typeof RADIO_PILL_GROUP_SIZE];
 
 interface RadioPillGroupProps<T extends string> {
   controlActiveClassName?: string;

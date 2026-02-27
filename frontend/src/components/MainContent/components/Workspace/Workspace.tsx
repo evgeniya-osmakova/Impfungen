@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DownloadIcon from 'src/assets/icons/download.svg';
 import UploadIcon from 'src/assets/icons/upload.svg';
+import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from 'src/constants/ui';
+import { useDiseaseLabels } from 'src/hooks/useDiseaseLabels';
+import { useDoseModalActions } from 'src/hooks/useDoseModalActions';
 import type { MainPageUi } from 'src/interfaces/mainPageUi.ts';
 import type { VaccinationPageUi } from 'src/interfaces/vaccinationPageUi.ts';
+import { useVaccinationStore } from 'src/state/vaccination';
+import { useVaccinationCommands } from 'src/state/vaccination/commands';
+import { selectWorkspaceViewData } from 'src/state/vaccination/selectors';
+import { Button, Error, Input } from 'src/ui';
 import { useShallow } from 'zustand/react/shallow';
-
-import { BUTTON_VARIANT, HTML_BUTTON_TYPE } from '../../../../constants/ui';
-import { useDiseaseLabels } from '../../../../hooks/useDiseaseLabels';
-import { useDoseModalActions } from '../../../../hooks/useDoseModalActions';
-import { useVaccinationStore } from '../../../../state/vaccination';
-import { useVaccinationCommands } from '../../../../state/vaccination/commands';
-import { selectWorkspaceViewData } from '../../../../state/vaccination/selectors';
-import { Button, Error, Input } from '../../../../ui';
 
 import { VaccinationRecords } from './components/VaccinationRecords/VaccinationRecords';
 import { WorkspaceImportReport } from './components/WorkspaceImportReport/WorkspaceImportReport';
@@ -47,16 +46,11 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
   const { openAddDoseModal, openMarkPlannedDoneModal } = useDoseModalActions({
     openCompleteDoseModal,
   });
-  const {
-    exportError,
-    handleExportCsv,
-    handleExportPdf,
-    hasCompletedDoses,
-    isExporting,
-  } = useWorkspaceExportController({
-    recordsForView,
-    resolveDiseaseLabelById,
-  });
+  const { exportError, handleExportCsv, handleExportPdf, hasCompletedDoses, isExporting } =
+    useWorkspaceExportController({
+      recordsForView,
+      resolveDiseaseLabelById,
+    });
   const {
     fileInputRef,
     handleImportFileChange,
