@@ -1,4 +1,4 @@
-import { type ProfileSnapshot, getProfileApi } from 'src/api/profileApi.ts';
+import { getProfileApi,type ProfileSnapshot } from 'src/api/profileApi.ts';
 import type { CountryCode } from 'src/interfaces/base.ts';
 import type {
   ImmunizationDoseInput,

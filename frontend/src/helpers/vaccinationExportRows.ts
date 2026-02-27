@@ -1,10 +1,10 @@
 import type { DoseKind } from 'src/interfaces/base.ts';
-import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
 import type {
   VaccinationCompletedExportDoseRow,
   VaccinationCompletedExportGroup,
   VaccinationCompletedExportRow,
 } from 'src/interfaces/vaccinationExport.ts';
+import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
 import { parseIsoDateToUtc, toIsoPart } from 'src/utils/date.ts';
 
 interface BuildVaccinationCompletedExportRowsParams {

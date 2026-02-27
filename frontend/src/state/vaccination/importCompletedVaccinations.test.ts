@@ -1,13 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { type ProfileSnapshot, setProfileApi } from 'src/api/profileApi.ts';
 import type { VaccinationCompletedImportRow } from 'src/interfaces/vaccinationImport.ts';
 import { getTodayIsoDate } from 'src/utils/date.ts';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAccountsStore } from '../accounts';
 
-import { useVaccinationStore } from './index';
 import { importCompletedVaccinations } from './importCompletedVaccinations';
+import { useVaccinationStore } from './index';
 
 type ProfileApi = ReturnType<(typeof import('src/api/profileApi.ts'))['createProfileApi']>;
 type SubmitVaccinationRecordInput = Parameters<ProfileApi['submitVaccinationRecord']>[0];

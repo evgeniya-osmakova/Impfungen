@@ -1,9 +1,10 @@
+import { useMainPageUi } from 'src/components/MainContent/useMainPageUi.ts';
+import { useVaccinationPageUi } from 'src/components/MainContent/useVaccinationPageUi.ts';
+
 import { CatalogPane } from './components/CatalogPane/CatalogPane';
 import { Modals } from './components/Modals/Modals';
 import { TopRow } from './components/TopRow/TopRow';
 import { Workspace } from './components/Workspace/Workspace';
-import { useMainPageUi } from 'src/components/MainContent/useMainPageUi.ts';
-import { useVaccinationPageUi } from 'src/components/MainContent/useVaccinationPageUi.ts';
 
 import styles from './MainContent.module.css';
 

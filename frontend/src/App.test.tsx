@@ -4,10 +4,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { APP_ROUTE } from './constants/app-route';
-import App from './App';
-import i18n from './i18n';
 import { useAccountsStore } from './state/accounts';
 import { useLanguageStore } from './state/language';
+import App from './App';
+import i18n from './i18n';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -27,7 +27,7 @@ describe('App', () => {
     );
 
     expect(getByRole('heading', { name: 'Журнал вакцинации' })).toBeInTheDocument();
-    expect(getByRole('button', { name: 'Русский' })).toBeInTheDocument();
+    expect(getByRole('radio', { name: 'Русский' })).toBeInTheDocument();
     expect(queryByRole('button', { name: 'Войти' })).not.toBeInTheDocument();
   });
 
@@ -39,7 +39,7 @@ describe('App', () => {
         <App />
       </MemoryRouter>,
     );
-    await user.click(getByRole('button', { name: 'English' }));
+    await user.click(getByRole('radio', { name: 'English' }));
 
     expect(await findByRole('heading', { name: 'My vaccinations and upcoming dates' })).toBeInTheDocument();
   });

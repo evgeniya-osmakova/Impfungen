@@ -11,8 +11,8 @@ import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
 } from '../../../../interfaces/immunizationRecord';
-import { useVaccinationCommands } from '../../../../state/vaccination/commands';
 import { useVaccinationStore } from '../../../../state/vaccination';
+import { useVaccinationCommands } from '../../../../state/vaccination/commands';
 import { selectModalsViewData } from '../../../../state/vaccination/selectors';
 import { Modal } from '../../../../ui';
 

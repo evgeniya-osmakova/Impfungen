@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
+import { describe, expect, it } from 'vitest';
 
 import {
   buildVaccinationCompletedExportGroups,

@@ -35,16 +35,16 @@ const resetVaccinationState = () => {
 };
 
 const createApiMock = (snapshot: ProfileSnapshot) => ({
-  completeVaccinationDose: vi.fn(async () => snapshot),
-  createFamilyAccount: vi.fn(async () => snapshot),
-  deleteFamilyAccount: vi.fn(async () => snapshot),
-  getProfile: vi.fn(async () => snapshot),
-  removeVaccinationRecord: vi.fn(async () => snapshot),
-  selectAccount: vi.fn(async () => snapshot),
-  setLanguage: vi.fn(async () => snapshot),
-  setVaccinationCountry: vi.fn(async () => snapshot),
-  submitVaccinationRecord: vi.fn(async () => snapshot),
-  updateAccount: vi.fn(async () => snapshot),
+  completeVaccinationDose: vi.fn(() => snapshot),
+  createFamilyAccount: vi.fn(() => snapshot),
+  deleteFamilyAccount: vi.fn(() => snapshot),
+  getProfile: vi.fn(() => snapshot),
+  removeVaccinationRecord: vi.fn(() => snapshot),
+  selectAccount: vi.fn(() => snapshot),
+  setLanguage: vi.fn(() => snapshot),
+  setVaccinationCountry: vi.fn(() => snapshot),
+  submitVaccinationRecord: vi.fn(() => snapshot),
+  updateAccount: vi.fn(() => snapshot),
 });
 
 describe('accountsStore', () => {

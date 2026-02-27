@@ -152,8 +152,8 @@ describe('Account page', () => {
 
     const addDialog = screen.getByRole('dialog', { name: 'Добавить члена семьи' });
     const addQueries = within(addDialog);
-    const nameInput = addQueries.getByLabelText('Имя') as HTMLInputElement;
-    const birthYearInput = addQueries.getByLabelText('Год рождения') as HTMLInputElement;
+    const nameInput = addQueries.getByLabelText('Имя');
+    const birthYearInput = addQueries.getByLabelText('Год рождения');
     const countrySelect = addQueries.getByRole('combobox', { name: 'Страна прививочного календаря' });
 
     await user.clear(nameInput);

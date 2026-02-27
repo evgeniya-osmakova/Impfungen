@@ -8,8 +8,9 @@ import type {
 import type { VaccinationState } from 'src/interfaces/vaccinationState.ts';
 import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
 
-import { isTrpcConflictError } from './errors.ts';
 import { useAccountsStore } from '../accounts';
+
+import { isTrpcConflictError } from './errors.ts';
 import { useVaccinationStore } from './index';
 import {
   persistCompletedDose,

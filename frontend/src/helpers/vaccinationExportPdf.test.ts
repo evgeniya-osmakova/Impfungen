@@ -1,11 +1,10 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   VaccinationCompletedExportColumnLabels,
   VaccinationCompletedExportGroup,
   VaccinationCompletedExportMeta,
   VaccinationCompletedExportPdfLabels,
 } from 'src/interfaces/vaccinationExport.ts';
+import { describe, expect, it } from 'vitest';
 
 import { buildVaccinationCompletedPdfDocument } from './vaccinationExportPdf';
 

@@ -1,3 +1,5 @@
+import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue.ts'
+
 import {
   type CategoryFilter,
   type CountryCode,
@@ -6,7 +8,6 @@ import {
   REPEAT_UNIT_VALUES,
   type RepeatUnit,
 } from '../interfaces/base';
-import { NEXT_DUE_SOURCE } from 'src/interfaces/nextDue.ts'
 
 const toSelfRecord = <T extends string>(values: readonly T[]): Record<T, T> =>
   values.reduce<Record<T, T>>((accumulator, value) => {

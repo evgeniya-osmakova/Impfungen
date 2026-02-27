@@ -1,8 +1,6 @@
 /* @vitest-environment jsdom */
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import i18n from 'src/i18n';
 import type {
   VaccinationCompletedImportParseResult,
@@ -12,6 +10,7 @@ import type {
 import { useAccountsStore } from 'src/state/accounts';
 import { useLanguageStore } from 'src/state/language';
 import { useVaccinationStore } from 'src/state/vaccination';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Workspace } from './Workspace';
 
@@ -20,7 +19,7 @@ vi.mock('src/helpers/vaccinationExportCsv.ts', () => ({
 }));
 
 vi.mock('src/helpers/vaccinationExportPdf.ts', () => ({
-  exportVaccinationCompletedPdf: vi.fn(async () => undefined),
+  exportVaccinationCompletedPdf: vi.fn(() => undefined),
 }));
 
 vi.mock('src/helpers/vaccinationImportCsv.ts', () => ({
@@ -28,7 +27,7 @@ vi.mock('src/helpers/vaccinationImportCsv.ts', () => ({
 }));
 
 vi.mock('src/state/vaccination/importCompletedVaccinations.ts', () => ({
-  importCompletedVaccinations: vi.fn(async () => ({
+  importCompletedVaccinations: vi.fn(() => ({
     duplicateRows: 0,
     errors: [],
     importedRows: 0,
@@ -337,7 +336,7 @@ describe('Workspace export actions', () => {
     }));
     vi.mocked(importCompletedVaccinations).mockImplementationOnce(() => deferred.promise);
 
-    const { findByRole, getByLabelText, getByRole } = render(
+    const { getByLabelText, getByRole } = render(
       <Workspace ui={workspaceUi} vaccinationUi={workspaceVaccinationUi} />,
     );
 
@@ -357,7 +356,9 @@ describe('Workspace export actions', () => {
       totalDataRows: 1,
     }));
 
-    expect(await findByRole('button', { name: 'Импорт CSV' })).toBeEnabled();
+    await waitFor(() => {
+      expect(getByRole('button', { hidden: true, name: 'Импорт CSV' })).toBeEnabled();
+    });
   });
 
   it('allows importing the same file twice by resetting file input value', async () => {
@@ -371,13 +372,18 @@ describe('Workspace export actions', () => {
       totalDataRows: 1,
     }));
 
-    const { getByLabelText } = render(
+    const { findByText, getByLabelText, getByRole, queryByText } = render(
       <Workspace ui={workspaceUi} vaccinationUi={workspaceVaccinationUi} />,
     );
     const fileInput = getByLabelText('CSV файл с выполненными прививками') as HTMLInputElement;
     const file = new File(['csv-data'], 'vaccinations.csv', { type: 'text/csv' });
 
     await user.upload(fileInput, file);
+    expect(await findByText('Результат импорта CSV')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'Закрыть' }));
+    await waitFor(() => {
+      expect(queryByText('Результат импорта CSV')).not.toBeInTheDocument();
+    });
     await user.upload(fileInput, file);
 
     expect(parseVaccinationCompletedImportCsv).toHaveBeenCalledTimes(2);

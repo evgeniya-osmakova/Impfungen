@@ -1,11 +1,11 @@
 import classNames from 'classnames';
 import { type RefObject, type SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import {
   buildVaccinationRecordInput,
   createEmptyPlannedDose,
 } from 'src/helpers/vaccinationFormAdapter.ts';
-import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import { generateId } from 'src/utils/systemIdGenerator.ts'
 
 import { INTERNAL_HOME_EMPTY_FIELD_VALUE } from '../../../../../../constants/internalHomeUi';
@@ -30,6 +30,7 @@ import { getTodayIsoDate } from '../../../../../../utils/date';
 
 import { VaccinationFormBaseFields } from './VaccinationFormBaseFields';
 import { VaccinationFormScheduleFields } from './VaccinationFormScheduleFields';
+
 import styles from './VaccinationForm.module.css';
 
 interface VaccinationFormProps {

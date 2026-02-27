@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
-import type { FieldErrors } from 'src/interfaces/accountForm.ts'
 import { CURRENT_YEAR, MIN_BIRTH_YEAR } from 'src/constants/account.ts'
+import type { FieldErrors } from 'src/interfaces/accountForm.ts'
 
 export const validateAccountFields = (
   t: TFunction,

@@ -1,10 +1,11 @@
-import { formatVaccinationExportDate } from 'src/helpers/vaccinationExportRows.ts';
 import type {
   VaccinationCompletedExportColumnLabels,
   VaccinationCompletedExportGroup,
   VaccinationCompletedExportMeta,
   VaccinationCompletedExportPdfLabels,
 } from 'src/interfaces/vaccinationExport.ts';
+
+import { formatVaccinationExportDate } from './vaccinationExportRows';
 
 type PdfVfs = Record<string, string>;
 
@@ -213,4 +214,3 @@ export const exportVaccinationCompletedPdf = async ({
 
   pdfMake.createPdf(documentDefinition).download(filename);
 };
-

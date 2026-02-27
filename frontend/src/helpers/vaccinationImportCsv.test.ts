@@ -1,7 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
-import type { VaccinationCompletedExportColumnLabels, VaccinationCompletedExportRow } from 'src/interfaces/vaccinationExport.ts';
 import { resources } from 'src/i18n/resources.ts';
+import type { VaccinationCompletedExportColumnLabels, VaccinationCompletedExportRow } from 'src/interfaces/vaccinationExport.ts';
+import { describe, expect, it } from 'vitest';
 
 import { createVaccinationCompletedCsv } from './vaccinationExportCsv';
 import { parseVaccinationCompletedImportCsv } from './vaccinationImportCsv';
