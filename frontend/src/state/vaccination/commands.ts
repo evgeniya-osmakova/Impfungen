@@ -1,11 +1,9 @@
 import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts';
-import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import type { CountryCode } from 'src/interfaces/base.ts';
 import type {
   ImmunizationDoseInput,
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
-import type { VaccinationState } from 'src/interfaces/vaccinationState.ts';
 import { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
 
 import { useAccountsStore } from '../accounts';
@@ -19,46 +17,14 @@ import {
   persistVaccinationCountry,
 } from './persistence.ts';
 import {
+  resolveNewCompletedDoseId,
+  resolveSubmitRecordCompletedDoseId,
+  resolveUpdatedRecord,
+} from './recordResolution.ts';
+import {
   submitCompletedDoseUseCase,
   submitRecordUseCase,
 } from './vaccinationRecordUseCases.ts';
-
-const resolveUpdatedRecord = (
-  diseaseId: string,
-  records: readonly VaccinationState['records'][number][],
-) => {
-  const updatedRecord = records.find((record) => record.diseaseId === diseaseId);
-
-  if (!updatedRecord) {
-    throw new Error(`Unable to resolve updated record for disease ${diseaseId}.`);
-  }
-
-  return updatedRecord;
-};
-
-const resolveNewCompletedDoseId = (
-  previousRecord: VaccinationState['records'][number] | undefined,
-  nextRecord: VaccinationState['records'][number],
-): string | null => {
-  const previousDoseIds = new Set((previousRecord?.completedDoses ?? []).map((dose) => dose.id));
-
-  return nextRecord.completedDoses.find((dose) => !previousDoseIds.has(dose.id))?.id ?? null;
-};
-
-const resolveSubmitRecordCompletedDoseId = (
-  previousRecord: VaccinationState['records'][number] | undefined,
-  nextRecord: VaccinationState['records'][number],
-): string | null => {
-  const previousLatestDose = previousRecord
-    ? resolveLatestCompletedDose(previousRecord.completedDoses)
-    : null;
-
-  if (previousLatestDose) {
-    return previousLatestDose.id;
-  }
-
-  return resolveNewCompletedDoseId(previousRecord, nextRecord);
-};
 
 interface VaccinationCommands {
   removeRecord: (diseaseId: string) => Promise<boolean>;

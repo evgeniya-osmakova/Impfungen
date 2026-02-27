@@ -1,46 +1,76 @@
 # Impfungen Workspace
 
-## Current product scope (important)
+![Node.js 22](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111827)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
-This project currently targets a single user and does not implement authentication or authorization.
-The intended usage is one person managing their own vaccination data and the data of family members
-inside one shared profile.
+Impfungen is a vaccination tracking workspace with a React frontend and a Fastify + tRPC backend backed by PostgreSQL.
 
-Проект разделён на два сервиса:
+## Product Scope
 
-- `frontend` — React + Vite приложение
-- `backend` — Fastify + tRPC + Drizzle API
-- `postgres` — хранилище данных профиля и прививок
+- Single shared profile (no authentication/authorization).
+- Designed for one person managing personal and family vaccination data in one workspace.
 
-## Совместный запуск (Docker Compose)
+## Tech Stack
+
+- `frontend`: React 19, Vite, TypeScript, Zustand, i18next
+- `backend`: Fastify 5, tRPC 11, Drizzle ORM, TypeScript
+- `postgres`: PostgreSQL 16
+
+## System Overview
+
+```mermaid
+flowchart LR
+  FE["Frontend (React + Vite)<br/>http://localhost:5173"] -->|"tRPC over HTTP"| BE["Backend (Fastify + tRPC)<br/>http://localhost:3000/trpc"]
+  BE -->|"Drizzle + SQL"| DB["PostgreSQL 16<br/>localhost:5432"]
+```
+
+## Main Features
+
+- Primary + family account management
+- Vaccination records (create, edit, delete)
+- Future dose planning (manual dates or repeat interval)
+- Upcoming vaccinations view (next 12 months)
+- CSV import for completed vaccinations
+- CSV and PDF export
+- UI localization: English, Russian, German
+
+## Quick Start (Docker Compose)
+
+### Prerequisites
+
+- Docker
+- Docker Compose plugin
+
+### Run
 
 ```bash
 docker compose up --build
 ```
 
-Сервисы будут доступны на:
+### Service URLs
 
-- frontend: http://localhost:5173
-- backend: http://localhost:3000
-- postgres: localhost:5432
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- PostgreSQL: localhost:5432
 
-Остановка:
+### Stop
 
 ```bash
 docker compose down
 ```
 
-## Локальный запуск без Docker
+## Local Development (Without Docker)
 
-Frontend:
+### 1. Start PostgreSQL
+
+You can reuse Compose for DB only:
 
 ```bash
-cd frontend
-yarn install
-yarn start
+docker compose up -d postgres
 ```
 
-Backend:
+### 2. Run backend
 
 ```bash
 cd backend
@@ -49,9 +79,59 @@ npm run db:migrate
 npm run dev
 ```
 
-Для backend можно переопределить переменные:
+### 3. Run frontend
 
-- `DATABASE_URL` (по умолчанию `postgres://postgres:postgres@localhost:5432/impfungen`)
-- `CORS_ORIGIN` (по умолчанию `*`)
-- `HOST` (по умолчанию `0.0.0.0`)
-- `PORT` (по умолчанию `3000`)
+```bash
+cd frontend
+yarn install
+yarn start
+```
+
+### 4. Open app
+
+- http://localhost:5173
+
+## Environment Variables
+
+### Backend (`backend`)
+
+- `DATABASE_URL` (default: `postgres://postgres:postgres@localhost:5432/impfungen`)
+- `CORS_ORIGIN` (default: `*`)
+- `HOST` (default: `0.0.0.0`)
+- `PORT` (default: `3000`)
+
+### Frontend (`frontend`)
+
+- `VITE_API_BASE_URL` (default: `http://localhost:3000`)
+
+## Useful Commands
+
+### Backend
+
+```bash
+cd backend
+npm test
+npm run build
+```
+
+### Frontend
+
+```bash
+cd frontend
+yarn test
+yarn lint
+yarn build
+```
+
+## Project Structure
+
+```text
+.
+├── backend
+├── frontend
+└── docker-compose.yml
+```
+
+## Health Check
+
+- Backend health endpoint: `GET http://localhost:3000/health`

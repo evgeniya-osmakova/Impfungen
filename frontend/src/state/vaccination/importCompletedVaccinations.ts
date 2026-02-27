@@ -1,6 +1,5 @@
 import { INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE } from 'src/constants/internalHomeText.ts';
 import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationValidation.ts';
-import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import type { ImmunizationSeriesInput } from 'src/interfaces/immunizationRecord.ts';
 import type {
   VaccinationCompletedImportReport,
@@ -18,6 +17,11 @@ import {
   persistCompletedDose,
   persistSubmittedRecord,
 } from './persistence.ts';
+import {
+  resolveNewCompletedDoseId,
+  resolveSubmitRecordCompletedDoseId,
+  resolveUpdatedRecord,
+} from './recordResolution.ts';
 import {
   submitCompletedDoseUseCase,
   submitRecordUseCase,
@@ -81,43 +85,6 @@ const createInitialDuplicateKeySet = (
   }
 
   return duplicateKeys;
-};
-
-const resolveUpdatedRecord = (
-  diseaseId: string,
-  records: readonly VaccinationState['records'][number][],
-): VaccinationState['records'][number] => {
-  const updatedRecord = records.find((record) => record.diseaseId === diseaseId);
-
-  if (!updatedRecord) {
-    throw new Error(`Unable to resolve updated record for disease ${diseaseId}.`);
-  }
-
-  return updatedRecord;
-};
-
-const resolveNewCompletedDoseId = (
-  previousRecord: VaccinationState['records'][number] | undefined,
-  nextRecord: VaccinationState['records'][number],
-): string | null => {
-  const previousDoseIds = new Set((previousRecord?.completedDoses ?? []).map((dose) => dose.id));
-
-  return nextRecord.completedDoses.find((dose) => !previousDoseIds.has(dose.id))?.id ?? null;
-};
-
-const resolveSubmitRecordCompletedDoseId = (
-  previousRecord: VaccinationState['records'][number] | undefined,
-  nextRecord: VaccinationState['records'][number],
-): string | null => {
-  const previousLatestDose = previousRecord
-    ? resolveLatestCompletedDose(previousRecord.completedDoses)
-    : null;
-
-  if (previousLatestDose) {
-    return previousLatestDose.id;
-  }
-
-  return resolveNewCompletedDoseId(previousRecord, nextRecord);
 };
 
 const toRowError = (
