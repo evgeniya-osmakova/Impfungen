@@ -281,7 +281,7 @@ export const en = {
         meningococcalDisease: 'Meningococcal disease',
         mumps: 'Mumps',
         mpox: 'Mpox',
-        pertussis: 'Pertussis (whooping cough)',
+        pertussis: 'Pertussis',
         pneumococcalDisease: 'Pneumococcal disease',
         poliomyelitis: 'Poliomyelitis',
         rabies: 'Rabies',

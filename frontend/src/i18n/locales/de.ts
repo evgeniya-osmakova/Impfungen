@@ -19,7 +19,7 @@ export const de = {
         configMissing: 'OAuth ist in den Umgebungsvariablen nicht konfiguriert.',
         exchangeFailed: 'OAuth-Anmeldung konnte nicht abgeschlossen werden.',
         missingAccessToken: 'Der OAuth-Provider hat kein Access Token geliefert.',
-        missingVerifier: 'code_verifier fuer den OAuth-Callback fehlt.',
+        missingVerifier: 'code_verifier für den OAuth-Callback fehlt.',
         providerError: 'Der OAuth-Provider hat einen Fehler zurueckgegeben.',
         stateMismatch: 'OAuth-State-Pruefung fehlgeschlagen. Bitte erneut anmelden.',
         unexpected: 'Unerwarteter OAuth-Fehler.',
@@ -50,10 +50,10 @@ export const de = {
       page: {
         title: 'Meine Impfungen und kommende Termine',
         description:
-          'Erfasse erledigte Impfungen, trage das naechste Datum manuell ein und sehe alle noch moeglichen Impfungen fuer das gewaehlte Land.',
+          'Erfasse erledigte Impfungen, trage das naechste Datum manuell ein und sehe alle noch moeglichen Impfungen für das gewaehlte Land.',
       },
       countryOnboarding: {
-        title: 'Land fuer Empfehlungen auswaehlen',
+        title: 'Land für Empfehlungen auswaehlen',
         description:
           'Das Land steuert, welche Impfungen im Katalog als empfohlen oder optional markiert sind.',
         hint: 'Du kannst die Auswahl spaeter jederzeit auf dieser Seite aendern.',
@@ -78,7 +78,7 @@ export const de = {
         description: 'Liste der Impfungen, die in den naechsten 12 Monaten geplant sind.',
         dueLabel: 'Datum',
         typeLabel: 'Typ',
-        empty: 'Fuer das naechste Jahr sind nach aktuellen Daten keine Impfungen faellig.',
+        empty: 'Für das naechste Jahr sind nach aktuellen Daten keine Impfungen faellig.',
       },
       form: {
         titleAdd: 'Erledigte Impfung eintragen',
@@ -181,7 +181,7 @@ export const de = {
             processFailed:
               'Import wegen eines internen Fehlers fehlgeschlagen. Bitte erneut versuchen.',
             readFailed: 'Die ausgewaehlte Datei konnte nicht gelesen werden.',
-            targetUnavailable: 'Aktuelles Zielprofil fuer den Import konnte nicht bestimmt werden.',
+            targetUnavailable: 'Aktuelles Zielprofil für den Import konnte nicht bestimmt werden.',
             unsupportedHeader:
               'Diese CSV sieht nicht wie ein App-Export aus (ungueltige Kopfzeile).',
           },
@@ -228,7 +228,7 @@ export const de = {
         },
         deleteConfirm: {
           title: 'Eintrag loeschen?',
-          message: 'Bist du sicher, dass du den Impfeintrag fuer „{{disease}}“ loeschen willst?',
+          message: 'Bist du sicher, dass du den Impfeintrag für „{{disease}}“ loeschen willst?',
           warning: 'Diese Aktion kann nicht rueckgaengig gemacht werden.',
           requestFailed: 'Eintrag konnte nicht geloescht werden. Bitte erneut versuchen.',
           cancel: 'Abbrechen',
@@ -242,13 +242,13 @@ export const de = {
       catalog: {
         title: 'Noch moegliche Impfungen',
         description:
-          'Es werden nur Erkrankungen gezeigt, die fuer das gewaehlte Land relevant und noch nicht eingetragen sind.',
+          'Es werden nur Erkrankungen gezeigt, die für das gewaehlte Land relevant und noch nicht eingetragen sind.',
         descriptionNoRecommendations:
           'Es wird eine universelle Liste ohne Kennzeichnung als empfohlen oder optional gezeigt.',
         searchLabel: 'Erkrankung suchen',
         searchPlaceholder: 'Zum Beispiel: tetanus, masern, hpv',
         countLabel: 'Passende Impfungen: {{count}}',
-        empty: 'Keine passenden Erkrankungen fuer die aktuellen Filter.',
+        empty: 'Keine passenden Erkrankungen für die aktuellen Filter.',
         filters: {
           all: 'Alle',
           recommended: 'Empfohlen',
@@ -287,17 +287,17 @@ export const de = {
         meningococcalDisease: 'Meningokokken-Erkrankung',
         mumps: 'Mumps',
         mpox: 'Mpox',
-        pertussis: 'Pertussis (Keuchhusten)',
+        pertussis: 'Pertussis',
         pneumococcalDisease: 'Pneumokokken-Erkrankung',
         poliomyelitis: 'Poliomyelitis',
         rabies: 'Tollwut',
         respiratorySyncytialVirus: 'RSV-Infektion (respiratorisches Synzytialvirus)',
         rotavirus: 'Rotavirus',
-        rubella: 'Roeteln',
+        rubella: 'Röteln',
         shingles: 'Guertelrose (Herpes zoster)',
         smallpox: 'Pocken',
         tetanus: 'Tetanus',
-        tickBorneEncephalitis: 'Fruehsommer-Meningoenzephalitis (FSME)',
+        tickBorneEncephalitis: 'Frühsommer-Meningoenzephalitis (FSME)',
         tuberculosis: 'Tuberkulose',
         typhoidFever: 'Typhus abdominalis',
         varicella: 'Varizellen',
@@ -307,13 +307,13 @@ export const de = {
     account: {
       page: {
         title: 'Konto und Familie',
-        description: 'Verwalte Familienprofile und Einstellungen fuer den Impfkalender.',
+        description: 'Verwalte Familienprofile und Einstellungen für den Impfkalender.',
         empty: 'Konten sind noch nicht geladen.',
       },
       mandatory: {
         title: 'Hauptkonto ausfuellen',
         description:
-          'Bitte Name, Geburtsjahr und Land fuer den Impfkalender des Hauptkontos angeben, um fortzufahren.',
+          'Bitte Name, Geburtsjahr und Land für den Impfkalender des Hauptkontos angeben, um fortzufahren.',
       },
       list: {
         title: 'Konten',
