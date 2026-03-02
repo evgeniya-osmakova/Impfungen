@@ -285,7 +285,7 @@ export const en = {
         pneumococcalDisease: 'Pneumococcal disease',
         poliomyelitis: 'Poliomyelitis',
         rabies: 'Rabies',
-        respiratorySyncytialVirus: 'Respiratory syncytial virus (RSV)',
+        respiratorySyncytialVirus: 'Respiratory syncytial virus infection (RSV infection)',
         rotavirus: 'Rotavirus',
         rubella: 'Rubella',
         shingles: 'Shingles (herpes zoster)',

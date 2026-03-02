@@ -291,7 +291,7 @@ export const ru = {
         pneumococcalDisease: 'Пневмококковая инфекция',
         poliomyelitis: 'Полиомиелит',
         rabies: 'Бешенство',
-        respiratorySyncytialVirus: 'Респираторно-синцитиальный вирус (RSV)',
+        respiratorySyncytialVirus: 'РСВ-инфекция (респираторно-синцитиальная инфекция)',
         rotavirus: 'Ротавирусная инфекция',
         rubella: 'Краснуха',
         shingles: 'Опоясывающий лишай (Herpes zoster)',

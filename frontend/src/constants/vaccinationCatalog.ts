@@ -284,9 +284,19 @@ export const VACCINATION_DISEASE_CATALOG: readonly Disease[] = [
     id: 'respiratorySyncytialVirus',
     labelKey: getDiseaseLabelKey('respiratorySyncytialVirus'),
     searchAliases: {
-      de: ['rsv', 'respiratory syncytial virus'],
-      en: ['rsv', 'respiratory syncytial virus'],
-      ru: ['rsv', 'respiratorno sintitsialny virus'],
+      de: ['rsv', 'respiratory syncytial virus', 'rsv-infektion', 'synzytialvirus-infektion'],
+      en: [
+        'rsv',
+        'respiratory syncytial virus',
+        'rsv infection',
+        'respiratory syncytial virus infection',
+      ],
+      ru: [
+        'rsv',
+        'respiratorno sintitsialny virus',
+        'rsv infektsiya',
+        'respiratorno sintitsialnaya infektsiya',
+      ],
     },
   },
   {
@@ -388,7 +398,7 @@ export const VACCINATION_DISEASE_CATALOG: readonly Disease[] = [
     id: 'typhoidFever',
     labelKey: getDiseaseLabelKey('typhoidFever'),
     searchAliases: {
-      de: ['typhus', 'typhoid'],
+      de: ['typhus', 'typhoid', 'typhus abdominalis'],
       en: ['typhoid', 'typhoid fever'],
       ru: ['bryushnoy tif'],
     },
