@@ -20,7 +20,7 @@ export const de = {
         exchangeFailed: 'OAuth-Anmeldung konnte nicht abgeschlossen werden.',
         missingAccessToken: 'Der OAuth-Provider hat kein Access Token geliefert.',
         missingVerifier: 'code_verifier für den OAuth-Callback fehlt.',
-        providerError: 'Der OAuth-Provider hat einen Fehler zurueckgegeben.',
+        providerError: 'Der OAuth-Provider hat einen Fehler zurückgegeben.',
         stateMismatch: 'OAuth-State-Pruefung fehlgeschlagen. Bitte erneut anmelden.',
         unexpected: 'Unerwarteter OAuth-Fehler.',
       },
@@ -29,17 +29,17 @@ export const de = {
       badge: 'Impfkalender',
       title: 'Behalte alle Impfungen im Blick',
       description:
-        'Verwalte deinen Impfkalender, trage bereits gemachte Impfungen ein und sieh rechtzeitig, wann die naechste faellig ist.',
+        'Verwalte deinen Impfkalender, trage bereits gemachte Impfungen ein und sieh rechtzeitig, wann die nächste fällig ist.',
       features: {
         historyTitle: 'Impfverlauf',
         historyDescription:
           'Speichere erledigte Impfungen an einem Ort, damit dein aktueller Status sofort sichtbar ist.',
-        scheduleTitle: 'Naechste Termine',
+        scheduleTitle: 'Nächste Termine',
         scheduleDescription:
           'Sieh kommende Impfungen fruehzeitig und halte empfohlene Zeitpunkte einfacher ein.',
         remindersTitle: 'Klare Erinnerungen',
         remindersDescription:
-          'Erhalte rechtzeitig Hinweise auf die naechste Impfung, ohne selbst Fristen zu verfolgen.',
+          'Erhalte rechtzeitig Hinweise auf die nächste Impfung, ohne selbst Fristen zu verfolgen.',
       },
     },
     internal: {
@@ -50,17 +50,17 @@ export const de = {
       page: {
         title: 'Meine Impfungen und kommende Termine',
         description:
-          'Erfasse erledigte Impfungen, trage das naechste Datum manuell ein und sehe alle noch moeglichen Impfungen für das gewaehlte Land.',
+          'Erfasse erledigte Impfungen, trage das nächste Datum manuell ein und sehe alle noch möglichen Impfungen für das gewählte Land.',
       },
       countryOnboarding: {
-        title: 'Land für Empfehlungen auswaehlen',
+        title: 'Land für Empfehlungen auswählen',
         description:
           'Das Land steuert, welche Impfungen im Katalog als empfohlen oder optional markiert sind.',
-        hint: 'Du kannst die Auswahl spaeter jederzeit auf dieser Seite aendern.',
+        hint: 'Du kannst die Auswahl spaeter jederzeit auf dieser Seite ändern.',
       },
       country: {
         label: 'Empfehlungsland',
-        description: 'Katalog und Kategorien unten beziehen sich auf das ausgewaehlte Land.',
+        description: 'Katalog und Kategorien unten beziehen sich auf das ausgewählte Land.',
         descriptionNoRecommendations:
           'Es wird ein universeller Katalog ohne Empfehlungsmarkierungen gezeigt.',
         ru: 'Russland',
@@ -70,15 +70,15 @@ export const de = {
       summary: {
         title: 'Uebersicht deiner Impfkarte',
         recordsTotal: 'Eintraege gesamt',
-        withNextDate: 'Mit naechstem Termin',
-        withoutNextDate: 'Ohne naechstes Datum',
+        withNextDate: 'Mit nächstem Termin',
+        withoutNextDate: 'Ohne nächstes Datum',
       },
       upcomingYear: {
-        title: 'Impfungen im naechsten Jahr',
-        description: 'Liste der Impfungen, die in den naechsten 12 Monaten geplant sind.',
+        title: 'Impfungen im nächsten Jahr',
+        description: 'Liste der Impfungen, die in den nächsten 12 Monaten geplant sind.',
         dueLabel: 'Datum',
         typeLabel: 'Typ',
-        empty: 'Für das naechste Jahr sind nach aktuellen Daten keine Impfungen faellig.',
+        empty: 'Für das nächste Jahr sind nach aktuellen Daten keine Impfungen fällig.',
       },
       form: {
         titleAdd: 'Erledigte Impfung eintragen',
@@ -94,13 +94,13 @@ export const de = {
           batchNumber: 'Chargennummer',
           completedDoseKind: 'Typ der erledigten Impfung',
           disease: 'Erkrankung',
-          diseasePlaceholder: 'Erkrankung auswaehlen',
+          diseasePlaceholder: 'Erkrankung auswählen',
           completedAt: 'Datum der erledigten Impfung',
           futureDate: 'Zukuenftiges Datum {{index}}',
           plannedDoseKind: 'Typ der geplanten Impfung',
           repeatInterval: 'Wiederholungsintervall',
           repeatUnit: 'Intervall-Einheit',
-          scheduleMode: 'Planung naechster Dosen',
+          scheduleMode: 'Planung nächster Dosen',
           tradeName: 'Handelsname',
         },
         schedule: {
@@ -115,32 +115,32 @@ export const de = {
           years: 'Jahre',
         },
         actions: {
-          addDate: 'Datum hinzufuegen',
-          addDose: 'Dosis/Revakzinierung hinzufuegen',
+          addDate: 'Datum hinzufügen',
+          addDose: 'Dosis/Revakzinierung hinzufügen',
           closeModal: 'Schliessen',
           markPlannedDone: 'Als erledigt markieren',
           removeDate: 'Datum entfernen',
           openModal: 'Erledigte Impfung eintragen',
           saveCompletedDose: 'Erledigte Impfung speichern',
           saveAdd: 'Eintrag speichern',
-          saveEdit: 'Aenderungen speichern',
+          saveEdit: 'Änderungen speichern',
           cancelEdit: 'Bearbeitung abbrechen',
         },
         errors: {
           completedInFuture: 'Das Datum der erledigten Impfung darf nicht in der Zukunft liegen.',
-          diseaseRequired: 'Waehle eine Erkrankung aus.',
+          diseaseRequired: 'Wähle eine Erkrankung aus.',
           completedRequired: 'Bitte ein gueltiges Datum der erledigten Impfung angeben.',
-          doseKindInvalid: 'Bitte einen gueltigen Impfungs-Typ auswaehlen.',
+          doseKindInvalid: 'Bitte einen gueltigen Impfungs-Typ auswählen.',
           futureDateBeforeCompleted:
             'Ein zukuenftiges Datum darf nicht vor dem erledigten Datum liegen.',
           futureDatesDuplicate: 'Zukuenftige Daten duerfen sich nicht wiederholen.',
           futureDatesInvalid: 'Bitte pruefe die eingegebenen zukuenftigen Daten.',
           repeatIntervalInvalid:
             'Bitte ein gueltiges Wiederholungsintervall angeben (ganze Zahl > 0).',
-          saveFailed: 'Aenderungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
-          scheduleConflict: 'Bitte entweder manuelle Daten oder Wiederholungsintervall auswaehlen.',
+          saveFailed: 'Änderungen konnten nicht gespeichert werden. Bitte erneut versuchen.',
+          scheduleConflict: 'Bitte entweder manuelle Daten oder Wiederholungsintervall auswählen.',
           syncConflict:
-            'Der Eintrag wurde in einer anderen Sitzung geaendert. Bitte aktualisieren und erneut versuchen.',
+            'Der Eintrag wurde in einer anderen Sitzung geändert. Bitte aktualisieren und erneut versuchen.',
         },
       },
       records: {
@@ -150,9 +150,9 @@ export const de = {
         completedLabel: 'Erledigt',
         vaccinationDateLabel: 'Impfdatum',
         latestDoseLabel: 'Datum der letzten Impfung',
-        nextDoseLabel: 'Datum der naechsten Impfung',
+        nextDoseLabel: 'Datum der nächsten Impfung',
         futureDatesLabel: 'Zukuenftige Daten',
-        nextDueTypeLabel: 'Typ der naechsten Impfung',
+        nextDueTypeLabel: 'Typ der nächsten Impfung',
         repeatEveryLabel: 'Wiederholung',
         repeatPattern: 'Alle {{interval}} {{unit}}',
         repeatUnits: {
@@ -168,7 +168,7 @@ export const de = {
         },
         actions: {
           edit: 'Bearbeiten',
-          delete: 'Loeschen',
+          delete: 'Löschen',
         },
         import: {
           inputLabel: 'CSV-Datei mit erledigten Impfungen',
@@ -180,7 +180,7 @@ export const de = {
             invalidFile: 'CSV konnte nicht gelesen werden. Bitte Dateiformat pruefen.',
             processFailed:
               'Import wegen eines internen Fehlers fehlgeschlagen. Bitte erneut versuchen.',
-            readFailed: 'Die ausgewaehlte Datei konnte nicht gelesen werden.',
+            readFailed: 'Die ausgewählte Datei konnte nicht gelesen werden.',
             targetUnavailable: 'Aktuelles Zielprofil für den Import konnte nicht bestimmt werden.',
             unsupportedHeader:
               'Diese CSV sieht nicht wie ein App-Export aus (ungueltige Kopfzeile).',
@@ -227,22 +227,22 @@ export const de = {
           },
         },
         deleteConfirm: {
-          title: 'Eintrag loeschen?',
-          message: 'Bist du sicher, dass du den Impfeintrag für „{{disease}}“ loeschen willst?',
-          warning: 'Diese Aktion kann nicht rueckgaengig gemacht werden.',
-          requestFailed: 'Eintrag konnte nicht geloescht werden. Bitte erneut versuchen.',
+          title: 'Eintrag löschen?',
+          message: 'Bist du sicher, dass du den Impfeintrag für „{{disease}}“ löschen willst?',
+          warning: 'Diese Aktion kann nicht rückgaengig gemacht werden.',
+          requestFailed: 'Eintrag konnte nicht gelöscht werden. Bitte erneut versuchen.',
           cancel: 'Abbrechen',
-          confirm: 'Eintrag loeschen',
+          confirm: 'Eintrag löschen',
         },
       },
       doseKind: {
-        nextDose: 'Naechste Dosis',
+        nextDose: 'Nächste Dosis',
         revaccination: 'Revakzinierung',
       },
       catalog: {
-        title: 'Noch moegliche Impfungen',
+        title: 'Noch mögliche Impfungen',
         description:
-          'Es werden nur Erkrankungen gezeigt, die für das gewaehlte Land relevant und noch nicht eingetragen sind.',
+          'Es werden nur Erkrankungen gezeigt, die für das gewählte Land relevant und noch nicht eingetragen sind.',
         descriptionNoRecommendations:
           'Es wird eine universelle Liste ohne Kennzeichnung als empfohlen oder optional gezeigt.',
         searchLabel: 'Erkrankung suchen',
@@ -260,9 +260,9 @@ export const de = {
         },
       },
       timeline: {
-        title: 'Zeitlinie bis zur naechsten Impfung',
+        title: 'Zeitlinie bis zur nächsten Impfung',
         completed: 'Erledigt',
-        due: 'Naechste',
+        due: 'Nächste',
         status: {
           overdue: 'Datum ist bereits vorbei',
           today: 'Datum ist heute',
@@ -318,23 +318,23 @@ export const de = {
       list: {
         title: 'Konten',
         description: 'Zwischen Familienprofilen wechseln.',
-        selectLabel: 'Ausgewaehltes Konto',
-        selected: 'Ausgewaehlt',
+        selectLabel: 'Ausgewähltes Konto',
+        selected: 'Ausgewählt',
       },
       edit: {
         title: 'Kontodaten',
-        description: 'Daten des ausgewaehlten Kontos bearbeiten.',
+        description: 'Daten des ausgewählten Kontos bearbeiten.',
         primaryDescription: 'Bitte die Daten des Hauptkontos vervollstaendigen.',
       },
       add: {
-        title: 'Familienmitglied hinzufuegen',
-        description: 'Name und Geburtsjahr genuegen. Das Land kann spaeter gewaehlt werden.',
+        title: 'Familienmitglied hinzufügen',
+        description: 'Name und Geburtsjahr genuegen. Das Land kann spaeter gewählt werden.',
       },
       fields: {
         name: 'Name',
         birthYear: 'Geburtsjahr',
         country: 'Land des Impfkalenders',
-        countryUnset: 'Kein Land ausgewaehlt',
+        countryUnset: 'Kein Land ausgewählt',
       },
       placeholders: {
         noName: 'Ohne Namen',
@@ -347,27 +347,27 @@ export const de = {
       actions: {
         save: 'Speichern',
         saving: 'Speichert...',
-        addMember: 'Familienmitglied hinzufuegen',
-        adding: 'Wird hinzugefuegt...',
-        deleteMember: 'Familienmitglied loeschen',
-        deleting: 'Wird geloescht...',
+        addMember: 'Familienmitglied hinzufügen',
+        adding: 'Wird hinzugefügt...',
+        deleteMember: 'Familienmitglied löschen',
+        deleting: 'Wird gelöscht...',
       },
       validation: {
         nameRequired: 'Bitte Namen angeben',
         birthYearInvalid: 'Bitte ein gueltiges Geburtsjahr eingeben ({{min}}-{{max}})',
-        countryRequired: 'Bitte Land des Impfkalenders waehlen',
+        countryRequired: 'Bitte Land des Impfkalenders wählen',
       },
       errors: {
         saveFailed: 'Konto konnte nicht gespeichert werden, bitte erneut versuchen',
-        createFailed: 'Familienmitglied konnte nicht hinzugefuegt werden, bitte erneut versuchen',
-        deleteFailed: 'Familienmitglied konnte nicht geloescht werden, bitte erneut versuchen',
+        createFailed: 'Familienmitglied konnte nicht hinzugefügt werden, bitte erneut versuchen',
+        deleteFailed: 'Familienmitglied konnte nicht gelöscht werden, bitte erneut versuchen',
       },
       deleteConfirm: {
-        title: 'Familienmitglied loeschen?',
-        message: 'Sind Sie sicher, dass Sie das Profil "{{name}}" loeschen moechten?',
-        warning: 'Diese Aktion kann nicht rueckgaengig gemacht werden.',
+        title: 'Familienmitglied löschen?',
+        message: 'Sind Sie sicher, dass Sie das Profil "{{name}}" löschen möchten?',
+        warning: 'Diese Aktion kann nicht rückgaengig gemacht werden.',
         cancel: 'Abbrechen',
-        confirm: 'Loeschen',
+        confirm: 'Löschen',
       },
     },
   },

@@ -5,8 +5,6 @@ import type {
   VaccinationCompletedExportPdfLabels,
 } from 'src/interfaces/vaccinationExport.ts';
 
-import { formatVaccinationExportDate } from './vaccinationExportRows';
-
 type PdfVfs = Record<string, string>;
 
 interface PdfDownload {
@@ -105,28 +103,12 @@ const loadPdfMake = async (): Promise<PdfMakeInstance> => {
   return pdfMakeInstancePromise;
 };
 
-const padTwoDigits = (value: number): string => String(value).padStart(2, '0');
-
-const formatExportedAt = (date: Date): string => {
-  const exportDate = [
-    date.getFullYear(),
-    padTwoDigits(date.getMonth() + 1),
-    padTwoDigits(date.getDate()),
-  ].join('-');
-  const formattedDate = formatVaccinationExportDate(exportDate);
-  const hours = padTwoDigits(date.getHours());
-  const minutes = padTwoDigits(date.getMinutes());
-
-  return `${formattedDate} ${hours}:${minutes}`;
-};
-
 export const buildVaccinationCompletedPdfDocument = ({
   columnLabels,
   groups,
   meta,
   pdfLabels,
 }: Omit<ExportVaccinationCompletedPdfParams, 'filename'>) => {
-  const totalDoseCount = groups.reduce((sum, group) => sum + group.doses.length, 0);
   const groupedContent = groups.flatMap((group, index) => [
     {
       margin: [0, index === 0 ? 0 : 8, 0, 4],
@@ -140,19 +122,12 @@ export const buildVaccinationCompletedPdfDocument = ({
         body: [
           [
             { style: 'tableHeader', text: columnLabels.completedAt },
-            { style: 'tableHeader', text: columnLabels.doseKind },
             { style: 'tableHeader', text: columnLabels.tradeName },
-            { style: 'tableHeader', text: columnLabels.batchNumber },
           ],
-          ...group.doses.map((dose) => [
-            dose.formattedCompletedAt,
-            dose.doseKindLabel,
-            dose.tradeName ?? '',
-            dose.batchNumber ?? '',
-          ]),
+          ...group.doses.map((dose) => [dose.formattedCompletedAt, dose.tradeName ?? '']),
         ],
         headerRows: 1,
-        widths: [90, 120, '*', 90],
+        widths: [120, '*'],
       },
     },
   ]);
@@ -161,18 +136,8 @@ export const buildVaccinationCompletedPdfDocument = ({
     content: [
       { style: 'title', text: pdfLabels.title },
       {
-        columns: [
-          { text: `${pdfLabels.profileLabel}: ${meta.profileName}` },
-          {
-            alignment: 'right',
-            text: `${pdfLabels.exportedAtLabel}: ${formatExportedAt(meta.exportedAt)}`,
-          },
-        ],
-        margin: [0, 0, 0, 6],
-      },
-      {
+        text: `${pdfLabels.profileLabel}: ${meta.profileName}`,
         margin: [0, 0, 0, 12],
-        text: `${pdfLabels.recordsCountLabel}: ${totalDoseCount}`,
       },
       ...groupedContent,
     ],

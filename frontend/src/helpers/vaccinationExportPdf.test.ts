@@ -78,18 +78,19 @@ describe('vaccinationExportPdf', () => {
     };
 
     expect(document.content[0]).toMatchObject({ text: 'Completed vaccinations' });
-    expect(document.content[2]).toMatchObject({ text: 'Records: 3' });
+    expect(document.content[1]).toMatchObject({ text: 'Profile: Иван' });
 
-    const anthraxTitle = document.content[3];
-    const anthraxTable = document.content[4] as { table: { body: string[][] } };
-    const hepatitisTitle = document.content[5];
-    const hepatitisTable = document.content[6] as { table: { body: string[][] } };
+    const anthraxTitle = document.content[2];
+    const anthraxTable = document.content[3] as { table: { body: string[][] } };
+    const hepatitisTitle = document.content[4];
+    const hepatitisTable = document.content[5] as { table: { body: string[][] } };
 
     expect(anthraxTitle).toMatchObject({ text: 'Anthrax' });
     expect(hepatitisTitle).toMatchObject({ text: 'Hepatitis B' });
+    expect(anthraxTable.table.body[0]).toMatchObject([{ text: 'Date' }, { text: 'Trade name' }]);
 
-    expect(anthraxTable.table.body[1]).toEqual(['05.03.2024', 'Next dose', '', '']);
-    expect(hepatitisTable.table.body[1]).toEqual(['01.01.2024', 'Next dose', 'Combi', 'HB-1']);
-    expect(hepatitisTable.table.body[2]).toEqual(['01.05.2024', 'Revaccination', '', '']);
+    expect(anthraxTable.table.body[1]).toEqual(['05.03.2024', '']);
+    expect(hepatitisTable.table.body[1]).toEqual(['01.01.2024', 'Combi']);
+    expect(hepatitisTable.table.body[2]).toEqual(['01.05.2024', '']);
   });
 });
