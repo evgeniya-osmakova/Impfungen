@@ -3,6 +3,7 @@ import type { CompleteDoseDraft } from 'src/interfaces/completeDoseDraft';
 import { useVaccinationStore } from 'src/state/vaccination';
 import {
   buildAddDoseDraft,
+  buildEditDoseDraft,
   buildMarkPlannedDoneDraft,
 } from 'src/state/vaccination/completeDoseDraft.ts';
 
@@ -40,8 +41,19 @@ export const useDoseModalActions = ({ openCompleteDoseModal }: UseDoseModalActio
     );
   };
 
+  const openEditDoseModal = (diseaseId: string, doseId: string) => {
+    const draft = buildEditDoseDraft(records, { diseaseId, doseId });
+
+    if (!draft) {
+      return;
+    }
+
+    openCompleteDoseModal(draft);
+  };
+
   return {
     openAddDoseModal,
+    openEditDoseModal,
     openMarkPlannedDoneModal,
   };
 };

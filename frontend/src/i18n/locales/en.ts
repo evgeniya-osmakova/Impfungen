@@ -117,6 +117,7 @@ export const en = {
           addDate: 'Add date',
           addDose: 'Add dose/revaccination',
           closeModal: 'Close',
+          editDose: 'Edit dose',
           markPlannedDone: 'Mark as completed',
           removeDate: 'Remove date',
           openModal: 'Add completed vaccination',
@@ -227,6 +228,14 @@ export const en = {
           requestFailed: 'Failed to delete record. Please try again.',
           cancel: 'Cancel',
           confirm: 'Delete record',
+        },
+        deleteDoseConfirm: {
+          title: 'Delete dose from history?',
+          message: 'Delete the “{{disease}}” dose entry dated {{date}}?',
+          warning: 'This action cannot be undone.',
+          requestFailed: 'Failed to delete dose. Please try again.',
+          cancel: 'Cancel',
+          confirm: 'Delete dose',
         },
       },
       doseKind: {

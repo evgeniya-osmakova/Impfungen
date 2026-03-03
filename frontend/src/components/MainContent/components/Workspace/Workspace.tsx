@@ -42,8 +42,8 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
   });
   const { openFormModal, openCompleteDoseModal } = ui;
   const { cancelEdit, startEditRecord } = vaccinationUi;
-  const { removeRecord } = useVaccinationCommands();
-  const { openAddDoseModal, openMarkPlannedDoneModal } = useDoseModalActions({
+  const { removeCompletedDose, removeRecord } = useVaccinationCommands();
+  const { openAddDoseModal, openEditDoseModal, openMarkPlannedDoneModal } = useDoseModalActions({
     openCompleteDoseModal,
   });
   const { exportError, handleExportCsv, handleExportPdf, hasCompletedDoses, isExporting } =
@@ -90,6 +90,13 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
 
     return removeRecord(diseaseId);
   };
+
+  const handleEditDose = (diseaseId: string, doseId: string) => {
+    openEditDoseModal(diseaseId, doseId);
+  };
+
+  const handleDeleteDose = (payload: { diseaseId: string; doseId: string }) =>
+    removeCompletedDose(payload);
 
   return (
     <div className={styles.workspace}>
@@ -162,6 +169,8 @@ export const Workspace = ({ ui, vaccinationUi }: WorkspaceProps) => {
         <VaccinationRecords
           onAddDose={openAddDoseModal}
           onDeleteRecord={handleDeleteRecord}
+          onDeleteDose={handleDeleteDose}
+          onEditDose={handleEditDose}
           onEditRecord={handleEditRecord}
           onMarkPlannedDone={openMarkPlannedDoneModal}
           records={recordsForView}

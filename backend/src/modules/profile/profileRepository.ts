@@ -1,8 +1,4 @@
-import {
-  and,
-  eq,
-  sql,
-} from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { db } from '../../db/client.js';
 import {
@@ -14,6 +10,7 @@ import {
 } from '../../db/schema.js';
 import { toIsoDateTime } from './profileRepositoryDate.js';
 import {
+  LastCompletedDoseRemovalError,
   OptimisticConcurrencyError,
   ProfileAccountNotFoundError,
   ProfilePrimaryAccountDeletionError,
@@ -69,6 +66,22 @@ interface CompleteVaccinationDoseInput {
   tradeName: string | null;
 }
 
+interface UpdateVaccinationDoseInput {
+  batchNumber: string | null;
+  completedAt: string;
+  diseaseId: string;
+  doseId: string;
+  expectedUpdatedAt: string | null;
+  kind: DoseKind;
+  tradeName: string | null;
+}
+
+interface RemoveVaccinationDoseInput {
+  diseaseId: string;
+  doseId: string;
+  expectedUpdatedAt: string | null;
+}
+
 export interface ProfileRepository {
   createFamilyAccount: (input: {
     birthYear: number;
@@ -89,6 +102,8 @@ export interface ProfileRepository {
     accountId: number,
     input: CompleteVaccinationDoseInput,
   ) => Promise<string>;
+  updateVaccinationDose: (accountId: number, input: UpdateVaccinationDoseInput) => Promise<string>;
+  removeVaccinationDose: (accountId: number, input: RemoveVaccinationDoseInput) => Promise<string>;
   setLanguage: (language: AppLanguage) => Promise<void>;
   updateAccount: (input: {
     accountId: number;
@@ -98,19 +113,15 @@ export interface ProfileRepository {
   }) => Promise<ProfileSnapshot>;
 }
 
-export const createProfileRepository = (
-  database: DatabaseClient = db,
-): ProfileRepository => ({
+export const createProfileRepository = (database: DatabaseClient = db): ProfileRepository => ({
   createFamilyAccount: async ({ birthYear, country, name }) => {
     await database.transaction(async (transaction) => {
       const tx = transaction as unknown as DatabaseClient;
 
       await ensureDefaultProfileUsingDb(tx);
       const members = await loadProfileMembersUsingDb(tx);
-      const nextSortOrder = members.reduce(
-        (maxSortOrder, member) => Math.max(maxSortOrder, member.sortOrder),
-        -1,
-      ) + 1;
+      const nextSortOrder =
+        members.reduce((maxSortOrder, member) => Math.max(maxSortOrder, member.sortOrder), -1) + 1;
 
       await tx.insert(profileMember).values({
         appProfileId: APP_PROFILE_ID,
@@ -137,15 +148,14 @@ export const createProfileRepository = (
 
       await tx
         .delete(profileMember)
-        .where(and(
-          eq(profileMember.id, accountId),
-          eq(profileMember.appProfileId, APP_PROFILE_ID),
-        ));
+        .where(
+          and(eq(profileMember.id, accountId), eq(profileMember.appProfileId, APP_PROFILE_ID)),
+        );
 
       if (profile.selectedMemberId === accountId) {
         const membersAfterDelete = await loadProfileMembersUsingDb(tx);
-        const fallbackSelectedMember = membersAfterDelete.find((current) => current.kind === 'primary')
-          ?? membersAfterDelete[0];
+        const fallbackSelectedMember =
+          membersAfterDelete.find((current) => current.kind === 'primary') ?? membersAfterDelete[0];
 
         if (!fallbackSelectedMember) {
           throw new Error('Unable to resolve fallback account after deletion.');
@@ -174,10 +184,9 @@ export const createProfileRepository = (
 
     await database
       .delete(vaccinationSeries)
-      .where(and(
-        eq(vaccinationSeries.memberId, member.id),
-        eq(vaccinationSeries.diseaseId, diseaseId),
-      ));
+      .where(
+        and(eq(vaccinationSeries.memberId, member.id), eq(vaccinationSeries.diseaseId, diseaseId)),
+      );
   },
   selectAccount: async (accountId) => {
     await getProfileMemberByIdUsingDb(database, accountId);
@@ -210,20 +219,18 @@ export const createProfileRepository = (
       const tx = transaction as unknown as DatabaseClient;
 
       await ensureDefaultProfileUsingDb(tx);
-      const {
-        id: seriesId,
-        updatedAt: seriesUpdatedAt,
-      } = await upsertVaccinationSeriesForRecordSubmissionUsingDb(
-        tx,
-        member.id,
-        APP_PROFILE_ID,
-        input,
-      );
+      const { id: seriesId, updatedAt: seriesUpdatedAt } =
+        await upsertVaccinationSeriesForRecordSubmissionUsingDb(
+          tx,
+          member.id,
+          APP_PROFILE_ID,
+          input,
+        );
 
       const completedRows = await loadCompletedDoseRowsForSeriesUsingDb(tx, seriesId);
       const targetCompletedRow = input.completedDoseId
-        ? completedRows.find((row) => row.externalId === input.completedDoseId) ?? null
-        : completedRows[completedRows.length - 1] ?? null;
+        ? (completedRows.find((row) => row.externalId === input.completedDoseId) ?? null)
+        : (completedRows[completedRows.length - 1] ?? null);
 
       if (targetCompletedRow) {
         await tx
@@ -237,19 +244,19 @@ export const createProfileRepository = (
           .where(eq(completedDose.id, targetCompletedRow.id));
       } else {
         if (!input.completedDoseId) {
-          throw new Error(`Completed dose id is required to create vaccination series "${input.diseaseId}".`);
+          throw new Error(
+            `Completed dose id is required to create vaccination series "${input.diseaseId}".`,
+          );
         }
 
-        await tx
-          .insert(completedDose)
-          .values({
-            batchNumber: input.batchNumber,
-            completedAt: input.completedAt,
-            externalId: input.completedDoseId,
-            kind: input.completedDoseKind,
-            seriesId,
-            tradeName: input.tradeName,
-          });
+        await tx.insert(completedDose).values({
+          batchNumber: input.batchNumber,
+          completedAt: input.completedAt,
+          externalId: input.completedDoseId,
+          kind: input.completedDoseKind,
+          seriesId,
+          tradeName: input.tradeName,
+        });
       }
 
       await syncPlannedDosesForSeriesUsingDb(tx, seriesId, input.futureDueDoses);
@@ -287,25 +294,131 @@ export const createProfileRepository = (
         input.diseaseId,
       );
 
-      await tx
-        .insert(completedDose)
-        .values({
-          batchNumber: input.batchNumber,
-          completedAt: input.completedAt,
-          externalId: input.doseId,
-          kind: input.kind,
-          seriesId: existingSeries.id,
-          tradeName: input.tradeName,
-        });
+      await tx.insert(completedDose).values({
+        batchNumber: input.batchNumber,
+        completedAt: input.completedAt,
+        externalId: input.doseId,
+        kind: input.kind,
+        seriesId: existingSeries.id,
+        tradeName: input.tradeName,
+      });
 
       if (input.plannedDoseId) {
         await tx
           .delete(plannedDose)
-          .where(and(
-            eq(plannedDose.seriesId, existingSeries.id),
-            eq(plannedDose.externalId, input.plannedDoseId),
-          ));
+          .where(
+            and(
+              eq(plannedDose.seriesId, existingSeries.id),
+              eq(plannedDose.externalId, input.plannedDoseId),
+            ),
+          );
       }
+
+      return toIsoDateTime(updatedSeriesUpdatedAt);
+    });
+  },
+  updateVaccinationDose: async (accountId, input) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    return database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
+
+      await ensureDefaultProfileUsingDb(tx);
+
+      const existingSeries = await loadVaccinationSeriesVersionForMemberUsingDb(
+        tx,
+        member.id,
+        input.diseaseId,
+      );
+
+      if (!existingSeries) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${input.diseaseId}" no longer exists.`,
+        );
+      }
+
+      assertVaccinationSeriesVersionMatches({
+        diseaseId: input.diseaseId,
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        series: existingSeries,
+      });
+
+      const completedRows = await loadCompletedDoseRowsForSeriesUsingDb(tx, existingSeries.id);
+      const targetCompletedRow =
+        completedRows.find((row) => row.externalId === input.doseId) ?? null;
+
+      if (!targetCompletedRow) {
+        throw new OptimisticConcurrencyError(
+          `Completed dose "${input.doseId}" for series "${input.diseaseId}" no longer exists.`,
+        );
+      }
+
+      const updatedSeriesUpdatedAt = await touchVaccinationSeriesUsingDb(
+        tx,
+        existingSeries.id,
+        input.diseaseId,
+      );
+
+      await tx
+        .update(completedDose)
+        .set({
+          batchNumber: input.batchNumber,
+          completedAt: input.completedAt,
+          kind: input.kind,
+          tradeName: input.tradeName,
+        })
+        .where(eq(completedDose.id, targetCompletedRow.id));
+
+      return toIsoDateTime(updatedSeriesUpdatedAt);
+    });
+  },
+  removeVaccinationDose: async (accountId, input) => {
+    const member = await getProfileMemberByIdUsingDb(database, accountId);
+
+    return database.transaction(async (transaction) => {
+      const tx = transaction as unknown as DatabaseClient;
+
+      await ensureDefaultProfileUsingDb(tx);
+
+      const existingSeries = await loadVaccinationSeriesVersionForMemberUsingDb(
+        tx,
+        member.id,
+        input.diseaseId,
+      );
+
+      if (!existingSeries) {
+        throw new OptimisticConcurrencyError(
+          `Vaccination series "${input.diseaseId}" no longer exists.`,
+        );
+      }
+
+      assertVaccinationSeriesVersionMatches({
+        diseaseId: input.diseaseId,
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        series: existingSeries,
+      });
+
+      const completedRows = await loadCompletedDoseRowsForSeriesUsingDb(tx, existingSeries.id);
+      const targetCompletedRow =
+        completedRows.find((row) => row.externalId === input.doseId) ?? null;
+
+      if (!targetCompletedRow) {
+        throw new OptimisticConcurrencyError(
+          `Completed dose "${input.doseId}" for series "${input.diseaseId}" no longer exists.`,
+        );
+      }
+
+      if (completedRows.length <= 1) {
+        throw new LastCompletedDoseRemovalError(input.diseaseId, input.doseId);
+      }
+
+      const updatedSeriesUpdatedAt = await touchVaccinationSeriesUsingDb(
+        tx,
+        existingSeries.id,
+        input.diseaseId,
+      );
+
+      await tx.delete(completedDose).where(eq(completedDose.id, targetCompletedRow.id));
 
       return toIsoDateTime(updatedSeriesUpdatedAt);
     });
@@ -332,10 +445,7 @@ export const createProfileRepository = (
         name,
         updatedAt: sql`now()`,
       })
-      .where(and(
-        eq(profileMember.id, accountId),
-        eq(profileMember.appProfileId, APP_PROFILE_ID),
-      ));
+      .where(and(eq(profileMember.id, accountId), eq(profileMember.appProfileId, APP_PROFILE_ID)));
 
     return getProfileSnapshotUsingDb(database);
   },
@@ -344,6 +454,7 @@ export const createProfileRepository = (
 export { APP_PROFILE_ID };
 export { toVaccinationState } from './profileRepositoryMappers.js';
 export {
+  LastCompletedDoseRemovalError,
   OptimisticConcurrencyError,
   ProfileAccountNotFoundError,
   ProfilePrimaryAccountDeletionError,

@@ -39,11 +39,13 @@ describe('languageStore', () => {
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      removeVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       removeVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       submitVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      updateVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 
@@ -61,11 +63,13 @@ describe('languageStore', () => {
       createFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       deleteFamilyAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       getProfile: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      removeVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       removeVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       selectAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       setLanguage,
       setVaccinationCountry: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       submitVaccinationRecord: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
+      updateVaccinationDose: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
       updateAccount: vi.fn(() => Promise.resolve(defaultProfileSnapshot)),
     });
 

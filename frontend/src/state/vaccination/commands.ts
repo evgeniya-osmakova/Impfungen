@@ -2,6 +2,7 @@ import { VACCINATION_VALIDATION_ERROR_CODE } from 'src/constants/vaccinationVali
 import type { CountryCode } from 'src/interfaces/base.ts';
 import type {
   ImmunizationDoseInput,
+  ImmunizationDoseUpdateInput,
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
 import type { VaccinationValidationErrorCode } from 'src/interfaces/validation.ts';
@@ -11,8 +12,10 @@ import { isTrpcConflictError } from './errors.ts';
 import { useVaccinationStore } from './index';
 import {
   persistCompletedDose,
+  persistRemovedDose,
   persistRemovedRecord,
   persistSubmittedRecord,
+  persistUpdatedDose,
   persistVaccinationCountry,
 } from './persistence.ts';
 import {
@@ -20,15 +23,24 @@ import {
   resolveSubmitRecordCompletedDoseId,
   resolveUpdatedRecord,
 } from './recordResolution.ts';
-import { submitCompletedDoseUseCase, submitRecordUseCase } from './vaccinationRecordUseCases.ts';
+import {
+  removeCompletedDoseUseCase,
+  submitCompletedDoseUseCase,
+  submitRecordUseCase,
+  updateCompletedDoseUseCase,
+} from './vaccinationRecordUseCases.ts';
 
 interface VaccinationCommands {
+  removeCompletedDose: (payload: { diseaseId: string; doseId: string }) => Promise<boolean>;
   removeRecord: (diseaseId: string) => Promise<boolean>;
   setCountry: (country: CountryCode) => Promise<void>;
   submitCompletedDose: (
     record: ImmunizationDoseInput,
   ) => Promise<VaccinationValidationErrorCode | null>;
   submitRecord: (record: ImmunizationSeriesInput) => Promise<VaccinationValidationErrorCode | null>;
+  updateCompletedDose: (
+    record: ImmunizationDoseUpdateInput,
+  ) => Promise<VaccinationValidationErrorCode | null>;
 }
 
 export const useVaccinationCommands = (): VaccinationCommands => {
@@ -59,6 +71,40 @@ export const useVaccinationCommands = (): VaccinationCommands => {
       return true;
     } catch (error) {
       console.error('Unable to delete vaccination record.', error);
+
+      return false;
+    }
+  };
+
+  const removeCompletedDose: VaccinationCommands['removeCompletedDose'] = async ({
+    diseaseId,
+    doseId,
+  }) => {
+    const currentRecords = records;
+    const currentRecord = currentRecords.find((record) => record.diseaseId === diseaseId);
+    const removalResult = removeCompletedDoseUseCase(currentRecords, { diseaseId, doseId });
+
+    if (removalResult.errorCode || !removalResult.records) {
+      return false;
+    }
+
+    try {
+      const snapshot = await persistRemovedDose({
+        accountId: activeAccountId,
+        diseaseId,
+        doseId,
+        expectedUpdatedAt: currentRecord?.updatedAt ?? null,
+      });
+
+      if (snapshot) {
+        useAccountsStore.getState().replaceFromProfileSnapshot(snapshot);
+      } else {
+        replaceRecords(removalResult.records);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Unable to remove completed dose.', error);
 
       return false;
     }
@@ -170,10 +216,48 @@ export const useVaccinationCommands = (): VaccinationCommands => {
     return null;
   };
 
+  const updateCompletedDose: VaccinationCommands['updateCompletedDose'] = async (recordInput) => {
+    const currentRecords = records;
+    const currentRecord = currentRecords.find(
+      (record) => record.diseaseId === recordInput.diseaseId,
+    );
+    const updateResult = updateCompletedDoseUseCase(currentRecords, recordInput);
+
+    if (updateResult.errorCode || !updateResult.records) {
+      return updateResult.errorCode;
+    }
+
+    try {
+      const snapshot = await persistUpdatedDose({
+        accountId: activeAccountId,
+        doseInput: recordInput,
+        expectedUpdatedAt: currentRecord?.updatedAt ?? null,
+      });
+
+      if (snapshot) {
+        useAccountsStore.getState().replaceFromProfileSnapshot(snapshot);
+      } else {
+        replaceRecords(updateResult.records);
+      }
+    } catch (error) {
+      if (isTrpcConflictError(error)) {
+        return VACCINATION_VALIDATION_ERROR_CODE.sync_conflict;
+      }
+
+      console.error('Unable to update completed dose.', error);
+
+      return VACCINATION_VALIDATION_ERROR_CODE.save_failed;
+    }
+
+    return null;
+  };
+
   return {
+    removeCompletedDose,
     removeRecord,
     setCountry,
     submitCompletedDose,
     submitRecord,
+    updateCompletedDose,
   };
 };

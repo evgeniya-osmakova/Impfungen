@@ -2,6 +2,8 @@ import type { DoseKind } from '@backend/contracts';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VaccinationRecordCardView } from 'src/interfaces/vaccinationViewData.ts';
+import { useLanguageStore } from 'src/state/language';
+import { formatDateByLanguage } from 'src/utils/date';
 
 import { VaccinationRecordCard } from './VaccinationRecordCard';
 import { VaccinationRecordsDeleteModal } from './VaccinationRecordsDeleteModal';
@@ -10,7 +12,9 @@ import styles from './VaccinationRecords.module.css';
 
 interface VaccinationRecordsProps {
   onAddDose: (diseaseId: string) => void;
+  onDeleteDose: (payload: { diseaseId: string; doseId: string }) => Promise<boolean>;
   onDeleteRecord: (diseaseId: string) => Promise<boolean>;
+  onEditDose: (diseaseId: string, doseId: string) => void;
   onEditRecord: (diseaseId: string) => void;
   onMarkPlannedDone: (payload: {
     diseaseId: string;
@@ -24,40 +28,75 @@ interface VaccinationRecordsProps {
 
 export const VaccinationRecords = ({
   onAddDose,
+  onDeleteDose,
   onDeleteRecord,
+  onEditDose,
   onEditRecord,
   onMarkPlannedDone,
   records,
   resolveDiseaseLabelById,
 }: VaccinationRecordsProps) => {
   const { t } = useTranslation();
-  const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
-  const [deleteRequestError, setDeleteRequestError] = useState<string | null>(null);
+  const language = useLanguageStore((state) => state.language);
+  const [deleteRecordCandidateId, setDeleteRecordCandidateId] = useState<string | null>(null);
+  const [deleteRecordRequestError, setDeleteRecordRequestError] = useState<string | null>(null);
+  const [deleteDoseCandidate, setDeleteDoseCandidate] = useState<{
+    completedAt: string;
+    diseaseId: string;
+    doseId: string;
+  } | null>(null);
+  const [deleteDoseRequestError, setDeleteDoseRequestError] = useState<string | null>(null);
   const [expandedHistoryByDiseaseId, setExpandedHistoryByDiseaseId] = useState<
     Record<string, boolean>
   >({});
 
-  const handleCancelDelete = () => {
-    setDeleteCandidateId(null);
-    setDeleteRequestError(null);
+  const handleCancelRecordDelete = () => {
+    setDeleteRecordCandidateId(null);
+    setDeleteRecordRequestError(null);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!deleteCandidateId) {
+  const handleConfirmRecordDelete = async () => {
+    if (!deleteRecordCandidateId) {
       return;
     }
 
-    setDeleteRequestError(null);
+    setDeleteRecordRequestError(null);
 
-    const isDeleted = await onDeleteRecord(deleteCandidateId);
+    const isDeleted = await onDeleteRecord(deleteRecordCandidateId);
 
     if (isDeleted) {
-      setDeleteCandidateId(null);
+      setDeleteRecordCandidateId(null);
 
       return;
     }
 
-    setDeleteRequestError(t('internal.records.deleteConfirm.requestFailed'));
+    setDeleteRecordRequestError(t('internal.records.deleteConfirm.requestFailed'));
+  };
+
+  const handleCancelDoseDelete = () => {
+    setDeleteDoseCandidate(null);
+    setDeleteDoseRequestError(null);
+  };
+
+  const handleConfirmDoseDelete = async () => {
+    if (!deleteDoseCandidate) {
+      return;
+    }
+
+    setDeleteDoseRequestError(null);
+
+    const isDeleted = await onDeleteDose({
+      diseaseId: deleteDoseCandidate.diseaseId,
+      doseId: deleteDoseCandidate.doseId,
+    });
+
+    if (isDeleted) {
+      setDeleteDoseCandidate(null);
+
+      return;
+    }
+
+    setDeleteDoseRequestError(t('internal.records.deleteDoseConfirm.requestFailed'));
   };
 
   const toggleHistory = (diseaseId: string) => {
@@ -81,7 +120,9 @@ export const VaccinationRecords = ({
               isHistoryExpanded={Boolean(expandedHistoryByDiseaseId[record.diseaseId])}
               key={record.diseaseId}
               onAddDose={onAddDose}
-              onDeleteRequest={setDeleteCandidateId}
+              onDeleteDoseRequest={setDeleteDoseCandidate}
+              onDeleteRecordRequest={setDeleteRecordCandidateId}
+              onEditDose={onEditDose}
               onEditRecord={onEditRecord}
               onMarkPlannedDone={onMarkPlannedDone}
               onToggleHistory={toggleHistory}
@@ -94,11 +135,33 @@ export const VaccinationRecords = ({
       )}
 
       <VaccinationRecordsDeleteModal
-        deleteCandidateId={deleteCandidateId}
-        onCancel={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        requestError={deleteRequestError}
-        resolveDiseaseLabelById={resolveDiseaseLabelById}
+        confirmLabel={t('internal.records.deleteConfirm.confirm')}
+        isOpen={Boolean(deleteRecordCandidateId)}
+        message={t('internal.records.deleteConfirm.message', {
+          disease: deleteRecordCandidateId ? resolveDiseaseLabelById(deleteRecordCandidateId) : '',
+        })}
+        onCancel={handleCancelRecordDelete}
+        onConfirm={handleConfirmRecordDelete}
+        requestError={deleteRecordRequestError}
+        title={t('internal.records.deleteConfirm.title')}
+        warning={t('internal.records.deleteConfirm.warning')}
+      />
+      <VaccinationRecordsDeleteModal
+        confirmLabel={t('internal.records.deleteDoseConfirm.confirm')}
+        isOpen={Boolean(deleteDoseCandidate)}
+        message={t('internal.records.deleteDoseConfirm.message', {
+          date: deleteDoseCandidate
+            ? formatDateByLanguage(deleteDoseCandidate.completedAt, language)
+            : '',
+          disease: deleteDoseCandidate
+            ? resolveDiseaseLabelById(deleteDoseCandidate.diseaseId)
+            : '',
+        })}
+        onCancel={handleCancelDoseDelete}
+        onConfirm={handleConfirmDoseDelete}
+        requestError={deleteDoseRequestError}
+        title={t('internal.records.deleteDoseConfirm.title')}
+        warning={t('internal.records.deleteDoseConfirm.warning')}
       />
     </section>
   );

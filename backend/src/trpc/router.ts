@@ -8,6 +8,7 @@ import {
   REPEAT_UNIT_VALUES,
 } from '../modules/profile/profileTypes.js';
 import {
+  LastCompletedDoseRemovalError,
   OptimisticConcurrencyError,
   ProfileAccountNotFoundError,
   ProfilePrimaryAccountDeletionError,
@@ -57,6 +58,22 @@ const completeVaccinationDoseSchema = z.object({
   tradeName: z.string().nullable(),
 });
 
+const updateVaccinationDoseSchema = z.object({
+  batchNumber: z.string().nullable(),
+  completedAt: isoDateSchema,
+  diseaseId: z.string().min(1),
+  doseId: z.string().min(1),
+  expectedUpdatedAt: isoDateTimeSchema.nullable(),
+  kind: z.enum(DOSE_KIND_VALUES),
+  tradeName: z.string().nullable(),
+});
+
+const removeVaccinationDoseSchema = z.object({
+  diseaseId: z.string().min(1),
+  doseId: z.string().min(1),
+  expectedUpdatedAt: isoDateTimeSchema.nullable(),
+});
+
 type SetLanguageInput = {
   language: (typeof APP_LANGUAGE_VALUES)[number];
 };
@@ -69,15 +86,12 @@ interface ErrorMapping {
   matches: (error: unknown) => boolean;
 }
 
-const toTrpcError = (
-  code: TrpcErrorCode,
-  message: string,
-  cause: unknown,
-): TRPCError => new TRPCError({
-  code,
-  message,
-  cause,
-});
+const toTrpcError = (code: TrpcErrorCode, message: string, cause: unknown): TRPCError =>
+  new TRPCError({
+    code,
+    message,
+    cause,
+  });
 
 const runProfileOperation = async <T>(
   operation: () => Promise<T>,
@@ -102,10 +116,14 @@ const isProfileAccountNotFoundError = (error: unknown): error is ProfileAccountN
 
 const isProfilePrimaryAccountDeletionError = (
   error: unknown,
-): error is ProfilePrimaryAccountDeletionError => error instanceof ProfilePrimaryAccountDeletionError;
+): error is ProfilePrimaryAccountDeletionError =>
+  error instanceof ProfilePrimaryAccountDeletionError;
 
 const isOptimisticConcurrencyError = (error: unknown): error is OptimisticConcurrencyError =>
   error instanceof OptimisticConcurrencyError;
+
+const isLastCompletedDoseRemovalError = (error: unknown): error is LastCompletedDoseRemovalError =>
+  error instanceof LastCompletedDoseRemovalError;
 
 const PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING: ErrorMapping = {
   code: 'NOT_FOUND',
@@ -125,6 +143,12 @@ const VACCINATION_SYNC_CONFLICT_ERROR_MAPPING: ErrorMapping = {
   message: 'Vaccination record was changed by another client. Refresh and retry.',
 };
 
+const LAST_COMPLETED_DOSE_REMOVAL_ERROR_MAPPING: ErrorMapping = {
+  code: 'BAD_REQUEST',
+  matches: isLastCompletedDoseRemovalError,
+  message: 'Cannot remove the last completed dose from vaccination record.',
+};
+
 const accountMutationBaseSchema = z.object({
   birthYear: birthYearSchema,
   name: z.string().trim().min(1),
@@ -135,7 +159,8 @@ const profileRouter = router({
     runProfileOperation(
       () => ctx.profileRepository.getProfileSnapshot(),
       'Failed to load profile state.',
-    )),
+    ),
+  ),
   selectAccount: publicProcedure
     .input(z.object({ accountId: accountIdSchema }))
     .mutation(({ ctx, input }) =>
@@ -143,43 +168,50 @@ const profileRouter = router({
         () => ctx.profileRepository.selectAccount(input.accountId),
         'Failed to select account.',
         [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
-      )),
+      ),
+    ),
   createFamilyAccount: publicProcedure
-    .input(accountMutationBaseSchema.extend({
-      country: z.enum(COUNTRY_CODE_VALUES).nullable(),
-    }))
+    .input(
+      accountMutationBaseSchema.extend({
+        country: z.enum(COUNTRY_CODE_VALUES).nullable(),
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         () => ctx.profileRepository.createFamilyAccount(input),
         'Failed to create family account.',
-      )),
+      ),
+    ),
   deleteFamilyAccount: publicProcedure
     .input(z.object({ accountId: accountIdSchema }))
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         () => ctx.profileRepository.deleteFamilyAccount(input.accountId),
         'Failed to delete family account.',
-        [
-          PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING,
-          PRIMARY_ACCOUNT_DELETE_ERROR_MAPPING,
-        ],
-      )),
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING, PRIMARY_ACCOUNT_DELETE_ERROR_MAPPING],
+      ),
+    ),
   updateAccount: publicProcedure
-    .input(accountMutationBaseSchema.extend({
-      accountId: accountIdSchema,
-      country: z.enum(COUNTRY_CODE_VALUES).nullable(),
-    }))
+    .input(
+      accountMutationBaseSchema.extend({
+        accountId: accountIdSchema,
+        country: z.enum(COUNTRY_CODE_VALUES).nullable(),
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         () => ctx.profileRepository.updateAccount(input),
         'Failed to update account.',
         [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
-      )),
+      ),
+    ),
   setVaccinationCountry: publicProcedure
-    .input(z.object({
-      accountId: accountIdSchema,
-      country: z.enum(COUNTRY_CODE_VALUES),
-    }))
+    .input(
+      z.object({
+        accountId: accountIdSchema,
+        country: z.enum(COUNTRY_CODE_VALUES),
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         async () => {
@@ -188,11 +220,14 @@ const profileRouter = router({
         },
         'Failed to save vaccination country.',
         [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
-      )),
+      ),
+    ),
   submitVaccinationRecord: publicProcedure
-    .input(submitVaccinationRecordSchema.extend({
-      accountId: accountIdSchema,
-    }))
+    .input(
+      submitVaccinationRecordSchema.extend({
+        accountId: accountIdSchema,
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         async () => {
@@ -201,15 +236,15 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to save vaccination record.',
-        [
-          PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING,
-          VACCINATION_SYNC_CONFLICT_ERROR_MAPPING,
-        ],
-      )),
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING, VACCINATION_SYNC_CONFLICT_ERROR_MAPPING],
+      ),
+    ),
   completeVaccinationDose: publicProcedure
-    .input(completeVaccinationDoseSchema.extend({
-      accountId: accountIdSchema,
-    }))
+    .input(
+      completeVaccinationDoseSchema.extend({
+        accountId: accountIdSchema,
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         async () => {
@@ -218,16 +253,54 @@ const profileRouter = router({
           return ctx.profileRepository.getProfileSnapshot();
         },
         'Failed to save completed dose.',
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING, VACCINATION_SYNC_CONFLICT_ERROR_MAPPING],
+      ),
+    ),
+  updateVaccinationDose: publicProcedure
+    .input(
+      updateVaccinationDoseSchema.extend({
+        accountId: accountIdSchema,
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      runProfileOperation(
+        async () => {
+          const { accountId, ...dose } = input;
+          await ctx.profileRepository.updateVaccinationDose(accountId, dose);
+          return ctx.profileRepository.getProfileSnapshot();
+        },
+        'Failed to update completed dose.',
+        [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING, VACCINATION_SYNC_CONFLICT_ERROR_MAPPING],
+      ),
+    ),
+  removeVaccinationDose: publicProcedure
+    .input(
+      removeVaccinationDoseSchema.extend({
+        accountId: accountIdSchema,
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      runProfileOperation(
+        async () => {
+          const { accountId, ...dose } = input;
+          await ctx.profileRepository.removeVaccinationDose(accountId, dose);
+          return ctx.profileRepository.getProfileSnapshot();
+        },
+        'Failed to remove completed dose.',
         [
           PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING,
           VACCINATION_SYNC_CONFLICT_ERROR_MAPPING,
+          LAST_COMPLETED_DOSE_REMOVAL_ERROR_MAPPING,
         ],
-      )),
+      ),
+    ),
   removeVaccinationRecord: publicProcedure
-    .input(z.object({
-      accountId: accountIdSchema,
-      diseaseId: z.string().min(1),
-    }))
+    .input(
+      z.object({
+        accountId: accountIdSchema,
+        diseaseId: z.string().min(1),
+      }),
+    )
     .mutation(({ ctx, input }) =>
       runProfileOperation(
         async () => {
@@ -236,17 +309,16 @@ const profileRouter = router({
         },
         'Failed to remove vaccination record.',
         [PROFILE_ACCOUNT_NOT_FOUND_ERROR_MAPPING],
-      )),
+      ),
+    ),
   setLanguage: publicProcedure
     .input(z.object({ language: z.enum(APP_LANGUAGE_VALUES) }))
     .mutation(({ ctx, input }: { ctx: TrpcContext; input: SetLanguageInput }) =>
-      runProfileOperation(
-        async () => {
-          await ctx.profileRepository.setLanguage(input.language);
-          return ctx.profileRepository.getProfileSnapshot();
-        },
-        'Failed to save language.',
-      )),
+      runProfileOperation(async () => {
+        await ctx.profileRepository.setLanguage(input.language);
+        return ctx.profileRepository.getProfileSnapshot();
+      }, 'Failed to save language.'),
+    ),
 });
 
 export const appRouter = router({

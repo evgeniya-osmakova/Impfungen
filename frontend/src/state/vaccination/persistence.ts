@@ -2,6 +2,7 @@ import { getProfileApi, type ProfileSnapshot } from 'src/api/profileApi.ts';
 import type { CountryCode } from 'src/interfaces/base.ts';
 import type {
   ImmunizationDoseInput,
+  ImmunizationDoseUpdateInput,
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
 
@@ -69,6 +70,58 @@ export const persistRemovedRecord = async ({
   }
 
   return api.removeVaccinationRecord({ accountId, diseaseId });
+};
+
+export const persistUpdatedDose = async ({
+  accountId,
+  doseInput,
+  expectedUpdatedAt,
+}: {
+  accountId: number | null;
+  doseInput: ImmunizationDoseUpdateInput;
+  expectedUpdatedAt: string | null;
+}): Promise<ProfileSnapshot | null> => {
+  const api = getProfileApi();
+
+  if (!api || accountId === null) {
+    return null;
+  }
+
+  return api.updateVaccinationDose({
+    accountId,
+    batchNumber: doseInput.batchNumber,
+    completedAt: doseInput.completedAt,
+    diseaseId: doseInput.diseaseId,
+    doseId: doseInput.doseId,
+    expectedUpdatedAt,
+    kind: doseInput.kind,
+    tradeName: doseInput.tradeName,
+  });
+};
+
+export const persistRemovedDose = async ({
+  accountId,
+  diseaseId,
+  doseId,
+  expectedUpdatedAt,
+}: {
+  accountId: number | null;
+  diseaseId: string;
+  doseId: string;
+  expectedUpdatedAt: string | null;
+}): Promise<ProfileSnapshot | null> => {
+  const api = getProfileApi();
+
+  if (!api || accountId === null) {
+    return null;
+  }
+
+  return api.removeVaccinationDose({
+    accountId,
+    diseaseId,
+    doseId,
+    expectedUpdatedAt,
+  });
 };
 
 export const persistVaccinationCountry = async ({

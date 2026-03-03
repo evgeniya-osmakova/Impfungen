@@ -3,6 +3,7 @@ import { sortCompletedDoses } from 'src/helpers/recordHelpers.ts';
 import type { CompletedDose } from 'src/interfaces/dose.ts';
 import type {
   ImmunizationDoseInput,
+  ImmunizationDoseUpdateInput,
   ImmunizationSeriesInput,
 } from 'src/interfaces/immunizationRecord.ts';
 import type { VaccinationState } from 'src/interfaces/vaccinationState.ts';
@@ -126,6 +127,52 @@ const resolveRecordsWithCompletedDose = (
     };
   });
 
+const resolveRecordsWithUpdatedCompletedDose = (
+  records: readonly VaccinationState['records'][number][],
+  input: ImmunizationDoseUpdateInput,
+): VaccinationState['records'] =>
+  records.map((record) => {
+    if (record.diseaseId !== input.diseaseId) {
+      return record;
+    }
+
+    return {
+      ...record,
+      completedDoses: sortCompletedDoses(
+        record.completedDoses.map((dose) => {
+          if (dose.id !== input.doseId) {
+            return dose;
+          }
+
+          return {
+            ...dose,
+            batchNumber: normalizeOptionalText(input.batchNumber),
+            completedAt: input.completedAt,
+            kind: input.kind,
+            tradeName: normalizeOptionalText(input.tradeName),
+          };
+        }),
+      ),
+      updatedAt: getNowISODateTime(),
+    };
+  });
+
+const resolveRecordsWithoutCompletedDose = (
+  records: readonly VaccinationState['records'][number][],
+  input: Pick<ImmunizationDoseUpdateInput, 'diseaseId' | 'doseId'>,
+): VaccinationState['records'] =>
+  records.map((record) => {
+    if (record.diseaseId !== input.diseaseId) {
+      return record;
+    }
+
+    return {
+      ...record,
+      completedDoses: record.completedDoses.filter((dose) => dose.id !== input.doseId),
+      updatedAt: getNowISODateTime(),
+    };
+  });
+
 export const submitRecordUseCase = (
   records: readonly VaccinationState['records'][number][],
   recordInput: ImmunizationSeriesInput,
@@ -170,5 +217,77 @@ export const submitCompletedDoseUseCase = (
   return {
     errorCode: null,
     records: resolveRecordsWithCompletedDose(records, recordInput),
+  };
+};
+
+export const updateCompletedDoseUseCase = (
+  records: readonly VaccinationState['records'][number][],
+  recordInput: ImmunizationDoseUpdateInput,
+): ValidationOutcome => {
+  const validationResult = validateVaccinationCompleteDoseInput(recordInput);
+
+  if (!validationResult.isValid) {
+    return {
+      errorCode: validationResult.errorCode,
+      records: null,
+    };
+  }
+
+  const targetRecord = records.find((record) => record.diseaseId === recordInput.diseaseId);
+
+  if (!targetRecord) {
+    return {
+      errorCode: VACCINATION_VALIDATION_ERROR_CODE.disease_required,
+      records: null,
+    };
+  }
+
+  const hasTargetDose = targetRecord.completedDoses.some((dose) => dose.id === recordInput.doseId);
+
+  if (!hasTargetDose) {
+    return {
+      errorCode: VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
+      records: null,
+    };
+  }
+
+  return {
+    errorCode: null,
+    records: resolveRecordsWithUpdatedCompletedDose(records, recordInput),
+  };
+};
+
+export const removeCompletedDoseUseCase = (
+  records: readonly VaccinationState['records'][number][],
+  input: Pick<ImmunizationDoseUpdateInput, 'diseaseId' | 'doseId'>,
+): ValidationOutcome => {
+  const targetRecord = records.find((record) => record.diseaseId === input.diseaseId);
+
+  if (!targetRecord) {
+    return {
+      errorCode: VACCINATION_VALIDATION_ERROR_CODE.disease_required,
+      records: null,
+    };
+  }
+
+  const hasTargetDose = targetRecord.completedDoses.some((dose) => dose.id === input.doseId);
+
+  if (!hasTargetDose) {
+    return {
+      errorCode: VACCINATION_VALIDATION_ERROR_CODE.sync_conflict,
+      records: null,
+    };
+  }
+
+  if (targetRecord.completedDoses.length <= 1) {
+    return {
+      errorCode: VACCINATION_VALIDATION_ERROR_CODE.save_failed,
+      records: null,
+    };
+  }
+
+  return {
+    errorCode: null,
+    records: resolveRecordsWithoutCompletedDose(records, input),
   };
 };

@@ -118,6 +118,7 @@ export const ru = {
           addDate: 'Добавить дату',
           addDose: 'Добавить дозу/ревакцинацию',
           closeModal: 'Закрыть',
+          editDose: 'Редактировать дозу',
           markPlannedDone: 'Отметить сделанной',
           removeDate: 'Удалить дату',
           openModal: 'Добавить выполненную вакцинацию',
@@ -233,6 +234,14 @@ export const ru = {
           requestFailed: 'Не удалось удалить запись, попробуйте ещё раз.',
           cancel: 'Отмена',
           confirm: 'Удалить запись',
+        },
+        deleteDoseConfirm: {
+          title: 'Удалить дозу из истории?',
+          message: 'Удалить запись «{{disease}}» от {{date}}?',
+          warning: 'Это действие нельзя будет отменить.',
+          requestFailed: 'Не удалось удалить дозу, попробуйте ещё раз.',
+          cancel: 'Отмена',
+          confirm: 'Удалить дозу',
         },
       },
       doseKind: {

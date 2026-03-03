@@ -18,3 +18,12 @@ export class ProfilePrimaryAccountDeletionError extends Error {
     this.name = 'ProfilePrimaryAccountDeletionError';
   }
 }
+
+export class LastCompletedDoseRemovalError extends Error {
+  constructor(diseaseId: string, doseId: string) {
+    super(
+      `Cannot remove completed dose "${doseId}" for disease "${diseaseId}" because it is the last one.`,
+    );
+    this.name = 'LastCompletedDoseRemovalError';
+  }
+}

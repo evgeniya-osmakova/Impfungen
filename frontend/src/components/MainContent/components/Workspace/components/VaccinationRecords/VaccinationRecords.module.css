@@ -167,17 +167,29 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  align-items: baseline;
+  align-items: flex-start;
   font-size: 0.86rem;
 }
 
-.vaccinationRecords__historyMain strong {
+.vaccinationRecords__historyMainText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vaccinationRecords__historyMainText strong {
   color: var(--text-primary);
 }
 
-.vaccinationRecords__historyMain span {
+.vaccinationRecords__historyMainText span {
   color: var(--text-secondary);
-  text-align: right;
+}
+
+.vaccinationRecords__historyActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .vaccinationRecords__historyMeta {
@@ -414,7 +426,11 @@
   }
 
   .vaccinationRecords__detailLine strong,
-  .vaccinationRecords__historyMain span {
+  .vaccinationRecords__historyMainText span {
     text-align: left;
+  }
+
+  .vaccinationRecords__historyActions {
+    justify-content: flex-start;
   }
 }

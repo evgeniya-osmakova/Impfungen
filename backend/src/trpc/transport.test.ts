@@ -2,6 +2,7 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
 
+import { LastCompletedDoseRemovalError } from '../modules/profile/profileRepository.js';
 import type { ProfileRepository } from '../modules/profile/profileRepository.js';
 import type { ProfileSnapshot } from '../modules/profile/profileTypes.js';
 
@@ -28,9 +29,7 @@ const createSnapshot = (): ProfileSnapshot => ({
   },
 });
 
-const createRepository = (
-  snapshot: ProfileSnapshot,
-): ProfileRepository => ({
+const createRepository = (snapshot: ProfileSnapshot): ProfileRepository => ({
   createFamilyAccount: async ({ birthYear, country, name }) => {
     const nextId = Math.max(...snapshot.accountsState.accounts.map((account) => account.id), 0) + 1;
 
@@ -64,7 +63,58 @@ const createRepository = (
       (record) => record.diseaseId !== diseaseId,
     );
   },
-  completeVaccinationDose: async () => '2025-01-10T00:00:00.000Z',
+  completeVaccinationDose: async (_accountId, input) => {
+    const targetRecord = snapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+
+    if (targetRecord) {
+      targetRecord.completedDoses.push({
+        batchNumber: input.batchNumber,
+        completedAt: input.completedAt,
+        id: input.doseId,
+        kind: input.kind,
+        tradeName: input.tradeName,
+      });
+      targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+    }
+
+    return '2025-01-10T00:00:00.000Z';
+  },
+  updateVaccinationDose: async (_accountId, input) => {
+    const targetRecord = snapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+    const targetDose = targetRecord?.completedDoses.find((dose) => dose.id === input.doseId);
+
+    if (targetRecord && targetDose) {
+      targetDose.batchNumber = input.batchNumber;
+      targetDose.completedAt = input.completedAt;
+      targetDose.kind = input.kind;
+      targetDose.tradeName = input.tradeName;
+      targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+    }
+
+    return '2025-01-10T00:00:00.000Z';
+  },
+  removeVaccinationDose: async (_accountId, input) => {
+    const targetRecord = snapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+
+    if (targetRecord) {
+      if (targetRecord.completedDoses.length <= 1) {
+        throw new LastCompletedDoseRemovalError(input.diseaseId, input.doseId);
+      }
+
+      targetRecord.completedDoses = targetRecord.completedDoses.filter(
+        (dose) => dose.id !== input.doseId,
+      );
+      targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+    }
+
+    return '2025-01-10T00:00:00.000Z';
+  },
   setVaccinationCountry: async (accountId, country) => {
     snapshot.vaccinationState.country = country;
     const selectedAccount = snapshot.accountsState.accounts.find(
@@ -139,11 +189,12 @@ describe('tRPC Fastify transport', () => {
       prefix: '/trpc',
       trpcOptions: {
         router: appRouter,
-        createContext: ({ req, res }) => createTrpcContext({
-          profileRepository,
-          req,
-          res,
-        }),
+        createContext: ({ req, res }) =>
+          createTrpcContext({
+            profileRepository,
+            req,
+            res,
+          }),
       },
     });
 
@@ -243,6 +294,63 @@ describe('tRPC Fastify transport', () => {
     });
     expect(snapshot.vaccinationState.records).toEqual([persistedRecord]);
 
+    const completeDoseResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.completeVaccinationDose',
+      payload: {
+        accountId: 1,
+        batchNumber: null,
+        completedAt: '2025-02-01',
+        diseaseId: 'measles',
+        doseId: 'done-2',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+        kind: 'revaccination',
+        plannedDoseId: null,
+        tradeName: null,
+      },
+    });
+
+    expect(completeDoseResponse.statusCode).toBe(200);
+
+    const updateDoseResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.updateVaccinationDose',
+      payload: {
+        accountId: 1,
+        batchNumber: 'B-2',
+        completedAt: '2025-02-02',
+        diseaseId: 'measles',
+        doseId: 'done-2',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+        kind: 'revaccination',
+        tradeName: 'MMR',
+      },
+    });
+
+    expect(updateDoseResponse.statusCode).toBe(200);
+
+    const removeDoseResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.removeVaccinationDose',
+      payload: {
+        accountId: 1,
+        diseaseId: 'measles',
+        doseId: 'done-1',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+      },
+    });
+
+    expect(removeDoseResponse.statusCode).toBe(200);
+    expect(snapshot.vaccinationState.records[0]?.completedDoses).toEqual([
+      {
+        batchNumber: 'B-2',
+        completedAt: '2025-02-02',
+        id: 'done-2',
+        kind: 'revaccination',
+        tradeName: 'MMR',
+      },
+    ]);
+
     const removeRecordResponse = await app.inject({
       method: 'POST',
       url: '/trpc/profile.removeVaccinationRecord',
@@ -254,6 +362,65 @@ describe('tRPC Fastify transport', () => {
 
     expect(removeRecordResponse.statusCode).toBe(200);
     expect(snapshot.vaccinationState.records).toEqual([]);
+
+    await app.close();
+  });
+
+  it('returns bad request for removing the last completed dose', async () => {
+    const snapshot = createSnapshot();
+    snapshot.vaccinationState = {
+      country: null,
+      records: [
+        {
+          completedDoses: [
+            {
+              batchNumber: null,
+              completedAt: '2025-01-10',
+              id: 'done-1',
+              kind: 'nextDose',
+              tradeName: null,
+            },
+          ],
+          diseaseId: 'measles',
+          futureDueDoses: [],
+          repeatEvery: null,
+          updatedAt: '2025-01-10T00:00:00.000Z',
+        },
+      ],
+    };
+    const profileRepository = createRepository(snapshot);
+    const app = Fastify();
+
+    await app.register(fastifyTRPCPlugin, {
+      prefix: '/trpc',
+      trpcOptions: {
+        router: appRouter,
+        createContext: ({ req, res }) =>
+          createTrpcContext({
+            profileRepository,
+            req,
+            res,
+          }),
+      },
+    });
+
+    const removeDoseResponse = await app.inject({
+      method: 'POST',
+      url: '/trpc/profile.removeVaccinationDose',
+      payload: {
+        accountId: 1,
+        diseaseId: 'measles',
+        doseId: 'done-1',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+      },
+    });
+
+    expect(removeDoseResponse.statusCode).toBe(400);
+    expect(removeDoseResponse.json()).toMatchObject({
+      error: {
+        message: 'Cannot remove the last completed dose from vaccination record.',
+      },
+    });
 
     await app.close();
   });

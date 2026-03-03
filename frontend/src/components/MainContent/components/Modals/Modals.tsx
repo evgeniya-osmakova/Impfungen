@@ -61,7 +61,7 @@ export const Modals = ({ ui, vaccinationUi }: ModalsProps) => {
     records,
   });
   const { cancelEdit } = vaccinationUi;
-  const { submitCompletedDose, submitRecord } = useVaccinationCommands();
+  const { submitCompletedDose, submitRecord, updateCompletedDose } = useVaccinationCommands();
   const { resolveDiseaseLabel } = useDiseaseLabels();
   const diseaseFieldRef = useRef<HTMLSelectElement | null>(null);
 
@@ -89,7 +89,13 @@ export const Modals = ({ ui, vaccinationUi }: ModalsProps) => {
   };
 
   const handleSubmitCompletedDose = async (doseInput: ImmunizationDoseInput) => {
-    const errorCode = await submitCompletedDose(doseInput);
+    const editingDoseId = completeDoseDraft?.editingDoseId;
+    const errorCode = editingDoseId
+      ? await updateCompletedDose({
+          ...doseInput,
+          doseId: editingDoseId,
+        })
+      : await submitCompletedDose(doseInput);
 
     if (errorCode) {
       setCompleteDoseErrorKey(INTERNAL_HOME_FORM_ERROR_TEXT_KEY_BY_CODE[errorCode]);
@@ -137,6 +143,7 @@ export const Modals = ({ ui, vaccinationUi }: ModalsProps) => {
             errorKey={completeDoseErrorKey}
             initialValues={completeDoseDraft.initialValues}
             isInModal
+            isEditingFlow={Boolean(completeDoseDraft.editingDoseId)}
             isMarkPlannedFlow={completeDoseDraft.isMarkPlannedFlow}
             onCancel={closeCompleteDoseModal}
             onSubmit={handleSubmitCompletedDose}

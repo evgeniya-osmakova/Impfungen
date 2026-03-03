@@ -28,6 +28,8 @@ type DeleteFamilyAccountInput = RouterInputs['profile']['deleteFamilyAccount'];
 type UpdateAccountInput = RouterInputs['profile']['updateAccount'];
 type SubmitVaccinationRecordInput = RouterInputs['profile']['submitVaccinationRecord'];
 type CompleteVaccinationDoseInput = RouterInputs['profile']['completeVaccinationDose'];
+type UpdateVaccinationDoseInput = RouterInputs['profile']['updateVaccinationDose'];
+type RemoveVaccinationDoseInput = RouterInputs['profile']['removeVaccinationDose'];
 type RemoveVaccinationRecordInput = RouterInputs['profile']['removeVaccinationRecord'];
 
 interface ProfileApi {
@@ -37,11 +39,13 @@ interface ProfileApi {
     accountId: DeleteFamilyAccountInput['accountId'],
   ) => Promise<ProfileSnapshot>;
   getProfile: () => Promise<ProfileSnapshot>;
+  removeVaccinationDose: (input: RemoveVaccinationDoseInput) => Promise<ProfileSnapshot>;
   removeVaccinationRecord: (input: RemoveVaccinationRecordInput) => Promise<ProfileSnapshot>;
   selectAccount: (accountId: SelectAccountInput['accountId']) => Promise<ProfileSnapshot>;
   setLanguage: (language: SetLanguageInput['language']) => Promise<ProfileSnapshot>;
   setVaccinationCountry: (input: SetVaccinationCountryInput) => Promise<ProfileSnapshot>;
   submitVaccinationRecord: (input: SubmitVaccinationRecordInput) => Promise<ProfileSnapshot>;
+  updateVaccinationDose: (input: UpdateVaccinationDoseInput) => Promise<ProfileSnapshot>;
   updateAccount: (input: UpdateAccountInput) => Promise<ProfileSnapshot>;
 }
 
@@ -52,11 +56,13 @@ export const createProfileApi = (): ProfileApi => ({
   createFamilyAccount: (input) => trpc.profile.createFamilyAccount.mutate(input),
   deleteFamilyAccount: (accountId) => trpc.profile.deleteFamilyAccount.mutate({ accountId }),
   getProfile: () => trpc.profile.get.query(),
+  removeVaccinationDose: (input) => trpc.profile.removeVaccinationDose.mutate(input),
   removeVaccinationRecord: (input) => trpc.profile.removeVaccinationRecord.mutate(input),
   selectAccount: (accountId) => trpc.profile.selectAccount.mutate({ accountId }),
   setLanguage: (language) => trpc.profile.setLanguage.mutate({ language }),
   setVaccinationCountry: (input) => trpc.profile.setVaccinationCountry.mutate(input),
   submitVaccinationRecord: (input) => trpc.profile.submitVaccinationRecord.mutate(input),
+  updateVaccinationDose: (input) => trpc.profile.updateVaccinationDose.mutate(input),
   updateAccount: (input) => trpc.profile.updateAccount.mutate(input),
 });
 

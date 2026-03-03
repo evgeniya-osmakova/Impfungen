@@ -2,6 +2,7 @@ import type { DoseKind } from '@backend/contracts';
 import { VACCINATION_DOSE_KIND } from 'src/constants/vaccination';
 import { resolveLatestCompletedDose } from 'src/helpers/recordHelpers.ts';
 import type { CompleteDoseDraft } from 'src/interfaces/completeDoseDraft';
+import type { CompletedDose } from 'src/interfaces/dose.ts';
 import type { ImmunizationSeries } from 'src/interfaces/immunizationRecord';
 
 interface MarkPlannedDonePayload {
@@ -16,6 +17,11 @@ const resolveRecordByDiseaseId = (
   diseaseId: string,
 ): ImmunizationSeries | null => records.find((record) => record.diseaseId === diseaseId) ?? null;
 
+const resolveCompletedDoseById = (
+  record: ImmunizationSeries | null,
+  doseId: string,
+): CompletedDose | null => record?.completedDoses.find((dose) => dose.id === doseId) ?? null;
+
 export const buildAddDoseDraft = (
   records: readonly ImmunizationSeries[],
   diseaseId: string,
@@ -25,6 +31,7 @@ export const buildAddDoseDraft = (
 
   return {
     diseaseId,
+    editingDoseId: null,
     initialValues: {
       batchNumber: latestCompletedDose?.batchNumber ?? null,
       completedAt: '',
@@ -45,6 +52,7 @@ export const buildMarkPlannedDoneDraft = (
 
   return {
     diseaseId: payload.diseaseId,
+    editingDoseId: null,
     initialValues: {
       batchNumber: latestCompletedDose?.batchNumber ?? null,
       completedAt: payload.dueAt,
@@ -53,5 +61,33 @@ export const buildMarkPlannedDoneDraft = (
       tradeName: latestCompletedDose?.tradeName ?? null,
     },
     isMarkPlannedFlow: true,
+  };
+};
+
+export const buildEditDoseDraft = (
+  records: readonly ImmunizationSeries[],
+  payload: {
+    diseaseId: string;
+    doseId: string;
+  },
+): CompleteDoseDraft | null => {
+  const targetRecord = resolveRecordByDiseaseId(records, payload.diseaseId);
+  const targetDose = resolveCompletedDoseById(targetRecord, payload.doseId);
+
+  if (!targetDose) {
+    return null;
+  }
+
+  return {
+    diseaseId: payload.diseaseId,
+    editingDoseId: targetDose.id,
+    initialValues: {
+      batchNumber: targetDose.batchNumber,
+      completedAt: targetDose.completedAt,
+      kind: targetDose.kind,
+      plannedDoseId: null,
+      tradeName: targetDose.tradeName,
+    },
+    isMarkPlannedFlow: false,
   };
 };

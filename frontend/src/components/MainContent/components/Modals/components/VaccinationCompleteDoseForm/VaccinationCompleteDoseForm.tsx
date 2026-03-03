@@ -27,6 +27,7 @@ interface VaccinationCompleteDoseFormProps {
   diseaseId: string;
   errorKey: string | null;
   initialValues: VaccinationCompleteDoseFormInitialValues;
+  isEditingFlow?: boolean;
   isInModal?: boolean;
   isMarkPlannedFlow: boolean;
   onCancel: () => void;
@@ -39,6 +40,7 @@ export const VaccinationCompleteDoseForm = ({
   diseaseId,
   errorKey,
   initialValues,
+  isEditingFlow = false,
   isInModal = false,
   isMarkPlannedFlow,
   onCancel,
@@ -88,7 +90,9 @@ export const VaccinationCompleteDoseForm = ({
         <h2 className={styles.vaccinationCompleteDoseForm__title}>
           {isMarkPlannedFlow
             ? t('internal.form.actions.markPlannedDone')
-            : t('internal.form.actions.addDose')}
+            : isEditingFlow
+              ? t('internal.form.actions.editDose')
+              : t('internal.form.actions.addDose')}
         </h2>
         <p className={styles.vaccinationCompleteDoseForm__subtitle}>
           {t('internal.form.markDoneSubtitle')}

@@ -53,11 +53,13 @@ const createApiMock = (responses?: {
     Promise.resolve(responses?.deleteFamilyAccount ?? createSnapshot()),
   ),
   getProfile: vi.fn(() => Promise.resolve(createSnapshot())),
+  removeVaccinationDose: vi.fn(() => Promise.resolve(createSnapshot())),
   removeVaccinationRecord: vi.fn(() => Promise.resolve(createSnapshot())),
   selectAccount: vi.fn(() => Promise.resolve(responses?.selectAccount ?? createSnapshot())),
   setLanguage: vi.fn(() => Promise.resolve(createSnapshot())),
   setVaccinationCountry: vi.fn(() => Promise.resolve(createSnapshot())),
   submitVaccinationRecord: vi.fn(() => Promise.resolve(createSnapshot())),
+  updateVaccinationDose: vi.fn(() => Promise.resolve(createSnapshot())),
   updateAccount: vi.fn(() => Promise.resolve(responses?.updateAccount ?? createSnapshot())),
 });
 

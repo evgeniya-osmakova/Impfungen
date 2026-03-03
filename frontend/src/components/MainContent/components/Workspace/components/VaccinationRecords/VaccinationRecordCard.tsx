@@ -16,7 +16,13 @@ interface VaccinationRecordCardProps {
   diseaseLabel: string;
   isHistoryExpanded: boolean;
   onAddDose: (diseaseId: string) => void;
-  onDeleteRequest: (diseaseId: string) => void;
+  onDeleteDoseRequest: (payload: {
+    completedAt: string;
+    diseaseId: string;
+    doseId: string;
+  }) => void;
+  onDeleteRecordRequest: (diseaseId: string) => void;
+  onEditDose: (diseaseId: string, doseId: string) => void;
   onEditRecord: (diseaseId: string) => void;
   onMarkPlannedDone: (payload: {
     diseaseId: string;
@@ -32,7 +38,9 @@ export const VaccinationRecordCard = ({
   diseaseLabel,
   isHistoryExpanded,
   onAddDose,
-  onDeleteRequest,
+  onDeleteDoseRequest,
+  onDeleteRecordRequest,
+  onEditDose,
   onEditRecord,
   onMarkPlannedDone,
   onToggleHistory,
@@ -59,6 +67,7 @@ export const VaccinationRecordCard = ({
   const sortedCompletedDoses = record.completedDoseHistory;
   const historyDoseCount = sortedCompletedDoses.length;
   const shouldShowHistoryToggle = historyDoseCount > 1;
+  const canDeleteHistoryDose = historyDoseCount > 1;
   const visibleCompletedDoses = isHistoryExpanded ? sortedCompletedDoses : [];
   const completedDateLabelKey =
     historyDoseCount > 1
@@ -95,7 +104,7 @@ export const VaccinationRecordCard = ({
           <Button
             aria-label={t('internal.records.actions.delete')}
             className={`${styles.vaccinationRecords__actionButton} ${styles.vaccinationRecords__actionButtonIcon} ${styles.vaccinationRecords__actionButtonDelete}`}
-            onClick={() => onDeleteRequest(record.diseaseId)}
+            onClick={() => onDeleteRecordRequest(record.diseaseId)}
             title={t('internal.records.actions.delete')}
             type={HTML_BUTTON_TYPE.button}
             variant={BUTTON_VARIANT.secondary}
@@ -202,8 +211,46 @@ export const VaccinationRecordCard = ({
               {visibleCompletedDoses.map((dose) => (
                 <li className={styles.vaccinationRecords__historyItem} key={dose.id}>
                   <div className={styles.vaccinationRecords__historyMain}>
-                    <strong>{formatDateByLanguage(dose.completedAt, language)}</strong>
-                    <span>{resolveDoseKindText(dose.kind)}</span>
+                    <div className={styles.vaccinationRecords__historyMainText}>
+                      <strong>{formatDateByLanguage(dose.completedAt, language)}</strong>
+                      <span>{resolveDoseKindText(dose.kind)}</span>
+                    </div>
+                    <div className={styles.vaccinationRecords__historyActions}>
+                      <Button
+                        aria-label={t('internal.records.actions.edit')}
+                        className={`${styles.vaccinationRecords__actionButton} ${styles.vaccinationRecords__actionButtonIcon}`}
+                        onClick={() => onEditDose(record.diseaseId, dose.id)}
+                        title={t('internal.records.actions.edit')}
+                        type={HTML_BUTTON_TYPE.button}
+                        variant={BUTTON_VARIANT.secondary}
+                      >
+                        <EditIcon
+                          aria-hidden="true"
+                          className={styles.vaccinationRecords__actionIcon}
+                        />
+                      </Button>
+                      {canDeleteHistoryDose ? (
+                        <Button
+                          aria-label={t('internal.records.actions.delete')}
+                          className={`${styles.vaccinationRecords__actionButton} ${styles.vaccinationRecords__actionButtonIcon} ${styles.vaccinationRecords__actionButtonDelete}`}
+                          onClick={() =>
+                            onDeleteDoseRequest({
+                              completedAt: dose.completedAt,
+                              diseaseId: record.diseaseId,
+                              doseId: dose.id,
+                            })
+                          }
+                          title={t('internal.records.actions.delete')}
+                          type={HTML_BUTTON_TYPE.button}
+                          variant={BUTTON_VARIANT.secondary}
+                        >
+                          <TrashIcon
+                            aria-hidden="true"
+                            className={styles.vaccinationRecords__actionIcon}
+                          />
+                        </Button>
+                      ) : null}
+                    </div>
                   </div>
                   {dose.tradeName || dose.batchNumber ? (
                     <div className={styles.vaccinationRecords__historyMeta}>

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  LastCompletedDoseRemovalError,
   OptimisticConcurrencyError,
   ProfilePrimaryAccountDeletionError,
 } from '../modules/profile/profileRepository.js';
@@ -30,11 +31,10 @@ const createSnapshot = (): ProfileSnapshot => ({
   },
 });
 
-const createMockRepository = (
-  profileSnapshot: ProfileSnapshot,
-): ProfileRepository => ({
+const createMockRepository = (profileSnapshot: ProfileSnapshot): ProfileRepository => ({
   createFamilyAccount: vi.fn(async ({ birthYear, country, name }) => {
-    const nextId = Math.max(...profileSnapshot.accountsState.accounts.map((account) => account.id), 0) + 1;
+    const nextId =
+      Math.max(...profileSnapshot.accountsState.accounts.map((account) => account.id), 0) + 1;
 
     profileSnapshot.accountsState.accounts.push({
       birthYear,
@@ -47,7 +47,9 @@ const createMockRepository = (
     return profileSnapshot;
   }),
   deleteFamilyAccount: vi.fn(async (accountId: number) => {
-    const account = profileSnapshot.accountsState.accounts.find((current) => current.id === accountId);
+    const account = profileSnapshot.accountsState.accounts.find(
+      (current) => current.id === accountId,
+    );
 
     if (!account || account.kind === 'primary') {
       throw new ProfilePrimaryAccountDeletionError(accountId);
@@ -59,7 +61,9 @@ const createMockRepository = (
 
     if (profileSnapshot.accountsState.selectedAccountId === accountId) {
       profileSnapshot.accountsState.selectedAccountId = 1;
-      const selectedPrimary = profileSnapshot.accountsState.accounts.find((current) => current.id === 1);
+      const selectedPrimary = profileSnapshot.accountsState.accounts.find(
+        (current) => current.id === 1,
+      );
       profileSnapshot.vaccinationState.country = selectedPrimary?.country ?? null;
     }
 
@@ -72,7 +76,62 @@ const createMockRepository = (
       (record) => record.diseaseId !== diseaseId,
     );
   }),
-  completeVaccinationDose: vi.fn(async () => '2025-01-10T00:00:00.000Z'),
+  completeVaccinationDose: vi.fn(async (_accountId, input) => {
+    const targetRecord = profileSnapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+
+    if (targetRecord) {
+      targetRecord.completedDoses.push({
+        batchNumber: input.batchNumber,
+        completedAt: input.completedAt,
+        id: input.doseId,
+        kind: input.kind,
+        tradeName: input.tradeName,
+      });
+      targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+    }
+
+    return '2025-01-10T00:00:00.000Z';
+  }),
+  updateVaccinationDose: vi.fn(async (_accountId, input) => {
+    const targetRecord = profileSnapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+    const targetDose = targetRecord?.completedDoses.find((dose) => dose.id === input.doseId);
+
+    if (!targetDose || !targetRecord) {
+      throw new OptimisticConcurrencyError('dose missing');
+    }
+
+    targetDose.batchNumber = input.batchNumber;
+    targetDose.completedAt = input.completedAt;
+    targetDose.kind = input.kind;
+    targetDose.tradeName = input.tradeName;
+    targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+
+    return '2025-01-10T00:00:00.000Z';
+  }),
+  removeVaccinationDose: vi.fn(async (_accountId, input) => {
+    const targetRecord = profileSnapshot.vaccinationState.records.find(
+      (record) => record.diseaseId === input.diseaseId,
+    );
+
+    if (!targetRecord) {
+      throw new OptimisticConcurrencyError('record missing');
+    }
+
+    if (targetRecord.completedDoses.length <= 1) {
+      throw new LastCompletedDoseRemovalError(input.diseaseId, input.doseId);
+    }
+
+    targetRecord.completedDoses = targetRecord.completedDoses.filter(
+      (dose) => dose.id !== input.doseId,
+    );
+    targetRecord.updatedAt = '2025-01-10T00:00:00.000Z';
+
+    return '2025-01-10T00:00:00.000Z';
+  }),
   setVaccinationCountry: vi.fn(async (accountId, country) => {
     profileSnapshot.vaccinationState.country = country;
     const selectedAccount = profileSnapshot.accountsState.accounts.find(
@@ -121,7 +180,9 @@ const createMockRepository = (
     profileSnapshot.language = language;
   }),
   updateAccount: vi.fn(async ({ accountId, birthYear, country, name }) => {
-    const account = profileSnapshot.accountsState.accounts.find((current) => current.id === accountId);
+    const account = profileSnapshot.accountsState.accounts.find(
+      (current) => current.id === accountId,
+    );
 
     if (account) {
       account.birthYear = birthYear;
@@ -141,11 +202,13 @@ describe('appRouter profile namespace', () => {
   it('supports get and partial vaccination updates', async () => {
     const snapshot = createSnapshot();
     const repository = createMockRepository(snapshot);
-    const caller = appRouter.createCaller(createTrpcContext({
-      profileRepository: repository,
-      req: {} as never,
-      res: {} as never,
-    }));
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
 
     expect(await caller.profile.get()).toEqual(snapshot);
 
@@ -179,16 +242,68 @@ describe('appRouter profile namespace', () => {
       updatedAt: '2025-01-10T00:00:00.000Z',
     };
 
-    expect(await caller.profile.setVaccinationCountry({ accountId: 1, country: 'RU' })).toEqual(snapshot);
+    expect(await caller.profile.setVaccinationCountry({ accountId: 1, country: 'RU' })).toEqual(
+      snapshot,
+    );
     expect(snapshot.vaccinationState.country).toBe('RU');
 
-    expect(await caller.profile.submitVaccinationRecord({
-      accountId: 1,
-      ...nextRecord,
-    })).toEqual(snapshot);
+    expect(
+      await caller.profile.submitVaccinationRecord({
+        accountId: 1,
+        ...nextRecord,
+      }),
+    ).toEqual(snapshot);
     expect(snapshot.vaccinationState.records).toEqual([persistedRecord]);
 
-    expect(await caller.profile.removeVaccinationRecord({ accountId: 1, diseaseId: 'measles' })).toEqual(snapshot);
+    expect(
+      await caller.profile.completeVaccinationDose({
+        accountId: 1,
+        batchNumber: null,
+        completedAt: '2025-02-01',
+        diseaseId: 'measles',
+        doseId: 'done-2',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+        kind: 'revaccination',
+        plannedDoseId: null,
+        tradeName: null,
+      }),
+    ).toEqual(snapshot);
+
+    expect(
+      await caller.profile.updateVaccinationDose({
+        accountId: 1,
+        batchNumber: 'B-2',
+        completedAt: '2025-02-02',
+        diseaseId: 'measles',
+        doseId: 'done-2',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+        kind: 'revaccination',
+        tradeName: 'MMR',
+      }),
+    ).toEqual(snapshot);
+
+    expect(
+      await caller.profile.removeVaccinationDose({
+        accountId: 1,
+        diseaseId: 'measles',
+        doseId: 'done-1',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+      }),
+    ).toEqual(snapshot);
+
+    expect(snapshot.vaccinationState.records[0]?.completedDoses).toEqual([
+      {
+        batchNumber: 'B-2',
+        completedAt: '2025-02-02',
+        id: 'done-2',
+        kind: 'revaccination',
+        tradeName: 'MMR',
+      },
+    ]);
+
+    expect(
+      await caller.profile.removeVaccinationRecord({ accountId: 1, diseaseId: 'measles' }),
+    ).toEqual(snapshot);
     expect(snapshot.vaccinationState.records).toEqual([]);
   });
 
@@ -200,36 +315,102 @@ describe('appRouter profile namespace', () => {
       throw new OptimisticConcurrencyError('stale update');
     });
 
-    const caller = appRouter.createCaller(createTrpcContext({
-      profileRepository: repository,
-      req: {} as never,
-      res: {} as never,
-    }));
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
 
-    await expect(caller.profile.submitVaccinationRecord({
-      accountId: 1,
-      batchNumber: null,
-      completedAt: '2025-01-10',
-      completedDoseId: 'done-1',
-      completedDoseKind: 'nextDose',
-      diseaseId: 'measles',
-      expectedUpdatedAt: '2025-01-09T00:00:00.000Z',
-      futureDueDoses: [],
-      repeatEvery: null,
-      tradeName: null,
-    })).rejects.toMatchObject({
+    await expect(
+      caller.profile.submitVaccinationRecord({
+        accountId: 1,
+        batchNumber: null,
+        completedAt: '2025-01-10',
+        completedDoseId: 'done-1',
+        completedDoseKind: 'nextDose',
+        diseaseId: 'measles',
+        expectedUpdatedAt: '2025-01-09T00:00:00.000Z',
+        futureDueDoses: [],
+        repeatEvery: null,
+        tradeName: null,
+      }),
+    ).rejects.toMatchObject({
       code: 'CONFLICT',
+    });
+  });
+
+  it('returns conflict when completed dose update has stale expectedUpdatedAt', async () => {
+    const snapshot = createSnapshot();
+    const repository = createMockRepository(snapshot);
+
+    repository.updateVaccinationDose = vi.fn(async () => {
+      throw new OptimisticConcurrencyError('stale update');
+    });
+
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
+
+    await expect(
+      caller.profile.updateVaccinationDose({
+        accountId: 1,
+        batchNumber: null,
+        completedAt: '2025-01-10',
+        diseaseId: 'measles',
+        doseId: 'done-1',
+        expectedUpdatedAt: '2025-01-09T00:00:00.000Z',
+        kind: 'nextDose',
+        tradeName: null,
+      }),
+    ).rejects.toMatchObject({
+      code: 'CONFLICT',
+    });
+  });
+
+  it('returns bad request when trying to remove the last completed dose', async () => {
+    const snapshot = createSnapshot();
+    const repository = createMockRepository(snapshot);
+
+    repository.removeVaccinationDose = vi.fn(async () => {
+      throw new LastCompletedDoseRemovalError('measles', 'done-1');
+    });
+
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
+
+    await expect(
+      caller.profile.removeVaccinationDose({
+        accountId: 1,
+        diseaseId: 'measles',
+        doseId: 'done-1',
+        expectedUpdatedAt: '2025-01-10T00:00:00.000Z',
+      }),
+    ).rejects.toMatchObject({
+      code: 'BAD_REQUEST',
     });
   });
 
   it('supports family account create, update and selection', async () => {
     const snapshot = createSnapshot();
     const repository = createMockRepository(snapshot);
-    const caller = appRouter.createCaller(createTrpcContext({
-      profileRepository: repository,
-      req: {} as never,
-      res: {} as never,
-    }));
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
 
     const created = await caller.profile.createFamilyAccount({
       birthYear: 2018,
@@ -238,7 +419,9 @@ describe('appRouter profile namespace', () => {
     });
 
     expect(created.accountsState.accounts).toHaveLength(2);
-    const familyAccount = created.accountsState.accounts.find((account) => account.kind === 'family');
+    const familyAccount = created.accountsState.accounts.find(
+      (account) => account.kind === 'family',
+    );
 
     expect(familyAccount).toMatchObject({
       birthYear: 2018,
@@ -257,7 +440,9 @@ describe('appRouter profile namespace', () => {
       name: 'Anna Updated',
     });
 
-    const updatedFamily = updated.accountsState.accounts.find((account) => account.id === familyAccount.id);
+    const updatedFamily = updated.accountsState.accounts.find(
+      (account) => account.id === familyAccount.id,
+    );
 
     expect(updatedFamily).toMatchObject({
       birthYear: 2019,
@@ -271,17 +456,21 @@ describe('appRouter profile namespace', () => {
 
     const afterDelete = await caller.profile.deleteFamilyAccount({ accountId: familyAccount.id });
 
-    expect(afterDelete.accountsState.accounts.some((account) => account.id === familyAccount.id)).toBe(false);
+    expect(
+      afterDelete.accountsState.accounts.some((account) => account.id === familyAccount.id),
+    ).toBe(false);
   });
 
   it('returns bad request when deleting primary account', async () => {
     const snapshot = createSnapshot();
     const repository = createMockRepository(snapshot);
-    const caller = appRouter.createCaller(createTrpcContext({
-      profileRepository: repository,
-      req: {} as never,
-      res: {} as never,
-    }));
+    const caller = appRouter.createCaller(
+      createTrpcContext({
+        profileRepository: repository,
+        req: {} as never,
+        res: {} as never,
+      }),
+    );
 
     await expect(caller.profile.deleteFamilyAccount({ accountId: 1 })).rejects.toMatchObject({
       code: 'BAD_REQUEST',

@@ -30,5 +30,9 @@ export interface ImmunizationDoseInput {
   tradeName: string | null;
 }
 
+export interface ImmunizationDoseUpdateInput extends ImmunizationDoseInput {
+  doseId: string;
+}
+
 export type VaccinationScheduleMode =
   (typeof VACCINATION_SCHEDULE_MODE)[keyof typeof VACCINATION_SCHEDULE_MODE];

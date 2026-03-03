@@ -5,44 +5,39 @@ import { Button, Error, Modal } from 'src/ui';
 import styles from './VaccinationRecords.module.css';
 
 interface VaccinationRecordsDeleteModalProps {
-  deleteCandidateId: string | null;
+  confirmLabel: string;
+  isOpen: boolean;
+  message: string;
   onCancel: () => void;
   onConfirm: () => Promise<void>;
   requestError: string | null;
-  resolveDiseaseLabelById: (diseaseId: string) => string;
+  title: string;
+  warning: string;
 }
 
 export const VaccinationRecordsDeleteModal = ({
-  deleteCandidateId,
+  confirmLabel,
+  isOpen,
+  message,
   onCancel,
   onConfirm,
   requestError,
-  resolveDiseaseLabelById,
+  title,
+  warning,
 }: VaccinationRecordsDeleteModalProps) => {
   const { t } = useTranslation();
-  const deleteCandidateDiseaseLabel = deleteCandidateId
-    ? resolveDiseaseLabelById(deleteCandidateId)
-    : null;
 
   return (
     <Modal
-      ariaLabel={t('internal.records.deleteConfirm.title')}
+      ariaLabel={title}
       closeAriaLabel={t('internal.form.actions.closeModal')}
-      isOpen={Boolean(deleteCandidateId)}
+      isOpen={isOpen}
       onClose={onCancel}
     >
       <section className={styles.vaccinationRecords__deleteModal}>
-        <h3 className={styles.vaccinationRecords__deleteModalTitle}>
-          {t('internal.records.deleteConfirm.title')}
-        </h3>
-        <p className={styles.vaccinationRecords__deleteModalText}>
-          {t('internal.records.deleteConfirm.message', {
-            disease: deleteCandidateDiseaseLabel ?? '',
-          })}
-        </p>
-        <p className={styles.vaccinationRecords__deleteModalWarning}>
-          {t('internal.records.deleteConfirm.warning')}
-        </p>
+        <h3 className={styles.vaccinationRecords__deleteModalTitle}>{title}</h3>
+        <p className={styles.vaccinationRecords__deleteModalText}>{message}</p>
+        <p className={styles.vaccinationRecords__deleteModalWarning}>{warning}</p>
         <Error className={styles.vaccinationRecords__deleteModalWarning} message={requestError} />
         <div className={styles.vaccinationRecords__deleteModalActions}>
           <Button
@@ -59,7 +54,7 @@ export const VaccinationRecordsDeleteModal = ({
             type={HTML_BUTTON_TYPE.button}
             variant={BUTTON_VARIANT.danger}
           >
-            {t('internal.records.deleteConfirm.confirm')}
+            {confirmLabel}
           </Button>
         </div>
       </section>
